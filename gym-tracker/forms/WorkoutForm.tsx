@@ -1,12 +1,7 @@
-import { Exercise, SetTracker } from '@/types/workouts';
+import { Exercise, FormValues, SetTracker } from '@/types/workouts';
 import { useRef, useState } from 'react';
 import { Button, Text, TextInput, View } from 'react-native';
 import NewExercise from './NewExercise';
-
-interface FormValues {
-    name: string;
-    exercises: Exercise[];
-}
 
 export default function WorkoutForm () {
     const exerciseIndex = useRef<number>(1);
@@ -79,6 +74,10 @@ export default function WorkoutForm () {
         setForm(newData);
     }
 
+    const simSubmit = () => {
+        alert(JSON.stringify(form));
+    }
+
     return (
         <View>
             <View>
@@ -94,7 +93,7 @@ export default function WorkoutForm () {
                 <View id='exercises'>
                     {
                         form.exercises.map(exercise => {
-                            return <NewExercise key={exercise.id} exercise={exercise} exerciseCount={Object.keys(setCounters.current).length} removeExc={handleRemoveExercise} addSet={handleAddSet} removeSet={handleRemoveSet} activeSet={activeSet} updateActiveSet={updateActiveSet}></NewExercise>
+                            return <NewExercise key={exercise.id} form={form} updateForm={setForm} exercise={exercise} exerciseCount={Object.keys(setCounters.current).length} removeExc={handleRemoveExercise} addSet={handleAddSet} removeSet={handleRemoveSet} activeSet={activeSet} updateActiveSet={updateActiveSet}></NewExercise>
                         })
                     }
                 </View>
@@ -108,7 +107,7 @@ export default function WorkoutForm () {
                 <Button title='Cancel' />
                 {/* Still need to make sure reset clears set and exercise id counters */}
                 <Button title='Reset Form' onPress={() => setForm({ name: '', exercises: [{ id: 0, name: '', sets: [{ id: 0, type: 'working' }] }] })} />
-                <Button title='Submit' />
+                <Button title='Submit' onPress={simSubmit} />
             </View>
         </View>
     )

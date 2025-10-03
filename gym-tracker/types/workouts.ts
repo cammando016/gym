@@ -21,4 +21,9 @@ interface SetTracker {
     set: number;
 }
 
-export { setTypes, SetType, WorkoutSet, Exercise, SetTracker };
+interface FormValues {
+    name: string;
+    exercises: Exercise[];
+}
+
+export { setTypes, SetType, WorkoutSet, Exercise, SetTracker, FormValues };

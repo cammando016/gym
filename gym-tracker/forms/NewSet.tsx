@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Button, Pressable, StyleSheet, Text, View } from 'react-native';
-import { SetTracker, SetType, setTypes, WorkoutSet } from '../types/workouts.ts';
+import { FormValues, SetTracker, SetType, setTypes, WorkoutSet } from '../types/workouts.ts';
 
 interface Props {
     set: WorkoutSet,
@@ -9,10 +9,12 @@ interface Props {
     removeSet: (exerciseId: number, setId: number) => void,
     activeSet: SetTracker,
     updateActiveSet: (exerciseId: number, setId: number) => void
+    form: FormValues
+    updateForm: (form: FormValues) => void
 }
 
 export default function NewSet(props: Props) {
-    const [setType, setSetType] = useState<SetType>('working');
+    const setType = props.form.exercises[props.exerciseId].sets[props.set.id].type;
     const [showDropdown, setShowDropdown] = useState<Boolean>(false);
 
     const toggleDropdown = () => {
@@ -21,9 +23,20 @@ export default function NewSet(props: Props) {
         console.log(props.exerciseId, props.set.id, props.activeSet);
     }
 
-    const handleSetSelect = (value: string) => {
-        setSetType(value);
-        setShowDropdown(false);
+    const handleSetSelect = (value: SetType) => {
+        setShowDropdown(false)
+        props.updateForm({ ...props.form, exercises: props.form.exercises.map((exc: { id: number; sets: { id: number; }[]; }) => {
+                if (exc.id === props.exerciseId) {
+                    return { ...exc, sets: exc.sets.map((s: { id: number; }) => {
+                        if (s.id === props.set.id) {
+                            return {...s, type: value}
+                        }
+                        return s;
+                    })}
+                }
+                return exc;
+            })
+        })
     }
 
     return (
@@ -32,7 +45,7 @@ export default function NewSet(props: Props) {
                 <Text>Set: {props.set.id}</Text>
                 <Pressable style={{borderColor: 'black', borderWidth: 1, padding: '3px'}} onPress={() => toggleDropdown()}>
                     <View style={{flexDirection: 'row'}}>
-                        <Text>{(setType || 'Select Set Type')}</Text>
+                        <Text>{setType}</Text>
                     </View>
                 </Pressable>
                 {
@@ -44,13 +57,13 @@ export default function NewSet(props: Props) {
                 <View style={styles.modalContainer}>
                     <View style={styles.modalContent}>
                         {
-                            setTypes.map((set: { value: string; label: string; }) => {
+                            setTypes.map((s: { value: string; label: string; }) => {
                                 return (
                                     <Pressable
-                                        key={set.value}
-                                        onPress={() => handleSetSelect(set.value)}
+                                        key={s.value}
+                                        onPress={() => handleSetSelect(s.value)}
                                     >
-                                        <Text>{set.label}</Text>
+                                        <Text>{s.label}</Text>
                                     </Pressable>
                                 )
                             })
