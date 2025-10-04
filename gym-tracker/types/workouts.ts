@@ -13,6 +13,9 @@ interface WorkoutSet {
 interface Exercise {
     id: number;
     name: string;
+    targetMuscle: string;
+    repRangeLower: number;
+    repRangeHigher: number;
     sets: WorkoutSet[];
 }
 

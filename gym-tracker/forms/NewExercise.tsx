@@ -39,6 +39,49 @@ export default function NewExercise(props: Props) {
                         })})}
                     }
                 />
+                <Text>Target Muscle</Text>
+                <TextInput
+                    placeholder='Enter target muscle'
+                    value={props.form.exercises[props.exercise.id].targetMuscle}
+                    onChangeText={(text: string) => {
+                        props.updateForm({...props.form, exercises: props.form.exercises.map(exc => {
+                            if (exc.id === props.exercise.id) {
+                                return {...exc, targetMuscle: text} 
+                            }
+                            return exc
+                        })})
+                    }}
+                />
+                <View>
+                    <Text>Rep Range</Text>
+                    <View style={{display: 'flex', flexDirection: 'row'}}>
+                        <TextInput 
+                            placeholder='0'
+                            value={props.form.exercises[props.exercise.id].repRangeLower}
+                            onChangeText={(n: number) => {
+                                props.updateForm({...props.form, exercises: props.form.exercises.map(exc => {
+                                    if (exc.id === props.exercise.id) {
+                                        return {...exc, repRangeLower: n}
+                                    }
+                                    return exc
+                                })})
+                            }}
+                        />
+                        <Text> to </Text>
+                        <TextInput 
+                            placeholder='0'
+                            value={props.form.exercises[props.exercise.id].repRangeHigher}
+                            onChangeText={(n: number) => {
+                                props.updateForm({...props.form, exercises: props.form.exercises.map(exc => {
+                                    if (exc.id === props.exercise.id) {
+                                        return {...exc, repRangeHigher: n}
+                                    }
+                                    return exc
+                                })})
+                            }}
+                        />
+                    </View>
+                </View>
             </View>
 
             <View>
@@ -52,7 +95,6 @@ export default function NewExercise(props: Props) {
             <View>
                 <Button title='Add Set' onPress={() => props.addSet(props.exercise.id)} />
             </View>
-            
         </View>
     )
 }
