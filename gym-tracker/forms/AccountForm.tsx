@@ -2,6 +2,7 @@ import { FormValues } from '@/types/user';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, Switch, Text, TextInput, View } from 'react-native';
+import { signup } from '@/utils/account';
 
 export default function AccountForm() {
     const [form, setForm] = useState<FormValues>({
@@ -22,7 +23,14 @@ export default function AccountForm() {
     const router = useRouter();
 
     const handleCancel = () => router.back();
-    const handleSubmit = () => alert(JSON.stringify(form));
+    const handleSubmit = async (e: any) => {
+        e.preventDefault();
+        const res = await signup(form);
+        if (res.message) {
+            alert('Sign Up Worked!');
+        }
+        else alert('Sign up Error');
+    }
 
     return (
         <View>
