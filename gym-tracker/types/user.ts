@@ -15,4 +15,9 @@ interface FormValues {
     confirmPassword: string;
 }
 
-export { FormValues };
+interface LogonFormValues {
+    username: string;
+    password: string;
+}
+
+export { FormValues, LogonFormValues };

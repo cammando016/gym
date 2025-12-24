@@ -8,3 +8,12 @@ export const signup = async (details: FormValues) => {
     });
     return await res.json();
 };
+
+export const logon = async (details: any) => {
+    const res = await fetch(`http://localhost:3000/api/signup`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(details),
+    })
+    return await res.json();
+};

@@ -17,7 +17,7 @@ export default function LogonForm() {
         const res = await logon(form);
         if (res.message) {
             alert('Successful Logon');
-            // router.push(?)
+            router.replace('/(tabs)');
         }
         else alert (`Logon Error ${res.message}`);
     }

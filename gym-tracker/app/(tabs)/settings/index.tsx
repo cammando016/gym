@@ -1,7 +1,7 @@
 import { Link } from 'expo-router';
 import { Text, View } from 'react-native';
 
-export default function Schedule() {
+export default function Settings() {
     return (
         <View>
             <Text>Settings Page</Text>
