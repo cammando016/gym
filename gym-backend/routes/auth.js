@@ -44,19 +44,24 @@ router.post('/signup', async (req, res) => {
 })
 
 router.post('/login', async (req, res) => {
+    console.log('Received login request');
     const {username, password} = req.body;
     try {
-        const dbUserQuery = await pool.query('SELECT * FROM user WHERE username = $1', [username.toLowerCase()]);
+        const dbUserQuery = await pool.query('SELECT * FROM users WHERE username = $1', [username.toLowerCase()]);
         const user = dbUserQuery.rows[0];
 
         if (!user) {
-            return res.status(404).json({message: 'User not found'});
+            console.log('User not found');
+            return res.status(404).json({error: 'User not found'});
         }
         else if (!(await bcrypt.compare(password, user.password))){
-            return res.status(401).json({message: 'Invalid password'});
+            console.log('Incorrect password');
+            return res.status(401).json({error: 'Invalid password'});
         }
 
-        const token = jwt.sign({id: user.userid}, process.env.JWT_SECRET, {expiresIn: '7d'});
+        console.log(user);
+
+        const token = jwt.sign({id: user.id}, process.env.JWT_SECRET, {expiresIn: '7d'});
         res.status(200).json({
             message: 'Login Successful',
             token,
@@ -66,6 +71,7 @@ router.post('/login', async (req, res) => {
             }
         })
     } catch(error) {
+        console.log(error);
         return res.status(400).json({error: error.message});
     }
 })

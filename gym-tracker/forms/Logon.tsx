@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useRouter } from 'expo-router';
 import { Pressable, Text, TextInput, View } from 'react-native';
 import { logon } from "@/utils/account";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function LogonForm() {
     const [form, setForm] = useState<LogonFormValues>({
@@ -11,15 +12,15 @@ export default function LogonForm() {
     });
 
     const router = useRouter();
+    const { login } = useAuth();
 
-    const handleSubmit = async(e: any) => {
-        e.preventDefault();
+    const handleSubmit = async() => {
         const res = await logon(form);
-        if (res.message) {
+        if (res.status === 200) {
             alert('Successful Logon');
-            router.replace('/(tabs)');
+            login();
         }
-        else alert (`Logon Error ${res.message}`);
+        else alert (`Logon Error: ${res.message}`);
     }
 
     return (
@@ -27,12 +28,18 @@ export default function LogonForm() {
             <Text>Username</Text>
             <TextInput
                 placeholder='Enter your username'
+                autoCapitalize='none'
+                autoCorrect={false}
                 value={form.username}
                 onChangeText={(s: string) => setForm({...form, username: s})}
             />
             <Text>Password:</Text>
             <TextInput 
                 placeholder='Enter your password'
+                autoCapitalize='none'
+                autoCorrect={false}
+                value={form.password}
+                onChangeText={(s: string) => setForm({...form, password: s})}
             />
             <View>
                 <Pressable>
@@ -42,6 +49,10 @@ export default function LogonForm() {
                     <Text>Logon</Text>
                 </Pressable>
             </View>
+
+            <Pressable onPress={() => login()}>
+                <Text>Login Test</Text>
+            </Pressable>
         </View>
     )
 }

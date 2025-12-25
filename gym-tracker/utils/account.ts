@@ -10,10 +10,15 @@ export const signup = async (details: FormValues) => {
 };
 
 export const logon = async (details: any) => {
-    const res = await fetch(`http://localhost:3000/api/signup`, {
+    const res = await fetch(`http://localhost:3000/api/login`, {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(details),
     })
-    return await res.json();
+    const response = await res.json();
+
+    return {
+        status: res.status,
+        ...response
+    }
 };
