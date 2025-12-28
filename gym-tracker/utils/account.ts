@@ -1,6 +1,6 @@
-import { FormValues } from "@/types/user"
+import { SignupPayload, LogonFormValues } from "@/types/user"
 
-export const signup = async (details: FormValues) => {
+export const signup = async (details: SignupPayload) => {
     const res = await fetch(`http://localhost:3000/api/signup`, {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
@@ -9,7 +9,7 @@ export const signup = async (details: FormValues) => {
     return await res.json();
 };
 
-export const logon = async (details: any) => {
+export const logon = async (details: LogonFormValues) => {
     const res = await fetch(`http://localhost:3000/api/login`, {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},

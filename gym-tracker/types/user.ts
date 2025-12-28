@@ -2,9 +2,20 @@ type WeightUnit = 'kg' | 'lb'
 
 interface FormValues {
     name: string;
-    birthDay: number;
-    birthMonth: number;
-    birthYear: number;
+    birthday: Date;
+    username: string;
+    weight: string;
+    weightUnit: WeightUnit;
+    benchPr: string;
+    squatPr: string;
+    deadPr: string;
+    password: string;
+    confirmPassword: string;
+}
+
+interface SignupPayload {
+    name: string;
+    birthday: Date;
     username: string;
     weight: number;
     weightUnit: WeightUnit;
@@ -20,4 +31,4 @@ interface LogonFormValues {
     password: string;
 }
 
-export { FormValues, LogonFormValues };
+export { FormValues, SignupPayload, LogonFormValues };
