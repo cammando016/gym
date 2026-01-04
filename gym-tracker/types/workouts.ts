@@ -5,6 +5,13 @@ const setTypes = [
 ] as const;
 type SetType = typeof setTypes[number]['value'];
 
+const privacyTypes = [
+    {label: 'Private', value: 'private'},
+    {label: 'Friends', value: 'friends'},
+    {label: 'Public', value: 'public'}
+] as const;
+type PrivacyType = typeof privacyTypes[number]['value'];
+
 interface WorkoutSet {
     id: number;
     type: SetType;
@@ -13,6 +20,7 @@ interface WorkoutSet {
 interface Exercise {
     id: number;
     name: string;
+    isUnilateral: boolean;
     targetMuscle: string;
     repRangeLower: number;
     repRangeHigher: number;
@@ -26,7 +34,8 @@ interface SetTracker {
 
 interface FormValues {
     name: string;
+    privacy: PrivacyType;
     exercises: Exercise[];
 }
 
-export { setTypes, SetType, WorkoutSet, Exercise, SetTracker, FormValues };
+export { setTypes, SetType, WorkoutSet, Exercise, SetTracker, FormValues, privacyTypes, PrivacyType };

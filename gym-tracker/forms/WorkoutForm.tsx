@@ -1,12 +1,13 @@
-import { Exercise, FormValues, SetTracker } from '@/types/workouts';
+import { Exercise, FormValues, SetTracker, PrivacyType } from '@/types/workouts';
 import { useRef, useState } from 'react';
 import { Button, Text, TextInput, View } from 'react-native';
+import { RadioButton } from 'react-native-paper';
 import NewExercise from './NewExercise';
 
 export default function WorkoutForm () {
     const exerciseIndex = useRef<number>(1);
     const [activeSet, setActiveSet] = useState<SetTracker>({exercise: 0, set: 0});
-    const [form, setForm] = useState<FormValues>({ name: '', exercises: [{ id: 0, name: '', targetMuscle: '', repRangeLower: 0, repRangeHigher: 0, sets: [{ id: 0, type: 'working' }] }] });
+    const [form, setForm] = useState<FormValues>({ name: '', privacy: 'private', exercises: [{ id: 0, name: '', targetMuscle: '', isUnilateral: false, repRangeLower: 0, repRangeHigher: 0, sets: [{ id: 0, type: 'working' }] }] });
 
     const setCounters = useRef<Record<number, number>>({0: 1});
     //Passed down to NewSet to show only one set type drop down at a time
@@ -20,6 +21,7 @@ export default function WorkoutForm () {
             id: exerciseIndex.current,
             name: '',
             targetMuscle: '',
+            isUnilateral: false,
             repRangeLower: 0,
             repRangeHigher: 0,
             sets: [{id: 0, type: 'working'}]
@@ -93,6 +95,23 @@ export default function WorkoutForm () {
             </View>
 
             <View>
+                <RadioButton.Group onValueChange={(newValue: PrivacyType) => setForm({...form, privacy: newValue})} value={form.privacy}>
+                    <View>
+                        <Text>Private</Text>
+                        <RadioButton value='private'/>
+                    </View>
+                    <View>
+                        <Text>Friends Only</Text>
+                        <RadioButton value='friends'/>
+                    </View>
+                    <View>
+                        <Text>Public</Text>
+                        <RadioButton value='public'/>
+                    </View>
+                </RadioButton.Group>
+            </View>
+
+            <View>
                 <View id='exercises'>
                     {
                         form.exercises.map(exercise => {
@@ -109,7 +128,7 @@ export default function WorkoutForm () {
             <View style={{display: 'flex', flexDirection: 'row'}}>
                 <Button title='Cancel' />
                 {/* Still need to make sure reset clears set and exercise id counters */}
-                <Button title='Reset Form' onPress={() => setForm({ name: '', exercises: [{ id: 0, name: '', targetMuscle: '', repRangeLower: 0, repRangeHigher: 0, sets: [{ id: 0, type: 'working' }] }] })} />
+                <Button title='Reset Form' onPress={() => setForm({ name: '', privacy: 'private', exercises: [{ id: 0, name: '', targetMuscle: '', isUnilateral: false, repRangeLower: 0, repRangeHigher: 0, sets: [{ id: 0, type: 'working' }] }] })} />
                 <Button title='Submit' onPress={simSubmit} />
             </View>
         </View>

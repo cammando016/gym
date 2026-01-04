@@ -2,6 +2,7 @@ import { FormValues, SetTracker, SetType } from '@/types/workouts';
 import { Button, Text, TextInput, View } from 'react-native';
 import { Exercise } from '../types/workouts.ts';
 import NewSet from './NewSet';
+import { Checkbox } from 'expo-checkbox';
 
 interface Props {
     exercise: Exercise,
@@ -52,6 +53,24 @@ export default function NewExercise(props: Props) {
                         })})
                     }}
                 />
+                <Text>
+                    <Checkbox 
+                        value={props.form.exercises[props.exercise.id].isUnilateral} 
+                        onValueChange={(b: boolean) => {
+                            // props.updateForm({...props.form, exercises: props.form.exercises.filter(exc => exc.id === props.exercise.id).map(e => {
+                            //     return {...e, isUnilateral: b}
+                            // })
+                            props.updateForm({...props.form, exercises: props.form.exercises.map(exc => {
+                                if (exc.id === props.exercise.id) {
+                                    return {...exc, isUnilateral: b}
+                                }
+                                return exc
+                            })})
+                            //})
+                        }}
+                    />
+                    Unilateral
+                </Text>
                 <View>
                     <Text>Rep Range</Text>
                     <View style={{display: 'flex', flexDirection: 'row'}}>
