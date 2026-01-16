@@ -1,8 +1,9 @@
-import { FormValues, SetTracker, SetType } from '@/types/workouts';
+import { FormValues, SetTracker, SetType, ExerciseSearchResultType } from '@/types/workouts';
 import { Button, Text, TextInput, View } from 'react-native';
+import { useState } from 'react';
 import { Exercise } from '../types/workouts.ts';
 import NewSet from './NewSet';
-import { Checkbox } from 'expo-checkbox';
+import ExerciseSearchResult from '../components/ExerciseSearchResult.tsx';
 
 interface Props {
     exercise: Exercise,
@@ -16,7 +17,27 @@ interface Props {
     updateForm: (form: FormValues) => void
 }
 
+// <--------- TESTING ARRAYS - DELETE LATER ---------->
+const chestSearchTesting: ExerciseSearchResultType[] = [
+    {name: 'Bench Press', targetMuscle: 'Chest'},
+    {name: 'Dumbbell Press', targetMuscle: 'Chest'}
+];
+
+const backSearchTesting: ExerciseSearchResultType[] = [
+    {name: 'Low Row', targetMuscle: 'Upper Back'},
+    {name: 'Lat Pulldown', targetMuscle: 'Lats'},
+];
+
+// <----- END OF TESTING ARRAYS ----->
+
+const searchExercises = (searchString: string) : ExerciseSearchResultType[] => {
+
+
+    return [];
+}
+
 export default function NewExercise(props: Props) {
+    const [searchResults, setSearchResults] = useState<ExerciseSearchResultType[]>([]);
     const setsLength: number = props.exercise.sets.length;
 
     return (
@@ -40,47 +61,16 @@ export default function NewExercise(props: Props) {
                         })})}
                     }
                 />
-                <Text>Target Muscle</Text>
-                <TextInput
-                    placeholder='Enter target muscle'
-                    value={props.form.exercises[props.exercise.id].targetMuscle}
-                    onChangeText={(text: string) => {
-                        props.updateForm({...props.form, exercises: props.form.exercises.map(exc => {
-                            if (exc.id === props.exercise.id) {
-                                return {...exc, targetMuscle: text} 
-                            }
-                            return exc
-                        })})
-                    }}
-                />
-                <Text>
-                    <Checkbox 
-                        value={props.form.exercises[props.exercise.id].isUnilateral} 
-                        onValueChange={(b: boolean) => {
-                            // props.updateForm({...props.form, exercises: props.form.exercises.filter(exc => exc.id === props.exercise.id).map(e => {
-                            //     return {...e, isUnilateral: b}
-                            // })
-                            props.updateForm({...props.form, exercises: props.form.exercises.map(exc => {
-                                if (exc.id === props.exercise.id) {
-                                    return {...exc, isUnilateral: b}
-                                }
-                                return exc
-                            })})
-                            //})
-                        }}
-                    />
-                    Unilateral
-                </Text>
                 <View>
                     <Text>Rep Range</Text>
                     <View style={{display: 'flex', flexDirection: 'row'}}>
                         <TextInput 
                             placeholder='0'
                             value={props.form.exercises[props.exercise.id].repRangeLower}
-                            onChangeText={(n: number) => {
+                            onChangeText={(n: string) => {
                                 props.updateForm({...props.form, exercises: props.form.exercises.map(exc => {
                                     if (exc.id === props.exercise.id) {
-                                        return {...exc, repRangeLower: n}
+                                        return {...exc, repRangeLower: Number(n)}
                                     }
                                     return exc
                                 })})
@@ -90,10 +80,10 @@ export default function NewExercise(props: Props) {
                         <TextInput 
                             placeholder='0'
                             value={props.form.exercises[props.exercise.id].repRangeHigher}
-                            onChangeText={(n: number) => {
+                            onChangeText={(n: string) => {
                                 props.updateForm({...props.form, exercises: props.form.exercises.map(exc => {
                                     if (exc.id === props.exercise.id) {
-                                        return {...exc, repRangeHigher: n}
+                                        return {...exc, repRangeHigher: Number(n)}
                                     }
                                     return exc
                                 })})

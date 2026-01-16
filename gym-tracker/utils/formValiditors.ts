@@ -11,6 +11,15 @@ export const validateRequiredAlphabeticalField = (value: string, fieldName: stri
     } else return {isInvalid: false}
 }
 
+export const validateRequiredAlphanumbericSymbolsField = (value: string, fieldName: string) : ValidationResult => {
+    if (value === '' || !/^[a-zA-Z0-9,_/&\\s]*$/.test(value)) {
+        return {
+            isInvalid: true,
+            error: `${fieldName} is required containing only alphanumeric and "_ / , &" special characters`
+        }
+    } else return {isInvalid: false}
+}
+
 export const validateRequiredAlphanumericField = (value: string, fieldName: string) : ValidationResult => {
     if (value === '' || !/^[a-zA-Z0-9]+$/.test(value)) {
         return {

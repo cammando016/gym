@@ -15,13 +15,12 @@ type PrivacyType = typeof privacyTypes[number]['value'];
 interface WorkoutSet {
     id: number;
     type: SetType;
+    isUnilateral: boolean;
 }
 
 interface Exercise {
     id: number;
-    name: string;
-    isUnilateral: boolean;
-    targetMuscle: string;
+    dbId: string;
     repRangeLower: number;
     repRangeHigher: number;
     sets: WorkoutSet[];
@@ -38,4 +37,9 @@ interface FormValues {
     exercises: Exercise[];
 }
 
-export { setTypes, SetType, WorkoutSet, Exercise, SetTracker, FormValues, privacyTypes, PrivacyType };
+interface ExerciseSearchResultType {
+    name: string;
+    targetMuscle: string;
+}
+
+export { setTypes, SetType, WorkoutSet, Exercise, SetTracker, FormValues, privacyTypes, PrivacyType, ExerciseSearchResultType };
