@@ -19,24 +19,6 @@ interface Props {
     updateForm: (form: FormValues) => void
 }
 
-// <--------- TESTING ARRAYS - DELETE LATER ---------->
-const chestSearchTesting: ExerciseSearchResultType[] = [
-    {name: 'Bench Press', targetMuscle: 'Chest'},
-    {name: 'Dumbbell Press', targetMuscle: 'Chest'}
-];
-
-const backSearchTesting: ExerciseSearchResultType[] = [
-    {name: 'Low Row', targetMuscle: 'Upper Back'},
-    {name: 'Lat Pulldown', targetMuscle: 'Lats'},
-];
-
-// <----- END OF TESTING ARRAYS ----->
-
-// const searchExercises = (searchString: string) : ExerciseSearchResultType[] => {
-
-//     return [];
-// }
-
 export default function NewExercise(props: Props) {
     //Array of exercises with matching name in form vs db
     const [searchResults, setSearchResults] = useState<ExerciseSearchResultType[]>([]);
@@ -82,6 +64,15 @@ export default function NewExercise(props: Props) {
                         })})}
                     }
                 />
+                <View>
+                    {
+                        searchResults?.length > 0 && (
+                            searchResults.map((result) => {
+                                return <ExerciseSearchResult key={result.exercise_id} exerciseName={result.exercise_name} targetMuscle={result.muscle_name} />
+                            })
+                        )
+                    }
+                </View>
                 <View>
                     <Text>Rep Range</Text>
                     <View style={{display: 'flex', flexDirection: 'row'}}>

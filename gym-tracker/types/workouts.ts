@@ -39,8 +39,9 @@ interface FormValues {
 }
 
 interface ExerciseSearchResultType {
-    name: string;
-    targetMuscle: string;
+    exercise_name: string;
+    muscle_name: string;
+    exercise_id: number;
 }
 
 export { setTypes, SetType, WorkoutSet, Exercise, SetTracker, FormValues, privacyTypes, PrivacyType, ExerciseSearchResultType };

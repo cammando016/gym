@@ -1,5 +1,4 @@
 import { Text, View, StyleSheet } from 'react-native';
-import { ExerciseSearchResult } from '../types/workouts.ts';
 
 interface Props {
     exerciseName: string,

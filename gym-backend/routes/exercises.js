@@ -11,12 +11,15 @@ router.get('/exercise', async (req, res) => {
         const {searchString} = req.query;
 
         const exercisesQuery = await pool.query(
-            `SELECT name, id
-            FROM exercises
-            WHERE name ILIKE $1
+            `SELECT e.name AS exercise_name, e.id AS exercise_id, m.name AS muscle_name
+            FROM exercises e
+            JOIN muscle_groups m ON e.target_muscle = m.id
+            WHERE e.name ILIKE $1
             LIMIT 10`,
             [`%${searchString.toLowerCase()}%`]
         );
+
+        console.log(exercisesQuery.rows);
 
         return res.status(200).json({
             exercises: exercisesQuery.rows
