@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import passport from 'passport';
 import authRoutes from './routes/auth.js';
+import exerciseRoutes from './routes/exercises.js';
 
 const app = express();
 const port = 3000;
@@ -13,6 +14,7 @@ app.use(cors({
 app.use(express.json());
 app.use(passport.initialize());
 app.use('/api', authRoutes);
+app.use('/api', exerciseRoutes);
 
 app.listen(port, () => {
     console.log(`App listening on port ${port}`);

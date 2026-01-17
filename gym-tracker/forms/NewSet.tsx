@@ -26,8 +26,8 @@ export default function NewSet(props: Props) {
 
     const handleSetSelect = (value: SetType) => {
         setShowDropdown(false)
-        props.updateForm({ ...props.form, exercises: props.form.exercises.map((exc: { id: number; sets: { id: number; }[]; }) => {
-                if (exc.id === props.exerciseId) {
+        props.updateForm({ ...props.form, exercises: props.form.exercises.map((exc: { index: number; sets: { id: number; }[]; }) => {
+                if (exc.index === props.exerciseId) {
                     return { ...exc, sets: exc.sets.map((s: { id: number; }) => {
                         if (s.id === props.set.id) {
                             return {...s, type: value}
@@ -51,8 +51,8 @@ export default function NewSet(props: Props) {
                 </Pressable>
 
                 <Checkbox value={props.set.isUnilateral} onValueChange={(value: boolean) => props.updateForm({
-                    ...props.form, exercises: props.form.exercises.map((exc: {id: number; sets: {id: number;}[]; }) => {
-                        if (exc.id === props.exerciseId) {
+                    ...props.form, exercises: props.form.exercises.map((exc: {index: number; sets: {id: number;}[]; }) => {
+                        if (exc.index === props.exerciseId) {
                             return { ...exc, sets: exc.sets.map((s: { id: number; }) => {
                                 if (s.id === props.set.id) {
                                     return {...s, isUnilateral: value}

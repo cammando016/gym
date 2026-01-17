@@ -19,8 +19,9 @@ interface WorkoutSet {
 }
 
 interface Exercise {
-    id: number;
-    dbId: string;
+    index: number;
+    dbId: number;
+    name: string;
     repRangeLower: number;
     repRangeHigher: number;
     sets: WorkoutSet[];

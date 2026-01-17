@@ -8,7 +8,7 @@ import { validateRequiredAlphanumericSymbolsField } from '../utils/formValiditor
 export default function WorkoutForm () {
     const exerciseIndex = useRef<number>(1);
     const [activeSet, setActiveSet] = useState<SetTracker>({exercise: 0, set: 0});
-    const [form, setForm] = useState<FormValues>({ name: '', privacy: 'private', exercises: [{ id: 0, name: '', repRangeLower: 0, repRangeHigher: 0, sets: [{ id: 0, type: 'working', isUnilateral: false }] }] });
+    const [form, setForm] = useState<FormValues>({ name: '', privacy: 'private', exercises: [{ index: 0, dbId: 0, name: '', repRangeLower: 0, repRangeHigher: 0, sets: [{ id: 0, type: 'working', isUnilateral: false }] }] });
 
     const setCounters = useRef<Record<number, number>>({0: 1});
     //Passed down to NewSet to show only one set type drop down at a time
@@ -19,7 +19,8 @@ export default function WorkoutForm () {
         setCounters.current[newId] = 1;
 
         const newExercise: Exercise = {
-            id: exerciseIndex.current,
+            index: exerciseIndex.current,
+            dbId: 0,
             name: '',
             repRangeLower: 0,
             repRangeHigher: 0,
@@ -40,7 +41,7 @@ export default function WorkoutForm () {
         const newData: FormValues = {
             ...form,
             exercises: form.exercises.map(exc => {
-                if (exc.id === exerciseId) {
+                if (exc.index === exerciseId) {
                     return {
                         ...exc,
                         sets: [...exc.sets, {id: nextSetId, type: 'working', isUnilateral: false}]
@@ -55,7 +56,7 @@ export default function WorkoutForm () {
     const handleRemoveExercise = (exerciseId: number) => {
         const newData: FormValues = {
             ...form,
-            exercises: form.exercises.filter(exercise => exercise.id !== exerciseId)
+            exercises: form.exercises.filter(exercise => exercise.index !== exerciseId)
         }
 
         delete setCounters.current[exerciseId];
@@ -66,7 +67,7 @@ export default function WorkoutForm () {
         const newData: FormValues = {
             ...form,
             exercises: form.exercises.map(exc => {
-                if(exc.id === exerciseId) {
+                if(exc.index === exerciseId) {
                     return {
                         ...exc,
                         sets: exc.sets.filter(set => set.id !== setId)
@@ -123,7 +124,7 @@ export default function WorkoutForm () {
                     <View id='exercises'>
                         {
                             form.exercises.map(exercise => {
-                                return <NewExercise key={exercise.id} form={form} updateForm={setForm} exercise={exercise} exerciseCount={Object.keys(setCounters.current).length} removeExc={handleRemoveExercise} addSet={handleAddSet} removeSet={handleRemoveSet} activeSet={activeSet} updateActiveSet={updateActiveSet}></NewExercise>
+                                return <NewExercise key={exercise.index} form={form} updateForm={setForm} exercise={exercise} exerciseCount={Object.keys(setCounters.current).length} removeExc={handleRemoveExercise} addSet={handleAddSet} removeSet={handleRemoveSet} activeSet={activeSet} updateActiveSet={updateActiveSet}></NewExercise>
                             })
                         }
                     </View>
@@ -136,7 +137,7 @@ export default function WorkoutForm () {
                 <View style={{display: 'flex', flexDirection: 'row'}}>
                     <Button title='Cancel' />
                     {/* Still need to make sure reset clears set and exercise id counters */}
-                    <Button title='Reset Form' onPress={() => setForm({ name: '', privacy: 'private', exercises: [{ id: 0, name: '', repRangeLower: 0, repRangeHigher: 0, sets: [{ id: 0, type: 'working', isUnilateral: false }] }] })} />
+                    <Button title='Reset Form' onPress={() => setForm({ name: '', privacy: 'private', exercises: [{ index: 0, dbId: 0, name: '', repRangeLower: 0, repRangeHigher: 0, sets: [{ id: 0, type: 'working', isUnilateral: false }] }] })} />
                     <Button title='Submit' onPress={simSubmit} />
                 </View>
             </ScrollView>
