@@ -1,5 +1,5 @@
 import { FormValues, SetTracker, SetType, ExerciseSearchResultType } from '@/types/workouts';
-import { Button, Text, TextInput, View } from 'react-native';
+import { Button, Text, TextInput, View, ScrollView } from 'react-native';
 import { useEffect, useState } from 'react';
 import { Exercise } from '../types/workouts.ts';
 import NewSet from './NewSet';
@@ -14,7 +14,9 @@ interface Props {
     addSet: (exerciseId: number) => void,
     removeSet: (exerciseId: number, setId: number) => void,
     activeSet: SetTracker,
-    updateActiveSet: (exerciseId: number, setId: number) => void
+    activeExercise: number,
+    updateActiveSet: (exerciseId: number, setId: number) => void,
+    updateActiveExercise: (exerciseIndex: number) => void,
     form: FormValues
     updateForm: (form: FormValues) => void
 }
@@ -22,6 +24,9 @@ interface Props {
 export default function NewExercise(props: Props) {
     //Array of exercises with matching name in form vs db
     const [searchResults, setSearchResults] = useState<ExerciseSearchResultType[]>([]);
+    //Set to true if user clicks on a search result exercise, to prevent exercise search running again
+    const [selectingExercise, setSelectingExercise] = useState<boolean>(false);
+
     //Use to search db for exercises with matching name
     const debouncedExerciseName = useDebounce(props.exercise.name, 1000);
 
@@ -29,7 +34,7 @@ export default function NewExercise(props: Props) {
 
     //Search for exercises when user types in exercise name field
     useEffect(() => {
-        if (!debouncedExerciseName || debouncedExerciseName.length < 4) {
+        if (selectingExercise || !debouncedExerciseName || debouncedExerciseName.length < 4) {
             setSearchResults([]);
             return;
         }
@@ -43,6 +48,9 @@ export default function NewExercise(props: Props) {
         runSearch();
     }, [debouncedExerciseName]);
 
+    //When user clicks on searched exercise, sets to true to prevent searching again. Set back to false to allow changing exercise
+    useEffect(() => { selectingExercise && setSelectingExercise(false) }, [props.exercise.name]);
+
     return (
         <View>
             <View style={{display: 'flex', flexDirection: 'row'}}>
@@ -54,6 +62,7 @@ export default function NewExercise(props: Props) {
             <View>
                 <TextInput 
                     placeholder='Enter exercise name'
+                    onFocus={() => props.updateActiveExercise(props.exercise.index)}
                     value={props.form.exercises[props.exercise.index].name}
                     onChangeText={(text: string) => { 
                         props.updateForm({ ...props.form, exercises: props.form.exercises.map(exc => {
@@ -64,15 +73,39 @@ export default function NewExercise(props: Props) {
                         })})}
                     }
                 />
-                <View>
-                    {
-                        searchResults?.length > 0 && (
-                            searchResults.map((result) => {
-                                return <ExerciseSearchResult key={result.exercise_id} exerciseName={result.exercise_name} targetMuscle={result.muscle_name} />
-                            })
-                        )
-                    }
-                </View>
+
+                {/* Only render searched exercises for one exercise at a time */}
+                { props.activeExercise === props.exercise.index && (
+                // Render list of exercises from db that match user input into exercise name
+                    <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-evenly'}}>
+                        {
+                            searchResults?.length > 0 && (
+                                searchResults.map((result) => {
+                                    return ( 
+                                        <ExerciseSearchResult 
+                                            key={result.exercise_id} 
+                                            exerciseName={result.exercise_name} 
+                                            targetMuscle={result.muscle_name} 
+                                            onPress={() => {
+                                                setSelectingExercise(true);
+
+                                                props.updateForm({...props.form, exercises: props.form.exercises.map(exc => {
+                                                    if (exc.index === props.exercise.index) {
+                                                        return {...exc, name: result.exercise_name, dbId: result.exercise_id}
+                                                    }
+                                                    return exc
+                                                })})
+
+                                                setSearchResults([]);
+                                            }}
+                                        />
+                                    )
+                                })
+                            )
+                        }
+                    </View>
+                )}
+
                 <View>
                     <Text>Rep Range</Text>
                     <View style={{display: 'flex', flexDirection: 'row'}}>

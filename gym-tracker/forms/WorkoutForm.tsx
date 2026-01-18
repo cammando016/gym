@@ -8,11 +8,13 @@ import { validateRequiredAlphanumericSymbolsField } from '../utils/formValiditor
 export default function WorkoutForm () {
     const exerciseIndex = useRef<number>(1);
     const [activeSet, setActiveSet] = useState<SetTracker>({exercise: 0, set: 0});
+    const [activeExercise, setActiveExercise] = useState<number>(0);
     const [form, setForm] = useState<FormValues>({ name: '', privacy: 'private', exercises: [{ index: 0, dbId: 0, name: '', repRangeLower: 0, repRangeHigher: 0, sets: [{ id: 0, type: 'working', isUnilateral: false }] }] });
 
     const setCounters = useRef<Record<number, number>>({0: 1});
     //Passed down to NewSet to show only one set type drop down at a time
     const updateActiveSet = (exerciseId: number, setId: number) => setActiveSet({exercise: exerciseId, set: setId});
+    const updateActiveExercise = (exerciseIndex: number) => setActiveExercise(exerciseIndex);
 
     const handleAddExercise = () => {
         const newId = exerciseIndex.current;
@@ -124,7 +126,7 @@ export default function WorkoutForm () {
                     <View id='exercises'>
                         {
                             form.exercises.map(exercise => {
-                                return <NewExercise key={exercise.index} form={form} updateForm={setForm} exercise={exercise} exerciseCount={Object.keys(setCounters.current).length} removeExc={handleRemoveExercise} addSet={handleAddSet} removeSet={handleRemoveSet} activeSet={activeSet} updateActiveSet={updateActiveSet}></NewExercise>
+                                return <NewExercise key={exercise.index} form={form} updateForm={setForm} exercise={exercise} exerciseCount={Object.keys(setCounters.current).length} removeExc={handleRemoveExercise} addSet={handleAddSet} removeSet={handleRemoveSet} activeSet={activeSet} activeExercise={activeExercise} updateActiveSet={updateActiveSet} updateActiveExercise={updateActiveExercise}></NewExercise>
                             })
                         }
                     </View>
