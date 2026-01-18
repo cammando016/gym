@@ -24,17 +24,19 @@ interface Props {
 export default function NewExercise(props: Props) {
     //Array of exercises with matching name in form vs db
     const [searchResults, setSearchResults] = useState<ExerciseSearchResultType[]>([]);
-    //Set to true if user clicks on a search result exercise, to prevent exercise search running again
-    const [selectingExercise, setSelectingExercise] = useState<boolean>(false);
+    //Only update when user types in the exercise name text input field.
+    //Allows search to run when user types, but selecting exercise doesn't update inputValue, hence not triggering useEffects
+    const [inputValue, setInputValue] = useState<string>(props.exercise.name);
+    console.log(inputValue);
 
     //Use to search db for exercises with matching name
-    const debouncedExerciseName = useDebounce(props.exercise.name, 1000);
+    const debouncedExerciseName = useDebounce(inputValue, 1000);
 
     const setsLength: number = props.exercise.sets.length;
 
     //Search for exercises when user types in exercise name field
     useEffect(() => {
-        if (selectingExercise || !debouncedExerciseName || debouncedExerciseName.length < 4) {
+        if (!debouncedExerciseName || debouncedExerciseName.length < 4) {
             setSearchResults([]);
             return;
         }
@@ -47,9 +49,6 @@ export default function NewExercise(props: Props) {
 
         runSearch();
     }, [debouncedExerciseName]);
-
-    //When user clicks on searched exercise, sets to true to prevent searching again. Set back to false to allow changing exercise
-    useEffect(() => { selectingExercise && setSelectingExercise(false) }, [props.exercise.name]);
 
     return (
         <View>
@@ -65,6 +64,8 @@ export default function NewExercise(props: Props) {
                     onFocus={() => props.updateActiveExercise(props.exercise.index)}
                     value={props.form.exercises[props.exercise.index].name}
                     onChangeText={(text: string) => { 
+                        setInputValue(text);
+
                         props.updateForm({ ...props.form, exercises: props.form.exercises.map(exc => {
                             if(exc.index === props.exercise.index) {
                                 return {...exc, name: text}
@@ -87,8 +88,6 @@ export default function NewExercise(props: Props) {
                                             exerciseName={result.exercise_name} 
                                             targetMuscle={result.muscle_name} 
                                             onPress={() => {
-                                                setSelectingExercise(true);
-
                                                 props.updateForm({...props.form, exercises: props.form.exercises.map(exc => {
                                                     if (exc.index === props.exercise.index) {
                                                         return {...exc, name: result.exercise_name, dbId: result.exercise_id}
