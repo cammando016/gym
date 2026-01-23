@@ -9,7 +9,7 @@ export default function WorkoutForm () {
     const exerciseIndex = useRef<number>(1);
     const [activeSet, setActiveSet] = useState<SetTracker>({exercise: 0, set: 0});
     const [activeExercise, setActiveExercise] = useState<number>(0);
-    const [form, setForm] = useState<FormValues>({ name: '', privacy: 'private', exercises: [{ index: 0, dbId: 0, name: '', repRangeLower: 0, repRangeHigher: 0, sets: [{ id: 0, type: 'working', isUnilateral: false }] }] });
+    const [form, setForm] = useState<FormValues>({ name: '', privacy: 'private', exercises: [{ index: 0, dbId: 0, name: '', repRangeLower: 0, repRangeHigher: 0, isUnilateral: false, sets: [{ id: 0, type: 'working', isUnilateral: false }] }] });
 
     const setCounters = useRef<Record<number, number>>({0: 1});
     //Passed down to NewSet to show only one set type drop down at a time
@@ -26,6 +26,7 @@ export default function WorkoutForm () {
             name: '',
             repRangeLower: 0,
             repRangeHigher: 0,
+            isUnilateral: false,
             sets: [{id: 0, type: 'working', isUnilateral: false}]
         };
 
@@ -139,7 +140,7 @@ export default function WorkoutForm () {
                 <View style={{display: 'flex', flexDirection: 'row'}}>
                     <Button title='Cancel' />
                     {/* Still need to make sure reset clears set and exercise id counters */}
-                    <Button title='Reset Form' onPress={() => setForm({ name: '', privacy: 'private', exercises: [{ index: 0, dbId: 0, name: '', repRangeLower: 0, repRangeHigher: 0, sets: [{ id: 0, type: 'working', isUnilateral: false }] }] })} />
+                    <Button title='Reset Form' onPress={() => setForm({ name: '', privacy: 'private', exercises: [{ index: 0, dbId: 0, name: '', repRangeLower: 0, repRangeHigher: 0, isUnilateral: false, sets: [{ id: 0, type: 'working', isUnilateral: false }] }] })} />
                     <Button title='Submit' onPress={simSubmit} />
                 </View>
             </ScrollView>

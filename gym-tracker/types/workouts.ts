@@ -12,6 +12,20 @@ const privacyTypes = [
 ] as const;
 type PrivacyType = typeof privacyTypes[number]['value'];
 
+const muscleGroups = [
+    {label: 'Arms', value: 'arms'},
+    {label: 'Back', value: 'back'},
+    {label: 'Chest', value: 'chest'},
+    {label: 'Legs', value: 'legs'},
+    {label: 'Other', value: 'other'}
+] as const;
+type MuscleGroups = typeof muscleGroups[number]['value'];
+
+interface Muscle {
+    name: string;
+    id: string;
+}
+
 interface WorkoutSet {
     id: number;
     type: SetType;
@@ -25,6 +39,14 @@ interface Exercise {
     repRangeLower: number;
     repRangeHigher: number;
     sets: WorkoutSet[];
+    targetMuscle?: string;
+    isUnilateral: boolean;
+}
+
+interface CreatedExercise {
+    name: string;
+    targetMuscle: string;
+    isUnilateral: boolean;
 }
 
 interface SetTracker {
@@ -44,4 +66,4 @@ interface ExerciseSearchResultType {
     exercise_id: number;
 }
 
-export { setTypes, SetType, WorkoutSet, Exercise, SetTracker, FormValues, privacyTypes, PrivacyType, ExerciseSearchResultType };
+export { setTypes, SetType, muscleGroups, MuscleGroups, Muscle, WorkoutSet, Exercise, SetTracker, FormValues, privacyTypes, PrivacyType, ExerciseSearchResultType, CreatedExercise };

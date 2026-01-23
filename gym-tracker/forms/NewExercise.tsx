@@ -1,11 +1,12 @@
 import { FormValues, SetTracker, SetType, ExerciseSearchResultType } from '@/types/workouts';
-import { Button, Text, TextInput, View, ScrollView } from 'react-native';
+import { Button, Text, TextInput, View, ScrollView, Pressable, Modal } from 'react-native';
 import { useEffect, useState } from 'react';
 import { Exercise } from '../types/workouts.ts';
 import NewSet from './NewSet';
 import useDebounce from '@/utils/search';
 import ExerciseSearchResult from '../components/ExerciseSearchResult.tsx';
 import { dbExerciseSearch } from '@/utils/workouts';
+import CreateExercise from './CreateExercise';
 
 interface Props {
     exercise: Exercise,
@@ -17,7 +18,7 @@ interface Props {
     activeExercise: number,
     updateActiveSet: (exerciseId: number, setId: number) => void,
     updateActiveExercise: (exerciseIndex: number) => void,
-    form: FormValues
+    form: FormValues,
     updateForm: (form: FormValues) => void
 }
 
@@ -27,16 +28,18 @@ export default function NewExercise(props: Props) {
     //Only update when user types in the exercise name text input field.
     //Allows search to run when user types, but selecting exercise doesn't update inputValue, hence not triggering useEffects
     const [inputValue, setInputValue] = useState<string>(props.exercise.name);
-    console.log(inputValue);
 
     //Use to search db for exercises with matching name
     const debouncedExerciseName = useDebounce(inputValue, 1000);
+
+    //state value to show or hide modal for adding a new exercise not in DB
+    const [showCreateExercise, setShowCreateExercise] = useState<boolean>(false);
 
     const setsLength: number = props.exercise.sets.length;
 
     //Search for exercises when user types in exercise name field
     useEffect(() => {
-        if (!debouncedExerciseName || debouncedExerciseName.length < 4) {
+        if (!debouncedExerciseName ) {
             setSearchResults([]);
             return;
         }
@@ -44,14 +47,35 @@ export default function NewExercise(props: Props) {
         const runSearch = async () => {
             const res = await dbExerciseSearch(debouncedExerciseName);
             setSearchResults(res.exercises);
-            console.log(res.exercises)
         }
 
         runSearch();
     }, [debouncedExerciseName]);
 
+    const createExercise = () => {
+        props.updateForm({
+            ...props.form,
+            exercises: props.form.exercises.map(exc => {
+                if (exc.index === props.exercise.index) return {...exc, targetMuscle: '41c6578d-a82a-48f2-a815-d7a1953510b2'}
+                return exc
+            })
+        })
+        setShowCreateExercise(true);
+    }
+
+    const closeCreateExercise = () => {
+        setShowCreateExercise(false);
+    }
+
     return (
         <View>
+
+            {showCreateExercise && (
+                <Modal>
+                    <CreateExercise closeModal={closeCreateExercise} exercise={props.exercise} form={props.form} updateForm={props.updateForm} />
+                </Modal>
+            )}
+
             <View style={{display: 'flex', flexDirection: 'row'}}>
                 <Text>Exercise Name</Text>
                 {
@@ -78,10 +102,13 @@ export default function NewExercise(props: Props) {
                 {/* Only render searched exercises for one exercise at a time */}
                 { props.activeExercise === props.exercise.index && (
                 // Render list of exercises from db that match user input into exercise name
-                    <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-evenly'}}>
-                        {
-                            searchResults?.length > 0 && (
-                                searchResults.map((result) => {
+                    searchResults?.length > 0 && (
+                        <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-evenly'}}>
+                            <Pressable onPress={() => createExercise()}>
+                                <Text>Create New Exercise</Text>
+                            </Pressable>
+                            <ScrollView horizontal={true}><View style={{display: 'flex', flexDirection: 'row'}}>
+                                {searchResults.map((result) => {
                                     return ( 
                                         <ExerciseSearchResult 
                                             key={result.exercise_id} 
@@ -100,9 +127,10 @@ export default function NewExercise(props: Props) {
                                         />
                                     )
                                 })
-                            )
-                        }
-                    </View>
+                                }
+                            </View></ScrollView>
+                        </View>
+                    )
                 )}
 
                 <View>
