@@ -1,5 +1,6 @@
 const setTypes = [
     {label: 'Backoff', value: 'backoff'},
+    {label: 'Top Set', value: 'topset'},
     {label: 'Working', value: 'working'},
     {label: 'Warmup', value: 'warmup'}    
 ] as const;

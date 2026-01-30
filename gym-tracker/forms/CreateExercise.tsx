@@ -1,5 +1,5 @@
 import { Text, TextInput, View, Pressable } from 'react-native';
-import { useState } from 'react';
+import { Dispatch, SetStateAction, useState } from 'react';
 import { RadioButton } from 'react-native-paper';
 import { Checkbox } from 'expo-checkbox';
 import { muscleGroups, MuscleGroups, Exercise, Muscle } from '../types/workouts.ts';
@@ -10,7 +10,7 @@ interface Props {
     closeModal:  () => void,
     exercise: Exercise,
     form: FormValues,
-    updateForm: (form: FormValues) => void,
+    updateForm: Dispatch<SetStateAction<FormValues>>,
 }
 
 export default function CreateExercise(props: Props) {
@@ -63,13 +63,13 @@ export default function CreateExercise(props: Props) {
     }
 
     const updateTargetMuscle = (muscleArray: Muscle[]) => {
-        props.updateForm({
-            ...props.form,
-            exercises: props.form.exercises.map(exc => {
+        props.updateForm(prev => ({
+            ...prev,
+            exercises: prev.exercises.map(exc => {
                 if (exc.index === props.exercise.index) return {...exc, targetMuscle: muscleArray[0].id}
                 return exc
             })
-        })
+        }))
     }
 
     return (
@@ -80,10 +80,10 @@ export default function CreateExercise(props: Props) {
                 <TextInput 
                     placeholder='Enter Exercise Name'
                     onChangeText={ (text: string) => {
-                        props.updateForm({...props.form, exercises: props.form.exercises.map(exc => {
+                        props.updateForm(prev => ({...prev, exercises: prev.exercises.map(exc => {
                             if (exc.index === props.exercise.index) return {...exc, name: text}
                             return exc
-                        }) })
+                        }) }))
                     }}
                 />
             </View>
@@ -129,10 +129,10 @@ export default function CreateExercise(props: Props) {
                 <Checkbox 
                     value={props.exercise.isUnilateral}
                     onValueChange={(value: boolean) => {
-                        props.updateForm({...props.form, exercises: props.form.exercises.map(exc => {
+                        props.updateForm(prev => ({...prev, exercises: prev.exercises.map(exc => {
                             if (exc.index === props.exercise.index) return {...exc, isUnilateral: value}
                             return exc
-                        }) })
+                        }) }))
                     }}
                 />
                 <Text>Unilateral Exercise</Text>
@@ -142,10 +142,10 @@ export default function CreateExercise(props: Props) {
             <View style={{display: 'flex', flexDirection: 'row'}}>
                 {/* If cancelled, reset any exercise fields that were changed on the create exercise modal */}
                 <Pressable onPress={() => {
-                        props.updateForm({...props.form, exercises: props.form.exercises.map(exc => {
+                        props.updateForm(prev => ({...prev, exercises: prev.exercises.map(exc => {
                             if (exc.index === props.exercise.index) return {...exc, isUnilateral: false, targetMuscle: '', name: ''}
                             return exc
-                        })})
+                        })}))
                         props.closeModal()
                     }
                 }>

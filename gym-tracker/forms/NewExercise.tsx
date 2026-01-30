@@ -1,6 +1,6 @@
 import { FormValues, SetTracker, SetType, ExerciseSearchResultType } from '@/types/workouts';
 import { Button, Text, TextInput, View, ScrollView, Pressable, Modal } from 'react-native';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Dispatch, SetStateAction } from 'react';
 import { Exercise } from '../types/workouts.ts';
 import NewSet from './NewSet';
 import useDebounce from '@/utils/search';
@@ -19,7 +19,7 @@ interface Props {
     updateActiveSet: (exerciseId: number, setId: number) => void,
     updateActiveExercise: (exerciseIndex: number) => void,
     form: FormValues,
-    updateForm: (form: FormValues) => void
+    updateForm: Dispatch<SetStateAction<FormValues>>,
 }
 
 export default function NewExercise(props: Props) {
@@ -53,13 +53,13 @@ export default function NewExercise(props: Props) {
     }, [debouncedExerciseName]);
 
     const createExercise = () => {
-        props.updateForm({
-            ...props.form,
-            exercises: props.form.exercises.map(exc => {
+        props.updateForm(prev => ({
+            ...prev,
+            exercises: prev.exercises.map(exc => {
                 if (exc.index === props.exercise.index) return {...exc, targetMuscle: '41c6578d-a82a-48f2-a815-d7a1953510b2'}
                 return exc
             })
-        })
+        }))
         setShowCreateExercise(true);
     }
 
@@ -90,12 +90,12 @@ export default function NewExercise(props: Props) {
                     onChangeText={(text: string) => { 
                         setInputValue(text);
 
-                        props.updateForm({ ...props.form, exercises: props.form.exercises.map(exc => {
+                        props.updateForm(prev => ({ ...prev, exercises: prev.exercises.map(exc => {
                             if(exc.index === props.exercise.index) {
                                 return {...exc, name: text}
                             } 
                             return exc
-                        })})}
+                        })}))}
                     }
                 />
 
@@ -115,12 +115,12 @@ export default function NewExercise(props: Props) {
                                             exerciseName={result.exercise_name} 
                                             targetMuscle={result.muscle_name} 
                                             onPress={() => {
-                                                props.updateForm({...props.form, exercises: props.form.exercises.map(exc => {
+                                                props.updateForm(prev => ({...prev, exercises: prev.exercises.map(exc => {
                                                     if (exc.index === props.exercise.index) {
                                                         return {...exc, name: result.exercise_name, isUnilateral: result.exercise_unilateral, dbId: result.exercise_id}
                                                     }
                                                     return exc
-                                                })})
+                                                })}))
 
                                                 setSearchResults([]);
                                             }}
@@ -140,12 +140,12 @@ export default function NewExercise(props: Props) {
                             placeholder='0'
                             value={props.exercise.repRangeLower}
                             onChangeText={(n: string) => {
-                                props.updateForm({...props.form, exercises: props.form.exercises.map(exc => {
+                                props.updateForm(prev => ({...prev, exercises: prev.exercises.map(exc => {
                                     if (exc.index === props.exercise.index) {
                                         return {...exc, repRangeLower: Number(n)}
                                     }
                                     return exc
-                                })})
+                                })}))
                             }}
                         />
                         <Text> to </Text>
@@ -153,12 +153,12 @@ export default function NewExercise(props: Props) {
                             placeholder='0'
                             value={props.exercise.repRangeHigher}
                             onChangeText={(n: string) => {
-                                props.updateForm({...props.form, exercises: props.form.exercises.map(exc => {
+                                props.updateForm(prev => ({...prev, exercises: prev.exercises.map(exc => {
                                     if (exc.index === props.exercise.index) {
                                         return {...exc, repRangeHigher: Number(n)}
                                     }
                                     return exc
-                                })})
+                                })}))
                             }}
                         />
                     </View>

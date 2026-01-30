@@ -31,10 +31,10 @@ export default function WorkoutForm () {
         };
 
         exerciseIndex.current++;
-        setForm({
-            ...form,
-            exercises: [...form.exercises, newExercise]
-        });
+        setForm(prev => ({
+            ...prev,
+            exercises: [...prev.exercises, newExercise]
+        }));
     }
 
     const handleAddSet = (exerciseId: number) => {
@@ -102,11 +102,11 @@ export default function WorkoutForm () {
                     <TextInput 
                         placeholder='Enter workout name'
                         value={form.name}
-                        onChangeText={(text: string) => setForm({...form, name: text})}
+                        onChangeText={(text: string) => setForm(prev => ({...prev, name: text}))}
                     />
                 </View>
                 
-                <RadioButton.Group onValueChange={(newValue: PrivacyType) => setForm({...form, privacy: newValue})} value={form.privacy}>
+                <RadioButton.Group onValueChange={(newValue: PrivacyType) => setForm(prev => ({...prev, privacy: newValue}))} value={form.privacy}>
                     <View style={[styles.privacy]}>
                         <View>
                             <Text>Private</Text>

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { Dispatch, SetStateAction, useState } from 'react';
 import { Button, Pressable, StyleSheet, Text, View } from 'react-native';
 import { FormValues, SetTracker, SetType, setTypes, WorkoutSet } from '../types/workouts.ts';
 import { Checkbox } from 'expo-checkbox';
@@ -13,7 +13,7 @@ interface Props {
     activeSet: SetTracker,
     updateActiveSet: (exerciseId: number, setId: number) => void,
     form: FormValues,
-    updateForm: (form: FormValues) => void,
+    updateForm: Dispatch<SetStateAction<FormValues>>,
     unilateralExercise: boolean,
 }
 
@@ -29,7 +29,7 @@ export default function NewSet(props: Props) {
 
     const handleSetSelect = (value: SetType) => {
         setShowDropdown(false)
-        props.updateForm({ ...props.form, exercises: props.form.exercises.map((exc: { index: number; sets: { id: number; }[]; }) => {
+        props.updateForm((prev: FormValues) => ({ ...prev, exercises: prev.exercises.map((exc: Exercise) => {
                 if (exc.index === props.exerciseId) {
                     return { ...exc, sets: exc.sets.map((s: { id: number; }) => {
                         if (s.id === props.set.id) {
@@ -40,7 +40,7 @@ export default function NewSet(props: Props) {
                 }
                 return exc;
             })
-        })
+        }))
     }
 
     return (
@@ -53,8 +53,8 @@ export default function NewSet(props: Props) {
                     </View>
                 </Pressable>
 
-                <Checkbox value={ props.unilateralExercise ? true : props.set.isUnilateral } disabled={props.unilateralExercise} onValueChange={(value: boolean) => props.updateForm({
-                    ...props.form, exercises: props.form.exercises.map((exc: {index: number; sets: {id: number;}[]; }) => {
+                <Checkbox value={ props.unilateralExercise ? true : props.set.isUnilateral } disabled={props.unilateralExercise} onValueChange={(value: boolean) => props.updateForm((prev: FormValues) => ({
+                    ...prev, exercises: prev.exercises.map((exc: Exercise) => {
                         if (exc.index === props.exerciseId) {
                             return { ...exc, sets: exc.sets.map((s: { id: number; }) => {
                                 if (s.id === props.set.id) {
@@ -65,7 +65,7 @@ export default function NewSet(props: Props) {
                         }
                         return exc;
                     }) 
-                })}/>
+                }))}/>
                 <Text>Unilateral Set</Text>
                 {
                     props.setCount > 1 && <Button title='Remove Set' onPress={() => props.removeSet(props.exerciseId, props.set.id)} />
