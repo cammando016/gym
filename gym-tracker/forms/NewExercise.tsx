@@ -84,9 +84,9 @@ export default function NewExercise(props: Props) {
             </View>
             <View>
                 <TextInput 
-                    placeholder='Enter exercise name'
+                    placeholder='Search exercises'
                     onFocus={() => props.updateActiveExercise(props.exercise.index)}
-                    value={props.form.exercises[props.exercise.index].name}
+                    value={props.exercise.name}
                     onChangeText={(text: string) => { 
                         setInputValue(text);
 
@@ -117,7 +117,7 @@ export default function NewExercise(props: Props) {
                                             onPress={() => {
                                                 props.updateForm({...props.form, exercises: props.form.exercises.map(exc => {
                                                     if (exc.index === props.exercise.index) {
-                                                        return {...exc, name: result.exercise_name, dbId: result.exercise_id}
+                                                        return {...exc, name: result.exercise_name, isUnilateral: result.exercise_unilateral, dbId: result.exercise_id}
                                                     }
                                                     return exc
                                                 })})
@@ -138,7 +138,7 @@ export default function NewExercise(props: Props) {
                     <View style={{display: 'flex', flexDirection: 'row'}}>
                         <TextInput 
                             placeholder='0'
-                            value={props.form.exercises[props.exercise.index].repRangeLower}
+                            value={props.exercise.repRangeLower}
                             onChangeText={(n: string) => {
                                 props.updateForm({...props.form, exercises: props.form.exercises.map(exc => {
                                     if (exc.index === props.exercise.index) {
@@ -151,7 +151,7 @@ export default function NewExercise(props: Props) {
                         <Text> to </Text>
                         <TextInput 
                             placeholder='0'
-                            value={props.form.exercises[props.exercise.index].repRangeHigher}
+                            value={props.exercise.repRangeHigher}
                             onChangeText={(n: string) => {
                                 props.updateForm({...props.form, exercises: props.form.exercises.map(exc => {
                                     if (exc.index === props.exercise.index) {
@@ -168,7 +168,7 @@ export default function NewExercise(props: Props) {
             <View>
                 {
                     props.exercise.sets.map((set: { id: number, type: SetType }) => {
-                        return <NewSet key={set.id} form={props.form} updateForm={props.updateForm} exerciseId={props.exercise.index} set={set} setCount={setsLength} removeSet={props.removeSet} activeSet={props.activeSet} updateActiveSet={props.updateActiveSet} />
+                        return <NewSet key={set.id} exercise={props.exercise} form={props.form} updateForm={props.updateForm} exerciseId={props.exercise.index} set={set} setCount={setsLength} removeSet={props.removeSet} activeSet={props.activeSet} updateActiveSet={props.updateActiveSet} unilateralExercise={props.exercise.isUnilateral} />
                     })
                 }
             </View>

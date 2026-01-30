@@ -2,26 +2,29 @@ import { useState } from 'react';
 import { Button, Pressable, StyleSheet, Text, View } from 'react-native';
 import { FormValues, SetTracker, SetType, setTypes, WorkoutSet } from '../types/workouts.ts';
 import { Checkbox } from 'expo-checkbox';
+import { Exercise } from '@/types/workouts';
 
 interface Props {
     set: WorkoutSet,
     setCount: number,
     exerciseId: number,
+    exercise: Exercise
     removeSet: (exerciseId: number, setId: number) => void,
     activeSet: SetTracker,
-    updateActiveSet: (exerciseId: number, setId: number) => void
-    form: FormValues
-    updateForm: (form: FormValues) => void
+    updateActiveSet: (exerciseId: number, setId: number) => void,
+    form: FormValues,
+    updateForm: (form: FormValues) => void,
+    unilateralExercise: boolean,
 }
 
 export default function NewSet(props: Props) {
-    const setType = props.form.exercises[props.exerciseId].sets[props.set.id].type;
-    const [showDropdown, setShowDropdown] = useState<Boolean>(false);
+    console.log(props.unilateralExercise)
+    const setType = props.set.type;
+    const [showDropdown, setShowDropdown] = useState<boolean>(false);
 
     const toggleDropdown = () => {
         setShowDropdown(!showDropdown);
         props.updateActiveSet(props.exerciseId, props.set.id);
-        console.log(props.exerciseId, props.set.id, props.activeSet);
     }
 
     const handleSetSelect = (value: SetType) => {
@@ -50,7 +53,7 @@ export default function NewSet(props: Props) {
                     </View>
                 </Pressable>
 
-                <Checkbox value={props.set.isUnilateral} onValueChange={(value: boolean) => props.updateForm({
+                <Checkbox value={ props.unilateralExercise ? true : props.set.isUnilateral } disabled={props.unilateralExercise} onValueChange={(value: boolean) => props.updateForm({
                     ...props.form, exercises: props.form.exercises.map((exc: {index: number; sets: {id: number;}[]; }) => {
                         if (exc.index === props.exerciseId) {
                             return { ...exc, sets: exc.sets.map((s: { id: number; }) => {

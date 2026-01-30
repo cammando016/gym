@@ -62,6 +62,7 @@ interface FormValues {
 
 interface ExerciseSearchResultType {
     exercise_name: string;
+    exercise_unilateral: boolean;
     muscle_name: string;
     exercise_id: number;
 }
