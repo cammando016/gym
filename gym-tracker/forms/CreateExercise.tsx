@@ -1,16 +1,15 @@
 import { Text, TextInput, View, Pressable } from 'react-native';
-import { Dispatch, SetStateAction, useState } from 'react';
+import { Dispatch, useState } from 'react';
 import { RadioButton } from 'react-native-paper';
 import { Checkbox } from 'expo-checkbox';
 import { muscleGroups, MuscleGroups, Exercise, Muscle } from '../types/workouts.ts';
-import { FormValues } from '@/types/workouts';
+import { WorkoutAction } from '@/types/workouts';
 import MuscleSelector from '@/components/MuscleSelector';
 
 interface Props {
     closeModal:  () => void,
     exercise: Exercise,
-    form: FormValues,
-    updateForm: Dispatch<SetStateAction<FormValues>>,
+    updateForm: Dispatch<WorkoutAction>,
 }
 
 export default function CreateExercise(props: Props) {
@@ -52,25 +51,19 @@ export default function CreateExercise(props: Props) {
         { name: 'other', id: '7a269dda-ea56-4e86-b1fa-b3d5ce91cdfc' },
     ]
 
+    //Show specific muscles for selected muscle group
     const renderMuscleSelection = () => {
         switch (radioGroup) {
-            case 'arms' : return <MuscleSelector muscleList={armMuscles} exercise={props.exercise} form={props.form} updateForm={props.updateForm} />
-            case 'back' : return <MuscleSelector muscleList={backMuscles} exercise={props.exercise} form={props.form} updateForm={props.updateForm} />
-            case 'chest' : return <MuscleSelector muscleList={chestMuscles} exercise={props.exercise} form={props.form} updateForm={props.updateForm} />
-            case 'legs' : return <MuscleSelector muscleList={legMuscles} exercise={props.exercise} form={props.form} updateForm={props.updateForm} />
-            case 'other' : return <MuscleSelector muscleList={otherMuscles} exercise={props.exercise} form={props.form} updateForm={props.updateForm} />
+            case 'arms' : return <MuscleSelector muscleList={armMuscles} exercise={props.exercise} updateForm={props.updateForm} />
+            case 'back' : return <MuscleSelector muscleList={backMuscles} exercise={props.exercise} updateForm={props.updateForm} />
+            case 'chest' : return <MuscleSelector muscleList={chestMuscles} exercise={props.exercise} updateForm={props.updateForm} />
+            case 'legs' : return <MuscleSelector muscleList={legMuscles} exercise={props.exercise} updateForm={props.updateForm} />
+            case 'other' : return <MuscleSelector muscleList={otherMuscles} exercise={props.exercise} updateForm={props.updateForm} />
         }
     }
 
-    const updateTargetMuscle = (muscleArray: Muscle[]) => {
-        props.updateForm(prev => ({
-            ...prev,
-            exercises: prev.exercises.map(exc => {
-                if (exc.index === props.exercise.index) return {...exc, targetMuscle: muscleArray[0].id}
-                return exc
-            })
-        }))
-    }
+    //When muscle group changed, set target muscle to first specific muscle from group until changed by user
+    const updateTargetMuscle = (muscleArray: Muscle[]) => props.updateForm({ type: 'SET_DB_EXERCISE_TARGET_MUSCLE', exerciseIndex: props.exercise.index, value: muscleArray[0].id });
 
     return (
         <View styles={{maxHeight: '80%', marginTop: '10%'}}>
@@ -79,12 +72,7 @@ export default function CreateExercise(props: Props) {
                 <Text>Exercise Name:</Text>
                 <TextInput 
                     placeholder='Enter Exercise Name'
-                    onChangeText={ (text: string) => {
-                        props.updateForm(prev => ({...prev, exercises: prev.exercises.map(exc => {
-                            if (exc.index === props.exercise.index) return {...exc, name: text}
-                            return exc
-                        }) }))
-                    }}
+                    onChangeText={ (text: string) => props.updateForm({ type: 'SET_EXERCISE_NAME', exerciseIndex: props.exercise.index, value: text }) }
                 />
             </View>
             {/* Select muscle group, show subset of specific muscles from each group */}
@@ -128,12 +116,7 @@ export default function CreateExercise(props: Props) {
             <View style={{display: 'flex', flexDirection: 'row'}}>
                 <Checkbox 
                     value={props.exercise.isUnilateral}
-                    onValueChange={(value: boolean) => {
-                        props.updateForm(prev => ({...prev, exercises: prev.exercises.map(exc => {
-                            if (exc.index === props.exercise.index) return {...exc, isUnilateral: value}
-                            return exc
-                        }) }))
-                    }}
+                    onValueChange={(b: boolean) => props.updateForm({ type: 'SET_DB_EXERCISE_UNILATERAL', exerciseIndex: props.exercise.index, value: b }) }
                 />
                 <Text>Unilateral Exercise</Text>
             </View>
@@ -142,15 +125,13 @@ export default function CreateExercise(props: Props) {
             <View style={{display: 'flex', flexDirection: 'row'}}>
                 {/* If cancelled, reset any exercise fields that were changed on the create exercise modal */}
                 <Pressable onPress={() => {
-                        props.updateForm(prev => ({...prev, exercises: prev.exercises.map(exc => {
-                            if (exc.index === props.exercise.index) return {...exc, isUnilateral: false, targetMuscle: '', name: ''}
-                            return exc
-                        })}))
+                        props.updateForm({ type: 'CANCEL_CREATE_DB_EXERCISE', exerciseIndex: props.exercise.index });
                         props.closeModal()
                     }
                 }>
                     <Text>Cancel</Text>
                 </Pressable>
+                {/* Needs validation added to below */}
                 <Pressable onPress={() => props.closeModal()}>
                     <Text>Add Exercise</Text>
                 </Pressable>

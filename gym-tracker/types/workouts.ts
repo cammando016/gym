@@ -22,6 +22,25 @@ const muscleGroups = [
 ] as const;
 type MuscleGroups = typeof muscleGroups[number]['value'];
 
+type WorkoutAction = 
+| { type: 'SET_WORKOUT_NAME'; value: string }
+| { type: 'SET_WORKOUT_PRIVACY'; value: PrivacyType } 
+| { type: 'ADD_EXERCISE'; value: Exercise }
+| { type: 'REMOVE_EXERCISE'; exerciseIndex: number }
+| { type: 'SET_EXERCISE_NAME'; exerciseIndex: number; value: string }
+| { type: 'SELECT_EXERCISE'; exerciseIndex: number; newFieldValues: { name: string; isUnilateral: boolean; dbId: number } }
+| { type: 'SET_EXERCISE_REPS_TARGET_LOWER'; exerciseIndex: number; value: number }
+| { type: 'SET_EXERCISE_REPS_TARGET_UPPER'; exerciseIndex: number; value: number }
+| { type: 'CREATE_DB_EXERCISE'; exerciseIndex: number }
+| { type: 'SET_DB_EXERCISE_TARGET_MUSCLE'; exerciseIndex: number; value: string }
+| { type: 'SET_DB_EXERCISE_UNILATERAL'; exerciseIndex: number; value: boolean }
+| { type: 'CANCEL_CREATE_DB_EXERCISE'; exerciseIndex: number }
+| { type: 'ADD_SET'; exerciseIndex: number; value: WorkoutSet }
+| { type: 'REMOVE_SET'; exerciseIndex: number; setIndex: number }
+| { type: 'SET_SET_TYPE'; exerciseIndex: number; setIndex: number; value: SetType }
+| { type: 'SET_UNILATERAL_SET', exerciseIndex: number; setIndex: number; value: boolean }
+| { type: 'RESET_FORM' }
+
 interface Muscle {
     name: string;
     id: string;
@@ -68,4 +87,4 @@ interface ExerciseSearchResultType {
     exercise_id: number;
 }
 
-export { setTypes, SetType, muscleGroups, MuscleGroups, Muscle, WorkoutSet, Exercise, SetTracker, FormValues, privacyTypes, PrivacyType, ExerciseSearchResultType, CreatedExercise };
+export { setTypes, SetType, muscleGroups, MuscleGroups, Muscle, WorkoutSet, Exercise, SetTracker, FormValues, privacyTypes, PrivacyType, ExerciseSearchResultType, CreatedExercise, WorkoutAction };

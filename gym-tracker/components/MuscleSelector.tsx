@@ -1,5 +1,5 @@
-import { Exercise, FormValues } from '@/types/workouts';
-import { Dispatch, SetStateAction } from 'react';
+import { Exercise, WorkoutAction } from '@/types/workouts';
+import { Dispatch } from 'react';
 import { Text, View } from 'react-native';
 import { RadioButton } from 'react-native-paper';
 import { Muscle } from '../types/workouts.ts';
@@ -7,8 +7,7 @@ import { Muscle } from '../types/workouts.ts';
 interface Props {
     muscleList: Muscle[],
     exercise: Exercise,
-    form: FormValues,
-    updateForm: Dispatch<SetStateAction<FormValues>>,
+    updateForm: Dispatch<WorkoutAction>,
 }
 
 export default function MuscleSelector(props: Props) {
@@ -16,11 +15,8 @@ export default function MuscleSelector(props: Props) {
         <View>
             <RadioButton.Group
                 value={props.exercise.targetMuscle}
-                onValueChange={(value: string) => {
-                    props.updateForm(prev => ({ ...prev, exercises: props.form.exercises.map(exc => {
-                        if(exc.index === props.exercise.index) return {...exc, targetMuscle: value}
-                        return exc
-                    }) }))
+                onValueChange={(s: string) => {
+                    props.updateForm({ type: 'SET_DB_EXERCISE_TARGET_MUSCLE', exerciseIndex: props.exercise.index, value: s })
                 }}
             >
                 {

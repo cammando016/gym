@@ -1,7 +1,6 @@
-import { FormValues, SetTracker, SetType, ExerciseSearchResultType } from '@/types/workouts';
+import { SetTracker, SetType, ExerciseSearchResultType, WorkoutAction, Exercise } from '@/types/workouts';
 import { Button, Text, TextInput, View, ScrollView, Pressable, Modal } from 'react-native';
-import { useEffect, useState, Dispatch, SetStateAction } from 'react';
-import { Exercise } from '../types/workouts.ts';
+import { useEffect, useState, Dispatch } from 'react';
 import NewSet from './NewSet';
 import useDebounce from '@/utils/search';
 import ExerciseSearchResult from '../components/ExerciseSearchResult.tsx';
@@ -18,8 +17,7 @@ interface Props {
     activeExercise: number,
     updateActiveSet: (exerciseId: number, setId: number) => void,
     updateActiveExercise: (exerciseIndex: number) => void,
-    form: FormValues,
-    updateForm: Dispatch<SetStateAction<FormValues>>,
+    updateForm: Dispatch<WorkoutAction>,
 }
 
 export default function NewExercise(props: Props) {
@@ -53,13 +51,7 @@ export default function NewExercise(props: Props) {
     }, [debouncedExerciseName]);
 
     const createExercise = () => {
-        props.updateForm(prev => ({
-            ...prev,
-            exercises: prev.exercises.map(exc => {
-                if (exc.index === props.exercise.index) return {...exc, targetMuscle: '41c6578d-a82a-48f2-a815-d7a1953510b2'}
-                return exc
-            })
-        }))
+        props.updateForm({ type: 'CREATE_DB_EXERCISE', exerciseIndex: props.exercise.index });
         setShowCreateExercise(true);
     }
 
@@ -72,7 +64,7 @@ export default function NewExercise(props: Props) {
 
             {showCreateExercise && (
                 <Modal>
-                    <CreateExercise closeModal={closeCreateExercise} exercise={props.exercise} form={props.form} updateForm={props.updateForm} />
+                    <CreateExercise closeModal={closeCreateExercise} exercise={props.exercise} updateForm={props.updateForm} />
                 </Modal>
             )}
 
@@ -89,14 +81,8 @@ export default function NewExercise(props: Props) {
                     value={props.exercise.name}
                     onChangeText={(text: string) => { 
                         setInputValue(text);
-
-                        props.updateForm(prev => ({ ...prev, exercises: prev.exercises.map(exc => {
-                            if(exc.index === props.exercise.index) {
-                                return {...exc, name: text}
-                            } 
-                            return exc
-                        })}))}
-                    }
+                        props.updateForm({ type: 'SET_EXERCISE_NAME', value: text, exerciseIndex: props.exercise.index })
+                    }}
                 />
 
                 {/* Only render searched exercises for one exercise at a time */}
@@ -115,13 +101,11 @@ export default function NewExercise(props: Props) {
                                             exerciseName={result.exercise_name} 
                                             targetMuscle={result.muscle_name} 
                                             onPress={() => {
-                                                props.updateForm(prev => ({...prev, exercises: prev.exercises.map(exc => {
-                                                    if (exc.index === props.exercise.index) {
-                                                        return {...exc, name: result.exercise_name, isUnilateral: result.exercise_unilateral, dbId: result.exercise_id}
-                                                    }
-                                                    return exc
-                                                })}))
-
+                                                props.updateForm({ type: 'SELECT_EXERCISE', exerciseIndex: props.exercise.index, newFieldValues: {
+                                                    name: result.exercise_name,
+                                                    isUnilateral: result.exercise_unilateral,
+                                                    dbId: result.exercise_id
+                                                }})
                                                 setSearchResults([]);
                                             }}
                                         />
@@ -140,12 +124,7 @@ export default function NewExercise(props: Props) {
                             placeholder='0'
                             value={props.exercise.repRangeLower}
                             onChangeText={(n: string) => {
-                                props.updateForm(prev => ({...prev, exercises: prev.exercises.map(exc => {
-                                    if (exc.index === props.exercise.index) {
-                                        return {...exc, repRangeLower: Number(n)}
-                                    }
-                                    return exc
-                                })}))
+                                props.updateForm({ type: 'SET_EXERCISE_REPS_TARGET_LOWER', exerciseIndex: props.exercise.index, value: Number(n) })
                             }}
                         />
                         <Text> to </Text>
@@ -153,12 +132,7 @@ export default function NewExercise(props: Props) {
                             placeholder='0'
                             value={props.exercise.repRangeHigher}
                             onChangeText={(n: string) => {
-                                props.updateForm(prev => ({...prev, exercises: prev.exercises.map(exc => {
-                                    if (exc.index === props.exercise.index) {
-                                        return {...exc, repRangeHigher: Number(n)}
-                                    }
-                                    return exc
-                                })}))
+                                props.updateForm({ type: 'SET_EXERCISE_REPS_TARGET_UPPER', exerciseIndex: props.exercise.index, value: Number(n) })
                             }}
                         />
                     </View>
@@ -168,7 +142,7 @@ export default function NewExercise(props: Props) {
             <View>
                 {
                     props.exercise.sets.map((set: { id: number, type: SetType }) => {
-                        return <NewSet key={set.id} exercise={props.exercise} form={props.form} updateForm={props.updateForm} exerciseId={props.exercise.index} set={set} setCount={setsLength} removeSet={props.removeSet} activeSet={props.activeSet} updateActiveSet={props.updateActiveSet} unilateralExercise={props.exercise.isUnilateral} />
+                        return <NewSet key={set.id} exercise={props.exercise} updateForm={props.updateForm} exerciseId={props.exercise.index} set={set} setCount={setsLength} removeSet={props.removeSet} activeSet={props.activeSet} updateActiveSet={props.updateActiveSet} unilateralExercise={props.exercise.isUnilateral} />
                     })
                 }
             </View>
