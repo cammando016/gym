@@ -12,7 +12,6 @@ interface Props {
     exerciseCount: number,
     removeExc: (id: number) => void,
     addSet: (exerciseId: number) => void,
-    removeSet: (exerciseId: number, setId: number) => void,
     activeSet: SetTracker,
     activeExercise: number,
     updateActiveSet: (exerciseId: number, setId: number) => void,
@@ -32,8 +31,6 @@ export default function NewExercise(props: Props) {
 
     //state value to show or hide modal for adding a new exercise not in DB
     const [showCreateExercise, setShowCreateExercise] = useState<boolean>(false);
-
-    const setsLength: number = props.exercise.sets.length;
 
     //Search for exercises when user types in exercise name field
     useEffect(() => {
@@ -142,7 +139,7 @@ export default function NewExercise(props: Props) {
             <View>
                 {
                     props.exercise.sets.map((set: { id: number, type: SetType }) => {
-                        return <NewSet key={set.id} exercise={props.exercise} updateForm={props.updateForm} exerciseId={props.exercise.index} set={set} setCount={setsLength} removeSet={props.removeSet} activeSet={props.activeSet} updateActiveSet={props.updateActiveSet} unilateralExercise={props.exercise.isUnilateral} />
+                        return <NewSet key={set.id} exercise={props.exercise} updateForm={props.updateForm} set={set} activeSet={props.activeSet} updateActiveSet={props.updateActiveSet} />
                     })
                 }
             </View>

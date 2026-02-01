@@ -184,7 +184,6 @@ export default function WorkoutForm () {
         }
     }
 
-
     const [form, dispatch] = useReducer(workoutReducer, initialFormState);
 
     //Passed down to NewSet to show only one set type drop down at a time
@@ -224,9 +223,7 @@ export default function WorkoutForm () {
         delete setCounters.current[exerciseId];
         dispatch({ type: 'REMOVE_EXERCISE', exerciseIndex: exerciseId });
     }
-    //Remove a set from specific exercise in workout
-    const handleRemoveSet = (exerciseId: number, setId: number) => dispatch({ type: 'REMOVE_SET', exerciseIndex: exerciseId, setIndex: setId });
-
+    
     // <-------- TO COMPLETE: FORM SUBMISSION FUNCTION --------->
     const simSubmit = () => {
         alert(JSON.stringify(form));
@@ -273,7 +270,7 @@ export default function WorkoutForm () {
                     <View id='exercises'>
                         {
                             form.exercises.map(exercise => {
-                                return <NewExercise key={exercise.index} updateForm={dispatch} exercise={exercise} exerciseCount={Object.keys(setCounters.current).length} removeExc={handleRemoveExercise} addSet={handleAddSet} removeSet={handleRemoveSet} activeSet={activeSet} activeExercise={activeExercise} updateActiveSet={updateActiveSet} updateActiveExercise={updateActiveExercise}></NewExercise>
+                                return <NewExercise key={exercise.index} updateForm={dispatch} exercise={exercise} exerciseCount={Object.keys(setCounters.current).length} removeExc={handleRemoveExercise} addSet={handleAddSet} activeSet={activeSet} activeExercise={activeExercise} updateActiveSet={updateActiveSet} updateActiveExercise={updateActiveExercise}></NewExercise>
                             })
                         }
                     </View>

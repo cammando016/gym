@@ -6,24 +6,19 @@ import { Exercise } from '@/types/workouts';
 
 interface Props {
     set: WorkoutSet,
-    setCount: number,
-    exerciseId: number,
-    exercise: Exercise
-    removeSet: (exerciseId: number, setId: number) => void,
+    exercise: Exercise,
     activeSet: SetTracker,
     updateActiveSet: (exerciseId: number, setId: number) => void,
     updateForm: Dispatch<WorkoutAction>,
-    unilateralExercise: boolean,
 }
 
 export default function NewSet(props: Props) {
-    console.log(props.unilateralExercise)
     const setType = props.set.type;
     const [showDropdown, setShowDropdown] = useState<boolean>(false);
 
     const toggleDropdown = () => {
         setShowDropdown(!showDropdown);
-        props.updateActiveSet(props.exerciseId, props.set.id);
+        props.updateActiveSet(props.exercise.index, props.set.id);
     }
 
     const handleSetSelect = (sType: SetType) => {
@@ -34,7 +29,7 @@ export default function NewSet(props: Props) {
     return (
         <View>
             <View style={{display: 'flex', flexDirection: 'row'}}>
-                <Text>Set: {props.set.id}</Text>
+                <Text>Set {props.exercise.sets.indexOf(props.set) + 1}:</Text>
                 <Pressable style={{borderColor: 'black', borderWidth: 1, padding: '3px'}} onPress={() => toggleDropdown()}>
                     <View style={{flexDirection: 'row'}}>
                         <Text>{setType}</Text>
@@ -42,17 +37,17 @@ export default function NewSet(props: Props) {
                 </Pressable>
 
                 <Checkbox 
-                    value={ props.unilateralExercise ? true : props.set.isUnilateral } 
-                    disabled={props.unilateralExercise} 
+                    value={ props.exercise.isUnilateral ? true : props.set.isUnilateral } 
+                    disabled={props.exercise.isUnilateral} 
                     onValueChange={(b: boolean) => props.updateForm({ type: 'SET_UNILATERAL_SET', exerciseIndex: props.exercise.index, setIndex: props.set.id, value: b })}
                 />
                 <Text>Unilateral Set</Text>
                 {
-                    props.setCount > 1 && <Button title='Remove Set' onPress={() => props.removeSet(props.exerciseId, props.set.id)} />
+                    props.exercise.sets.length > 1 && <Button title='Remove Set' onPress={() => props.updateForm({ type: 'REMOVE_SET', exerciseIndex: props.exercise.index, setIndex: props.set.id }) }/>
                 }
             </View>
 
-            {(showDropdown && props.activeSet.exercise === props.exerciseId && props.activeSet.set === props.set.id) && 
+            {(showDropdown && props.activeSet.exercise === props.exercise.index && props.activeSet.set === props.set.id) && 
                 <View style={styles.modalContainer}>
                     <View style={styles.modalContent}>
                         {
