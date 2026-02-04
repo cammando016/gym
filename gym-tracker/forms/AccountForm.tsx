@@ -35,10 +35,10 @@ export default function AccountForm() {
         const passwordCheck = validateRequiredField(form.password, 'Password');
         const confirmPasswordCheck = validatePasswordsMatch(form.password, form.confirmPassword);
 
-        if (nameCheck.isInvalid) errors.name = nameCheck.error;
-        if (usernameCheck.isInvalid) errors.username = usernameCheck.error;
-        if (passwordCheck.isInvalid) errors.password = passwordCheck.error;
-        if (confirmPasswordCheck.isInvalid) errors.confirmPassword = confirmPasswordCheck.error;
+        if (nameCheck) errors.name = nameCheck;
+        if (usernameCheck) errors.username = usernameCheck;
+        if (passwordCheck) errors.password = passwordCheck;
+        if (confirmPasswordCheck) errors.confirmPassword = confirmPasswordCheck;
 
         return errors;
     }
@@ -77,7 +77,7 @@ export default function AccountForm() {
                 onBlur={() => {
                     const errorCheck = validateRequiredAlphabeticalField(form.name, 'First Name');
                     setErrors(prev => {
-                        if (errorCheck.isInvalid) return {...prev, name: errorCheck.error};
+                        if (errorCheck) return {...prev, name: errorCheck};
                         const {name, ...rest} = prev;
                         return rest;
                     });
@@ -96,7 +96,7 @@ export default function AccountForm() {
                 onBlur={() => {
                     const errorCheck = validateRequiredAlphanumericField(form.username, 'Username');
                     setErrors(prev => {
-                        if (errorCheck.isInvalid) return {...prev, username: errorCheck.error}
+                        if (errorCheck) return {...prev, username: errorCheck}
                         const {username, ...rest} = prev;
                         return rest;
                     })
@@ -145,7 +145,7 @@ export default function AccountForm() {
                     onBlur={() => {
                         const errorCheck = validateOptionalNumericField(form.weight, 'Weight');
                         setErrors(prev => {
-                            if (errorCheck.isInvalid) return {...prev, weight: errorCheck.error};
+                            if (errorCheck) return {...prev, weight: errorCheck};
                             const {weight, ...rest} = prev;
                             return rest;
                         })
@@ -167,7 +167,7 @@ export default function AccountForm() {
                     onBlur={() => {
                         const errorCheck = validateOptionalNumericField(form.benchPr, 'Bench PR');
                         setErrors(prev => {
-                            if (errorCheck.isInvalid) return {...prev, benchPr: errorCheck.error};
+                            if (errorCheck) return {...prev, benchPr: errorCheck};
                             const {benchPr, ...rest} = prev;
                             return rest;
                         })
@@ -189,7 +189,7 @@ export default function AccountForm() {
                     onBlur={() => {
                         const errorCheck = validateOptionalNumericField(form.squatPr, 'Squat PR');
                         setErrors(prev => {
-                            if (errorCheck.isInvalid) return {...prev, squatPr: errorCheck.error};
+                            if (errorCheck) return {...prev, squatPr: errorCheck};
                             const {squatPr, ...rest} = prev;
                             return rest;
                         })
@@ -211,7 +211,7 @@ export default function AccountForm() {
                     onBlur={() => {
                         const errorCheck = validateOptionalNumericField(form.deadPr, 'Deadlift PR');
                         setErrors(prev => {
-                            if (errorCheck.isInvalid) return {...prev, deadPr: errorCheck.error};
+                            if (errorCheck) return {...prev, deadPr: errorCheck};
                             const {deadPr, ...rest} = prev;
                             return rest;
                         })
@@ -232,7 +232,7 @@ export default function AccountForm() {
                 onBlur={() => {
                     const errorCheck = validateRequiredField(form.password, 'Password');
                     setErrors(prev => {
-                        if (errorCheck.isInvalid) return {...prev, password: errorCheck.error};
+                        if (errorCheck) return {...prev, password: errorCheck};
                         const {password, ...rest} = prev;
                         return rest;
                     })
@@ -252,7 +252,7 @@ export default function AccountForm() {
                 onBlur={() => {
                     const errorCheck = validatePasswordsMatch(form.password, form.confirmPassword);
                     setErrors(prev => {
-                        if (errorCheck.isInvalid) return {...prev, confirmPassword: errorCheck.error};
+                        if (errorCheck) return {...prev, confirmPassword: errorCheck};
                         const {confirmPassword, ...rest} = prev;
                         return rest;
                     })
