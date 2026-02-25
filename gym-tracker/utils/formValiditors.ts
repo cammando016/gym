@@ -26,6 +26,14 @@ export const validateOptionalNumericField = (value: string, fieldName: string) :
     return undefined
 }
 
+export const validateOptionalIntegerField = (value: string, fieldName: string) : string | undefined => {
+    //Field is allowed to be empty, don't test isNaN if empty
+    if (value === '' || value == null) return undefined;
+    //Regex for whole number (only numerical characters)
+    if (!/^\d+$/.test(value)) return `${fieldName} must be a whole number`;
+    return undefined;
+}
+
 export const validateRequiredField = (value: string, fieldName: string) : string | undefined => {
     if (value === '') return `${fieldName} must be provided`
     return undefined
@@ -34,4 +42,15 @@ export const validateRequiredField = (value: string, fieldName: string) : string
 export const validatePasswordsMatch = (password: string, confirmPassword: string) : string | undefined => {
     if (password !== confirmPassword) return 'Password does not match confirm password'
     return undefined
+}
+
+export const validateUpperRepsTarget = (upper?: string, lower?: string) : string | undefined => {
+    const isUpperEmpty = upper === '' || upper == null;
+    const isLowerEmpty = lower === '' || lower == null;
+
+    if (!isLowerEmpty && isUpperEmpty) return 'Upper reps target is required when lower reps is set';
+    if (!isUpperEmpty && !/^\d+$/.test(upper)) return 'Upper reps must be a whole number';
+    if (!isUpperEmpty && !isLowerEmpty && (Number(upper) < Number(lower))) return 'Upper reps target cannot be smaller than lower reps target';
+
+    return undefined;
 }

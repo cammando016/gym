@@ -3,7 +3,7 @@ import { useRef, useState, useReducer } from 'react';
 import { Button, Text, TextInput, View, ScrollView, StyleSheet } from 'react-native';
 import { RadioButton } from 'react-native-paper';
 import NewExercise from './NewExercise';
-import { validateRequiredAlphabeticalField, validateRequiredAlphanumericSymbolsField, validateRequiredAlphabeticalSpacesField, validateOptionalNumericField } from '../utils/formValiditors';
+import { validateRequiredAlphanumericSymbolsField, validateRequiredAlphabeticalSpacesField, validateOptionalNumericField, validateOptionalIntegerField, validateUpperRepsTarget } from '../utils/formValiditors';
 
 export default function WorkoutForm () {
     //State objects for tracking number of sets and exercises, and tracking current exercise/set being interacted with by user
@@ -133,7 +133,7 @@ export default function WorkoutForm () {
                 };
             }
             case 'VALIDATE_EXERCISE_REPS_TARGET_LOWER': {
-                const validation = validateOptionalNumericField(action.value, 'Lower Rep Range');
+                const validation = validateOptionalIntegerField(action.value, 'Lower Rep Range');
                 return {
                     ...state,
                     errors: {
@@ -155,24 +155,13 @@ export default function WorkoutForm () {
                 };
             }
             case 'VALIDATE_EXERCISE_REPS_TARGET_UPPER': {
-                const upper = action.value;
-                const lower = action.repsLower;
-
-                let error: string | undefined;
-
-                const isUpperEmpty = upper === '' || upper == null;
-                const isLowerEmpty = lower === '' || lower == null;
-
-                if (!isLowerEmpty && isUpperEmpty) error = 'Upper reps target is required when lower reps is set';
-                else if (!isUpperEmpty && isNaN(Number(upper))) error = 'Upper reps target must be a number';
-                else if (!isUpperEmpty && !isLowerEmpty && Number(upper) <= Number(lower)) error = 'Upper reps target must be greater than lower reps target';
-
+                const validation = validateUpperRepsTarget(action.value, action.repsLower);
                 return {
                     ...state,
                     errors: {
                         ...state.errors,
                         exercises: state.errors.exercises.map((err, i) => {
-                            if (state.values.exercises[i].index === action.exerciseIndex) return {...err, repRangeUpper: error}
+                            if (state.values.exercises[i].index === action.exerciseIndex) return {...err, repRangeUpper: validation}
                             return {...err}
                         })
                     }

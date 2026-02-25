@@ -47,6 +47,7 @@ type WorkoutAction =
 | { type: 'REMOVE_SET'; exerciseIndex: number; setIndex: number }
 | { type: 'SET_SET_TYPE'; exerciseIndex: number; setIndex: number; value: SetType }
 | { type: 'SET_UNILATERAL_SET', exerciseIndex: number; setIndex: number; value: boolean }
+| { type: 'VALIDATE_FULL_FORM' }
 | { type: 'RESET_FORM' }
 
 interface Muscle {
