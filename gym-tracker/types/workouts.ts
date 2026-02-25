@@ -1,4 +1,5 @@
 const setTypes = [
+    {label: 'AMRAP', value: 'amrap'},
     {label: 'Backoff', value: 'backoff'},
     {label: 'Top Set', value: 'topset'},
     {label: 'Working', value: 'working'},
@@ -38,6 +39,9 @@ type WorkoutAction =
 | { type: 'CREATE_DB_EXERCISE'; exerciseIndex: number }
 | { type: 'SET_DB_EXERCISE_TARGET_MUSCLE'; exerciseIndex: number; value: string }
 | { type: 'SET_DB_EXERCISE_UNILATERAL'; exerciseIndex: number; value: boolean }
+| { type: 'SET_DB_SET_OPTIONAL_UNILATERAL'; exerciseIndex: number; value: boolean }
+| { type: 'SET_DB_SET_OPTIONAL_STRAPS'; exerciseIndex: number; value: boolean }
+| { type: 'SET_DB_SET_OPTIONAL_BELT'; exerciseIndex: number; value: boolean }
 | { type: 'CANCEL_CREATE_DB_EXERCISE'; exerciseIndex: number }
 | { type: 'ADD_SET'; exerciseIndex: number; value: WorkoutSet }
 | { type: 'REMOVE_SET'; exerciseIndex: number; setIndex: number }
@@ -65,6 +69,9 @@ interface Exercise {
     sets: WorkoutSet[];
     targetMuscle?: string;
     isUnilateral: boolean;
+    setOptionalUnilateral: boolean;
+    setOptionalStraps: boolean;
+    setOptionalBelt: boolean;
 }
 
 interface CreatedExercise {

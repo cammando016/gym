@@ -24,6 +24,9 @@ export default function WorkoutForm () {
                 repRangeLower: 0, 
                 repRangeHigher: 0, 
                 isUnilateral: false, 
+                setOptionalUnilateral: false,
+                setOptionalStraps: false,
+                setOptionalBelt: false,
                 sets: [{ 
                     id: 0, 
                     type: 'working', 
@@ -202,6 +205,33 @@ export default function WorkoutForm () {
                     })}
                 };
             }
+            case 'SET_DB_SET_OPTIONAL_UNILATERAL': {
+                return {
+                    ...state,
+                    values: {...state.values, exercises: state.values.exercises.map(exc => {
+                        if (exc.index === action.exerciseIndex) return {...exc, setOptionalUnilateral: action.value};
+                        return exc;
+                    })}
+                }
+            }
+            case 'SET_DB_SET_OPTIONAL_STRAPS': {
+                return {
+                    ...state,
+                    values: {...state.values, exercises: state.values.exercises.map(exc => {
+                        if (exc.index === action.exerciseIndex) return {...exc, setOptionalStraps: action.value};
+                        return exc;
+                    })}
+                }
+            }
+            case 'SET_DB_SET_OPTIONAL_BELT': {
+                return {
+                    ...state,
+                    values: {...state.values, exercises: state.values.exercises.map(exc => {
+                        if (exc.index === action.exerciseIndex) return {...exc, setOptionalBelt: action.value};
+                        return exc;
+                    })}
+                }
+            }
             case 'CANCEL_CREATE_DB_EXERCISE': {
                 return {
                     ...state,
@@ -279,6 +309,9 @@ export default function WorkoutForm () {
             repRangeLower: 0,
             repRangeHigher: 0,
             isUnilateral: false,
+            setOptionalUnilateral: false,
+            setOptionalStraps: false,
+            setOptionalBelt: false,
             sets: [{id: 0, type: 'working', isUnilateral: false}]
         };
 

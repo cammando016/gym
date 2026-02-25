@@ -127,6 +127,37 @@ export default function CreateExercise(props: Props) {
                 <Text>Unilateral Exercise</Text>
             </View>
 
+            {/* Optional modifiers per set */}
+            <View>
+                <Text style={{fontWeight: 'bold'}}>Optional Set Modifiers.</Text>
+                <Text>Tick all that can be applied per set on this exercise.</Text>
+
+                <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-evenly'}}>
+                    <View style={{display: 'flex', flexDirection: 'column'}}>
+                        <Text>Unilateral</Text>
+                        <Checkbox 
+                            value={props.exercise.isUnilateral ? true : props.exercise.setOptionalUnilateral}
+                            disabled={props.exercise.isUnilateral}
+                            onValueChange={(b: boolean) => props.updateForm({ type: 'SET_DB_SET_OPTIONAL_UNILATERAL', exerciseIndex: props.exercise.index, value: b })}
+                        />
+                    </View>
+                    <View style={{display: 'flex', flexDirection: 'column'}}>
+                        <Text>Straps</Text>
+                        <Checkbox 
+                            value={props.exercise.setOptionalStraps}
+                            onValueChange={(b: boolean) => props.updateForm({ type: 'SET_DB_SET_OPTIONAL_STRAPS', exerciseIndex: props.exercise.index, value: b })}
+                        />
+                    </View>
+                    <View style={{display: 'flex', flexDirection: 'column'}}>
+                        <Text>Belt</Text>
+                        <Checkbox 
+                            value={props.exercise.setOptionalBelt}
+                            onValueChange={(b: boolean) => props.updateForm({ type: 'SET_DB_SET_OPTIONAL_BELT', exerciseIndex: props.exercise.index, value: b})}
+                        />
+                    </View>
+                </View>
+            </View>
+
             {/* Action buttons */}
             <View style={{display: 'flex', flexDirection: 'row'}}>
                 {/* If cancelled, reset any exercise fields that were changed on the create exercise modal */}
