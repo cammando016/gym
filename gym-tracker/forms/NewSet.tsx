@@ -1,8 +1,7 @@
 import { Dispatch, useState } from 'react';
 import { Button, Pressable, StyleSheet, Text, View } from 'react-native';
-import { SetTracker, SetType, setTypes, WorkoutSet, WorkoutAction } from '../types/workouts.ts';
 import { Checkbox } from 'expo-checkbox';
-import { Exercise } from '@/types/workouts';
+import { Exercise, SetTracker, SetType, setTypes, WorkoutSet, WorkoutAction } from '@/types/workouts';
 
 interface Props {
     set: WorkoutSet,
@@ -13,7 +12,6 @@ interface Props {
 }
 
 export default function NewSet(props: Props) {
-    const setType = props.set.type;
     const [showDropdown, setShowDropdown] = useState<boolean>(false);
 
     const toggleDropdown = () => {
@@ -32,7 +30,7 @@ export default function NewSet(props: Props) {
                 <Text>Set {props.exercise.sets.indexOf(props.set) + 1}:</Text>
                 <Pressable style={{borderColor: 'black', borderWidth: 1, padding: '3px'}} onPress={() => toggleDropdown()}>
                     <View style={{flexDirection: 'row'}}>
-                        <Text>{setType}</Text>
+                        <Text>{props.set.type}</Text>
                     </View>
                 </Pressable>
 

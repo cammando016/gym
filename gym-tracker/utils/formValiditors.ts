@@ -3,6 +3,11 @@ export const validateRequiredAlphabeticalField = (value: string, fieldName: stri
     return undefined;
 }
 
+export const validateRequiredAlphabeticalSpacesField = (value: string, fieldName: string) : string | undefined => {
+    if (value === '' || !/^[a-zA-Z\s]*$/.test(value)) return `${fieldName} is required and may only contain letters and spaces`;
+    return undefined;
+}
+
 export const validateRequiredAlphanumericSymbolsField = (value: string, fieldName: string) : string | undefined => {
     if (value === '' || !/^[a-zA-Z0-9,_/&\s]*$/.test(value)) return `${fieldName} is required containing only alphanumeric and "_ / , &" special characters`
     return undefined

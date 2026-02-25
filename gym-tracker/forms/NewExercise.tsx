@@ -1,5 +1,5 @@
 import { SetTracker, SetType, ExerciseSearchResultType, WorkoutAction, Exercise } from '@/types/workouts';
-import { Button, Text, TextInput, View, ScrollView, Pressable, Modal } from 'react-native';
+import { Button, Text, TextInput, View, ScrollView, Pressable, Modal, StyleSheet } from 'react-native';
 import { useEffect, useState, Dispatch } from 'react';
 import NewSet from './NewSet';
 import useDebounce from '@/utils/search';
@@ -9,6 +9,11 @@ import CreateExercise from './CreateExercise';
 
 interface Props {
     exercise: Exercise,
+    exerciseErrors?: {
+        name?: string,
+        repRangeLower?: string,
+        repRangeUpper?: string,
+    },
     exerciseCount: number,
     removeExc: (id: number) => void,
     addSet: (exerciseId: number) => void,
@@ -56,12 +61,19 @@ export default function NewExercise(props: Props) {
         setShowCreateExercise(false);
     }
 
+    const styles = StyleSheet.create({
+        modalContainer: {
+            maxHeight: '80%',
+            padding: 20,
+        }
+    })
+
     return (
         <View>
 
             {showCreateExercise && (
-                <Modal>
-                    <CreateExercise closeModal={closeCreateExercise} exercise={props.exercise} updateForm={props.updateForm} />
+                <Modal style={[styles.modalContainer]}>
+                    <CreateExercise closeModal={closeCreateExercise} nameError={props.exerciseErrors?.name} exercise={props.exercise} updateForm={props.updateForm} />
                 </Modal>
             )}
 
@@ -119,26 +131,36 @@ export default function NewExercise(props: Props) {
                     <View style={{display: 'flex', flexDirection: 'row'}}>
                         <TextInput 
                             placeholder='0'
+                            keyboardType='numeric'
+                            maxLength={2}
                             value={props.exercise.repRangeLower}
                             onChangeText={(n: string) => {
                                 props.updateForm({ type: 'SET_EXERCISE_REPS_TARGET_LOWER', exerciseIndex: props.exercise.index, value: Number(n) })
                             }}
+                            onEndEditing={(e: any) => props.updateForm({ type: 'VALIDATE_EXERCISE_REPS_TARGET_LOWER', exerciseIndex: props.exercise.index, value: e.nativeEvent.text })}
                         />
                         <Text> to </Text>
                         <TextInput 
                             placeholder='0'
+                            keyboardType='numeric'
+                            maxLength={2}
                             value={props.exercise.repRangeHigher}
                             onChangeText={(n: string) => {
                                 props.updateForm({ type: 'SET_EXERCISE_REPS_TARGET_UPPER', exerciseIndex: props.exercise.index, value: Number(n) })
                             }}
+                            onEndEditing={(e: any) => props.updateForm({ type: 'VALIDATE_EXERCISE_REPS_TARGET_UPPER', exerciseIndex: props.exercise.index, value: e.nativeEvent.text, repsLower: props.exercise.repRangeLower.toString() })}
                         />
+                    </View>
+                    <View>
+                        {props.exerciseErrors?.repRangeLower && <Text>{props.exerciseErrors.repRangeLower}</Text>}
+                        {props.exerciseErrors?.repRangeUpper && <Text>{props.exerciseErrors.repRangeUpper}</Text>}
                     </View>
                 </View>
             </View>
 
             <View>
                 {
-                    props.exercise.sets.map((set: { id: number, type: SetType }) => {
+                    props.exercise.sets.map(set => {
                         return <NewSet key={set.id} exercise={props.exercise} updateForm={props.updateForm} set={set} activeSet={props.activeSet} updateActiveSet={props.updateActiveSet} />
                     })
                 }

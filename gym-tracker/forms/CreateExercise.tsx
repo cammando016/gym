@@ -10,6 +10,7 @@ interface Props {
     closeModal:  () => void,
     exercise: Exercise,
     updateForm: Dispatch<WorkoutAction>,
+    nameError: string | undefined,
 }
 
 export default function CreateExercise(props: Props) {
@@ -66,14 +67,19 @@ export default function CreateExercise(props: Props) {
     const updateTargetMuscle = (muscleArray: Muscle[]) => props.updateForm({ type: 'SET_DB_EXERCISE_TARGET_MUSCLE', exerciseIndex: props.exercise.index, value: muscleArray[0].id });
 
     return (
-        <View styles={{maxHeight: '80%', marginTop: '10%'}}>
+        <View style={{maxHeight: '80%', marginTop: '10%', padding: 20, paddingTop: 50}}><View>
             <Text>Create New Exercise</Text>
             <View>
                 <Text>Exercise Name:</Text>
                 <TextInput 
                     placeholder='Enter Exercise Name'
-                    onChangeText={ (text: string) => props.updateForm({ type: 'SET_EXERCISE_NAME', exerciseIndex: props.exercise.index, value: text }) }
+                    value={props.exercise.name}
+                    onChangeText={ (text: string) => {
+                        props.updateForm({ type: 'SET_EXERCISE_NAME', exerciseIndex: props.exercise.index, value: text }); 
+                        props.updateForm({ type: 'VALIDATE_EXERCISE_NAME', exerciseIndex: props.exercise.index, value: text })
+                    }}
                 />
+                {props.nameError && <Text>{props.nameError}</Text>}
             </View>
             {/* Select muscle group, show subset of specific muscles from each group */}
             <View>
@@ -136,6 +142,6 @@ export default function CreateExercise(props: Props) {
                     <Text>Add Exercise</Text>
                 </Pressable>
             </View>
-        </View>
+            </View></View>
     )
 }

@@ -24,13 +24,17 @@ type MuscleGroups = typeof muscleGroups[number]['value'];
 
 type WorkoutAction = 
 | { type: 'SET_WORKOUT_NAME'; value: string }
+| { type: 'VALIDATE_WORKOUT_NAME'; value: string }
 | { type: 'SET_WORKOUT_PRIVACY'; value: PrivacyType } 
 | { type: 'ADD_EXERCISE'; value: Exercise }
 | { type: 'REMOVE_EXERCISE'; exerciseIndex: number }
 | { type: 'SET_EXERCISE_NAME'; exerciseIndex: number; value: string }
-| { type: 'SELECT_EXERCISE'; exerciseIndex: number; newFieldValues: { name: string; isUnilateral: boolean; dbId: number } }
+| { type: 'VALIDATE_EXERCISE_NAME'; exerciseIndex: number, value: string }
+| { type: 'SELECT_EXERCISE'; exerciseIndex: number; newFieldValues: { name: string; isUnilateral: boolean; dbId: string } }
 | { type: 'SET_EXERCISE_REPS_TARGET_LOWER'; exerciseIndex: number; value: number }
+| { type: 'VALIDATE_EXERCISE_REPS_TARGET_LOWER'; exerciseIndex: number; value: string }
 | { type: 'SET_EXERCISE_REPS_TARGET_UPPER'; exerciseIndex: number; value: number }
+| { type: 'VALIDATE_EXERCISE_REPS_TARGET_UPPER'; exerciseIndex: number; value: string; repsLower: string }
 | { type: 'CREATE_DB_EXERCISE'; exerciseIndex: number }
 | { type: 'SET_DB_EXERCISE_TARGET_MUSCLE'; exerciseIndex: number; value: string }
 | { type: 'SET_DB_EXERCISE_UNILATERAL'; exerciseIndex: number; value: boolean }
@@ -54,7 +58,7 @@ interface WorkoutSet {
 
 interface Exercise {
     index: number;
-    dbId: number;
+    dbId: string;
     name: string;
     repRangeLower: number;
     repRangeHigher: number;
@@ -80,11 +84,25 @@ interface FormValues {
     exercises: Exercise[];
 }
 
+interface ExerciseErrors {
+    name?: string;
+    repRangeLower?: string;
+    repRangeUpper?: string;
+}
+
+interface FormStateWithValidation {
+    values: FormValues;
+    errors: {
+        name?: string;
+        exercises: ExerciseErrors[];
+    }
+}
+
 interface ExerciseSearchResultType {
     exercise_name: string;
     exercise_unilateral: boolean;
     muscle_name: string;
-    exercise_id: number;
+    exercise_id: string;
 }
 
-export { setTypes, SetType, muscleGroups, MuscleGroups, Muscle, WorkoutSet, Exercise, SetTracker, FormValues, privacyTypes, PrivacyType, ExerciseSearchResultType, CreatedExercise, WorkoutAction };
+export { setTypes, SetType, muscleGroups, MuscleGroups, Muscle, WorkoutSet, Exercise, SetTracker, FormValues, FormStateWithValidation, privacyTypes, PrivacyType, ExerciseSearchResultType, CreatedExercise, WorkoutAction };
