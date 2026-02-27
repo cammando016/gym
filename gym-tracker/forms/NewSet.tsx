@@ -28,7 +28,7 @@ export default function NewSet(props: Props) {
         <View>
             <View style={{display: 'flex', flexDirection: 'row'}}>
                 <Text>Set {props.exercise.sets.indexOf(props.set) + 1}:</Text>
-                <Pressable style={{borderColor: 'black', borderWidth: 1, padding: '3px'}} onPress={() => toggleDropdown()}>
+                <Pressable style={{borderColor: 'black', borderWidth: 1, padding: 3}} onPress={() => toggleDropdown()}>
                     <View style={{flexDirection: 'row'}}>
                         <Text>{props.set.type}</Text>
                     </View>
@@ -49,7 +49,7 @@ export default function NewSet(props: Props) {
                 <View style={styles.modalContainer}>
                     <View style={styles.modalContent}>
                         {
-                            setTypes.map((s: { value: string; label: string; }) => {
+                            setTypes.map((s) => {
                                 return (
                                     <Pressable
                                         key={s.value}

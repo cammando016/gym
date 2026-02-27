@@ -1,7 +1,7 @@
 {
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
-    "moduleResolution": "Bundler",
+    "moduleResolution": "nodenext",
     "resolveJsonModule": false,
     "strict": true,
     "paths": {

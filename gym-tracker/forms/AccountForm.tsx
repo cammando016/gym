@@ -3,7 +3,7 @@ import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, Switch, Text, TextInput, View } from 'react-native';
 import { signup } from '@/utils/account';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import DateTimePicker, {DateTimePickerEvent} from '@react-native-community/datetimepicker';
 import { validateOptionalNumericField, validatePasswordsMatch, validateRequiredAlphabeticalField, validateRequiredAlphanumericField, validateRequiredField } from '@/utils/formValiditors';
 
 export default function AccountForm() {
@@ -119,7 +119,7 @@ export default function AccountForm() {
                             display="spinner"
                             minimumDate={new Date(1900, 0, 1)}
                             maximumDate={new Date(today.getFullYear() - 12, today.getMonth(), today.getDate())}
-                            onChange={(_ : any, selectedDate: Date) => {
+                            onChange={(_ : DateTimePickerEvent, selectedDate?: Date) => {
                                 setShowDatePicker(false);
                                 if(selectedDate) setForm(prev => ({...prev, birthday: (selectedDate)}))
                             }}

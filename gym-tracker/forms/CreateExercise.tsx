@@ -2,7 +2,7 @@ import { Text, TextInput, View, Pressable } from 'react-native';
 import { Dispatch, useState } from 'react';
 import { RadioButton } from 'react-native-paper';
 import { Checkbox } from 'expo-checkbox';
-import { muscleGroups, MuscleGroups, Exercise, Muscle } from '../types/workouts.ts';
+import { muscleGroups, Exercise, Muscle } from '../types/workouts';
 import { WorkoutAction } from '@/types/workouts';
 import MuscleSelector from '@/components/MuscleSelector';
 
@@ -99,7 +99,7 @@ export default function CreateExercise(props: Props) {
                 >
                     <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-evenly'}}>
                         {
-                            muscleGroups.map((mGroup: MuscleGroups) => {
+                            muscleGroups.map((mGroup) => {
                                 return (
                                     <View key={mGroup.value}>
                                         <Text>{mGroup.label}</Text>

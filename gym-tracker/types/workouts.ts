@@ -1,32 +1,45 @@
+enum SetType {
+    Amrap = 'amrap',
+    Backoff = 'backoff',
+    TopSet = 'topset',
+    Working = 'working',
+    Warmup = 'warmup',
+}
+
 const setTypes = [
-    {label: 'AMRAP', value: 'amrap'},
-    {label: 'Backoff', value: 'backoff'},
-    {label: 'Top Set', value: 'topset'},
-    {label: 'Working', value: 'working'},
-    {label: 'Warmup', value: 'warmup'}    
-] as const;
-type SetType = typeof setTypes[number]['value'];
+    {label: 'AMRAP', value: SetType.Amrap},
+    {label: 'Backoff', value: SetType.Backoff},
+    {label: 'Top Set', value: SetType.TopSet},
+    {label: 'Warmup', value: SetType.Warmup},
+    {label: 'Working', value: SetType.Working}    
+];
+
+enum PrivacyType {
+    Private = 'private',
+    Friends = 'friends',
+    Public = 'public'
+}
 
 const privacyTypes = [
-    {label: 'Private', value: 'private'},
-    {label: 'Friends', value: 'friends'},
-    {label: 'Public', value: 'public'}
-] as const;
-type PrivacyType = typeof privacyTypes[number]['value'];
+    {label: 'Private', value: PrivacyType.Private},
+    {label: 'Friends', value: PrivacyType.Friends},
+    {label: 'Public', value: PrivacyType.Public}
+];
 
-const muscleGroups = [
+const muscleGroups: dictionary[] = [
     {label: 'Arms', value: 'arms'},
     {label: 'Back', value: 'back'},
     {label: 'Chest', value: 'chest'},
     {label: 'Legs', value: 'legs'},
     {label: 'Other', value: 'other'}
-] as const;
-type MuscleGroups = typeof muscleGroups[number]['value'];
+];
+
+type dictionary = {label: string, value: string};
 
 type WorkoutAction = 
 | { type: 'SET_WORKOUT_NAME'; value: string }
 | { type: 'VALIDATE_WORKOUT_NAME'; value: string }
-| { type: 'SET_WORKOUT_PRIVACY'; value: PrivacyType } 
+| { type: 'SET_WORKOUT_PRIVACY'; value: string } 
 | { type: 'ADD_EXERCISE'; value: Exercise }
 | { type: 'REMOVE_EXERCISE'; exerciseIndex: number }
 | { type: 'SET_EXERCISE_NAME'; exerciseIndex: number; value: string }
@@ -57,7 +70,7 @@ interface Muscle {
 
 interface WorkoutSet {
     id: number;
-    type: SetType;
+    type: string;
     isUnilateral: boolean;
 }
 
@@ -88,7 +101,7 @@ interface SetTracker {
 
 interface FormValues {
     name: string;
-    privacy: PrivacyType;
+    privacy: string;
     exercises: Exercise[];
 }
 
@@ -113,4 +126,4 @@ interface ExerciseSearchResultType {
     exercise_id: string;
 }
 
-export { setTypes, SetType, muscleGroups, MuscleGroups, Muscle, WorkoutSet, Exercise, SetTracker, FormValues, FormStateWithValidation, privacyTypes, PrivacyType, ExerciseSearchResultType, CreatedExercise, WorkoutAction };
+export { setTypes, SetType, muscleGroups, Muscle, WorkoutSet, Exercise, SetTracker, FormValues, FormStateWithValidation, privacyTypes, PrivacyType, ExerciseSearchResultType, CreatedExercise, WorkoutAction };

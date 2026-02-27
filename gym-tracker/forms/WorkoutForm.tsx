@@ -1,9 +1,9 @@
-import { Exercise, WorkoutSet, FormValues, SetTracker, PrivacyType, WorkoutAction, FormStateWithValidation } from '@/types/workouts';
+import { Exercise, WorkoutSet, SetTracker, PrivacyType, WorkoutAction, FormStateWithValidation } from '@/types/workouts';
 import { useRef, useState, useReducer } from 'react';
 import { Button, Text, TextInput, View, ScrollView, StyleSheet } from 'react-native';
 import { RadioButton } from 'react-native-paper';
 import NewExercise from './NewExercise';
-import { validateRequiredAlphanumericSymbolsField, validateRequiredAlphabeticalSpacesField, validateOptionalNumericField, validateOptionalIntegerField, validateUpperRepsTarget } from '../utils/formValiditors';
+import { validateRequiredAlphanumericSymbolsField, validateRequiredAlphabeticalSpacesField, validateOptionalIntegerField, validateUpperRepsTarget } from '../utils/formValiditors';
 
 export default function WorkoutForm () {
     //State objects for tracking number of sets and exercises, and tracking current exercise/set being interacted with by user
@@ -16,7 +16,7 @@ export default function WorkoutForm () {
     const initialFormState: FormStateWithValidation = { 
         values: {
             name: '', 
-            privacy: 'private', 
+            privacy: PrivacyType.Private, 
             exercises: [{ 
                 index: 0, 
                 dbId: '', 
@@ -272,6 +272,9 @@ export default function WorkoutForm () {
                     })}
                 };
             }
+            case 'VALIDATE_FULL_FORM': {
+
+            }
             case 'RESET_FORM': {
                 return initialFormState;
             }
@@ -353,19 +356,19 @@ export default function WorkoutForm () {
                     {form.errors.name && <Text style={[styles.errorDescription]}>{form.errors.name}</Text>}
                 </View>
                 
-                <RadioButton.Group onValueChange={(newValue: PrivacyType) => dispatch({ type: 'SET_WORKOUT_PRIVACY', value: newValue })} value={form.values.privacy}>
+                <RadioButton.Group onValueChange={(newValue: string) => dispatch({ type: 'SET_WORKOUT_PRIVACY', value: newValue })} value={form.values.privacy}>
                     <View style={[styles.privacy]}>
                         <View>
                             <Text>Private</Text>
-                            <RadioButton value='private'/>
+                            <RadioButton value={PrivacyType.Private}/>
                         </View>
                         <View>
                             <Text>Friends</Text>
-                            <RadioButton value='friends'/>
+                            <RadioButton value={PrivacyType.Friends}/>
                         </View>
                         <View>
                             <Text>Public</Text>
-                            <RadioButton value='public'/>
+                            <RadioButton value={PrivacyType.Public}/>
                         </View>
                     </View>
                 </RadioButton.Group>
