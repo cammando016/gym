@@ -31,4 +31,17 @@ interface LogonFormValues {
     password: string;
 }
 
-export { FormValues, SignupPayload, LogonFormValues };
+interface User {
+    username: string;
+    firstname: string;
+}
+
+interface AuthContextType {
+    user: User | null;
+    isLoggedIn: boolean;
+    isLoading: boolean;
+    login: (token: string) => void;
+    logout: () => void;
+}
+
+export { FormValues, SignupPayload, LogonFormValues, User, AuthContextType };
