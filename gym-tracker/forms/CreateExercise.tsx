@@ -26,6 +26,7 @@ export default function CreateExercise(props: Props) {
     ];
 
     const backMuscles: Muscle[] = [
+        { name: 'full back', id: '957be7df-c733-48a3-9e1a-d3e4aa8febe7' },
         { name: 'lats', id: '96eb34d5-3f55-405d-af87-484fa9e073c2' },
         { name: 'traps', id: '7ddd633f-4d00-4b98-ae00-07758a1008c4' },
         { name: 'upper back', id: '9839045d-9951-4d56-8f3f-dd66f5ea59d2' },
