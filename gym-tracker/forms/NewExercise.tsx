@@ -7,6 +7,11 @@ import ExerciseSearchResult from '../components/ExerciseSearchResult';
 import { dbExerciseSearch } from '@/utils/workouts';
 import CreateExercise from './CreateExercise';
 
+// <----------- TO DO ------------>
+// Fix exercise searching: user should be able to see create exercise when selecting any exercise search field. 
+// Once exercise created, needs to hide create button unless name field changed again
+// Allow exercise reordering
+
 interface Props {
     exercise: Exercise,
     exerciseErrors?: {
@@ -97,34 +102,36 @@ export default function NewExercise(props: Props) {
                 {/* Only render searched exercises for one exercise at a time */}
                 { props.activeExercise === props.exercise.index && (
                 // Render list of exercises from db that match user input into exercise name
-                    searchResults?.length > 0 && (
-                        <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-evenly'}}>
-                            <Pressable onPress={() => createExercise()}>
-                                <Text>Create New Exercise</Text>
-                            </Pressable>
-                            <ScrollView horizontal={true}><View style={{display: 'flex', flexDirection: 'row'}}>
-                                {searchResults.map((result) => {
-                                    return ( 
-                                        <ExerciseSearchResult 
-                                            key={result.exercise_id} 
-                                            exerciseName={result.exercise_name} 
-                                            targetMuscle={result.muscle_name} 
-                                            onPress={() => {
-                                                props.updateForm({ type: 'SELECT_EXERCISE', exerciseIndex: props.exercise.index, newFieldValues: {
-                                                    name: result.exercise_name,
-                                                    isUnilateral: result.exercise_unilateral,
-                                                    dbId: result.exercise_id
-                                                }})
-                                                setSearchResults([]);
-                                            }}
-                                        />
-                                    )
-                                })
-                                }
-                            </View></ScrollView>
-                        </View>
+                    <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-evenly'}}>
+                        <Pressable onPress={() => createExercise()}>
+                            <Text>Create New Exercise</Text>
+                        </Pressable>
+                        { searchResults?.length > 0 && (
+                            <ScrollView horizontal={true}>
+                                <View style={{display: 'flex', flexDirection: 'row'}}>
+                                    {searchResults.map((result) => {
+                                        return ( 
+                                            <ExerciseSearchResult 
+                                                key={result.exercise_id} 
+                                                exerciseName={result.exercise_name} 
+                                                targetMuscle={result.muscle_name} 
+                                                onPress={() => {
+                                                    props.updateForm({ type: 'SELECT_EXERCISE', exerciseIndex: props.exercise.index, newFieldValues: {
+                                                        name: result.exercise_name,
+                                                        isUnilateral: result.exercise_unilateral,
+                                                        dbId: result.exercise_id
+                                                    }})
+                                                    setSearchResults([]);
+                                                }}
+                                            />
+                                        )
+                                    })}
+                                </View>
+                            </ScrollView>
+                        )}
+                    </View>
                     )
-                )}
+                }
 
                 <View>
                     <Text>Rep Range</Text>
