@@ -133,9 +133,9 @@ export default function NewExercise(props: Props) {
                             placeholder='0'
                             keyboardType='numeric'
                             maxLength={2}
-                            value={`${props.exercise.repRangeLower}`}
+                            value={props.exercise.repRangeLower}
                             onChangeText={(n: string) => {
-                                props.updateForm({ type: 'SET_EXERCISE_REPS_TARGET_LOWER', exerciseIndex: props.exercise.index, value: Number(n) })
+                                props.updateForm({ type: 'SET_EXERCISE_REPS_TARGET_LOWER', exerciseIndex: props.exercise.index, value: n })
                             }}
                             onEndEditing={(e: any) => props.updateForm({ type: 'VALIDATE_EXERCISE_REPS_TARGET_LOWER', exerciseIndex: props.exercise.index, value: e.nativeEvent.text })}
                         />
@@ -144,9 +144,9 @@ export default function NewExercise(props: Props) {
                             placeholder='0'
                             keyboardType='numeric'
                             maxLength={2}
-                            value={`${props.exercise.repRangeHigher}`}
+                            value={props.exercise.repRangeHigher}
                             onChangeText={(n: string) => {
-                                props.updateForm({ type: 'SET_EXERCISE_REPS_TARGET_UPPER', exerciseIndex: props.exercise.index, value: Number(n) })
+                                props.updateForm({ type: 'SET_EXERCISE_REPS_TARGET_UPPER', exerciseIndex: props.exercise.index, value: n })
                             }}
                             onEndEditing={(e: any) => props.updateForm({ type: 'VALIDATE_EXERCISE_REPS_TARGET_UPPER', exerciseIndex: props.exercise.index, value: e.nativeEvent.text, repsLower: props.exercise.repRangeLower.toString() })}
                         />

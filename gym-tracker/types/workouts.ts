@@ -45,9 +45,9 @@ type WorkoutAction =
 | { type: 'SET_EXERCISE_NAME'; exerciseIndex: number; value: string }
 | { type: 'VALIDATE_EXERCISE_NAME'; exerciseIndex: number, value: string }
 | { type: 'SELECT_EXERCISE'; exerciseIndex: number; newFieldValues: { name: string; isUnilateral: boolean; dbId: string } }
-| { type: 'SET_EXERCISE_REPS_TARGET_LOWER'; exerciseIndex: number; value: number }
+| { type: 'SET_EXERCISE_REPS_TARGET_LOWER'; exerciseIndex: number; value: string }
 | { type: 'VALIDATE_EXERCISE_REPS_TARGET_LOWER'; exerciseIndex: number; value: string }
-| { type: 'SET_EXERCISE_REPS_TARGET_UPPER'; exerciseIndex: number; value: number }
+| { type: 'SET_EXERCISE_REPS_TARGET_UPPER'; exerciseIndex: number; value: string }
 | { type: 'VALIDATE_EXERCISE_REPS_TARGET_UPPER'; exerciseIndex: number; value: string; repsLower: string }
 | { type: 'CREATE_DB_EXERCISE'; exerciseIndex: number }
 | { type: 'SET_DB_EXERCISE_TARGET_MUSCLE'; exerciseIndex: number; value: string }
@@ -78,8 +78,8 @@ interface Exercise {
     index: number;
     dbId: string;
     name: string;
-    repRangeLower: number;
-    repRangeHigher: number;
+    repRangeLower: string;
+    repRangeHigher: string;
     sets: WorkoutSet[];
     targetMuscle?: string;
     isUnilateral: boolean;
@@ -119,6 +119,34 @@ interface FormStateWithValidation {
     }
 }
 
+interface FormPayload {
+    username: string;
+    workoutName: string;
+    privacy: string;
+    exercises: {
+        index: number,
+        dbId: string | null,
+        exerciseName: string,
+        repRangeLower: number,
+        repRangeHigher: number,
+        targetMuscle: string | undefined,
+        unilateralExercise: boolean,
+        setOptionalUnilateral: boolean,
+        setOptionalStraps: boolean,
+        setOptionalBelt: boolean,
+        sets: {
+            index: number,
+            setType: string,
+            unilateralSet: boolean
+        }[]
+    }[]
+}
+
+interface ErrorShape {
+    name?: string,
+    exercises: ExerciseErrors[]
+}
+
 interface ExerciseSearchResultType {
     exercise_name: string;
     exercise_unilateral: boolean;
@@ -126,4 +154,4 @@ interface ExerciseSearchResultType {
     exercise_id: string;
 }
 
-export { setTypes, SetType, muscleGroups, Muscle, WorkoutSet, Exercise, SetTracker, FormValues, FormStateWithValidation, privacyTypes, PrivacyType, ExerciseSearchResultType, CreatedExercise, WorkoutAction };
+export { setTypes, SetType, muscleGroups, Muscle, WorkoutSet, Exercise, SetTracker, FormValues, FormStateWithValidation, privacyTypes, PrivacyType, ExerciseSearchResultType, CreatedExercise, WorkoutAction, ErrorShape, FormPayload };

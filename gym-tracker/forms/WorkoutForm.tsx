@@ -1,11 +1,14 @@
-import { Exercise, WorkoutSet, SetTracker, PrivacyType, WorkoutAction, FormStateWithValidation } from '@/types/workouts';
+import { Exercise, WorkoutSet, SetTracker, PrivacyType, WorkoutAction, FormStateWithValidation, ErrorShape, FormPayload } from '@/types/workouts';
 import { useRef, useState, useReducer } from 'react';
 import { Button, Text, TextInput, View, ScrollView, StyleSheet } from 'react-native';
 import { RadioButton } from 'react-native-paper';
 import NewExercise from './NewExercise';
+import { useAuth } from '@/contexts/AuthContext';
 import { validateRequiredAlphanumericSymbolsField, validateRequiredAlphabeticalSpacesField, validateOptionalIntegerField, validateUpperRepsTarget } from '../utils/formValiditors';
+import { createWorkout } from '@/utils/workouts';
 
 export default function WorkoutForm () {
+    const { user } = useAuth();
     //State objects for tracking number of sets and exercises, and tracking current exercise/set being interacted with by user
     const exerciseIndex = useRef<number>(1);
     const [activeSet, setActiveSet] = useState<SetTracker>({exercise: 0, set: 0});
@@ -21,8 +24,8 @@ export default function WorkoutForm () {
                 index: 0, 
                 dbId: '', 
                 name: '', 
-                repRangeLower: 0, 
-                repRangeHigher: 0, 
+                repRangeLower: '0', 
+                repRangeHigher: '0', 
                 isUnilateral: false, 
                 setOptionalUnilateral: false,
                 setOptionalStraps: false,
@@ -273,7 +276,19 @@ export default function WorkoutForm () {
                 };
             }
             case 'VALIDATE_FULL_FORM': {
-
+                return {
+                    ...state,
+                    errors: {
+                        name: validateRequiredAlphanumericSymbolsField(state.values.name.trim(), 'Workout Name'),
+                        exercises: state.values.exercises.map(exc => {
+                            return {
+                                name: validateRequiredAlphabeticalSpacesField(exc.name.trim(), 'Exercise Name'),
+                                repRangeLower: validateOptionalIntegerField(exc.repRangeLower.toString(), 'Rep Range Lower'),
+                                repRangeUpper: validateUpperRepsTarget(exc.repRangeHigher.toString(), exc.repRangeLower.toString())
+                            }
+                        })
+                    }
+                }
             }
             case 'RESET_FORM': {
                 return initialFormState;
@@ -289,6 +304,12 @@ export default function WorkoutForm () {
     const updateActiveSet = (exerciseId: number, setId: number) => setActiveSet({exercise: exerciseId, set: setId});
     const updateActiveExercise = (exerciseIndex: number) => setActiveExercise(exerciseIndex);
 
+    //Runs after form submission to check for any errors found in full validation and reject submission if required
+    const hasErrors = (errorObject: ErrorShape) : boolean => {
+        if (errorObject.name) return true;
+        return errorObject.exercises.some(exc => exc.name || exc.repRangeLower || exc.repRangeUpper);
+    }
+
     //Add new exercise to workout
     const handleAddExercise = () => {
         const newId = exerciseIndex.current;
@@ -298,8 +319,8 @@ export default function WorkoutForm () {
             index: exerciseIndex.current,
             dbId: '',
             name: '',
-            repRangeLower: 0,
-            repRangeHigher: 0,
+            repRangeLower: '0',
+            repRangeHigher: '0',
             isUnilateral: false,
             setOptionalUnilateral: false,
             setOptionalStraps: false,
@@ -327,8 +348,51 @@ export default function WorkoutForm () {
     }
 
     // <-------- TO COMPLETE: FORM SUBMISSION FUNCTION --------->
-    const simSubmit = () => {
-        alert(JSON.stringify(form));
+    const simSubmit = async () => {
+        const validatedState = workoutReducer(form, { type: 'VALIDATE_FULL_FORM' });
+        dispatch({ type: 'VALIDATE_FULL_FORM' });
+
+        if (hasErrors(validatedState.errors)) {
+            alert('Your workout has errors.');
+            return;
+        }
+        //else alert(JSON.stringify(form));
+
+        let payload : FormPayload;
+
+        if (!user) {
+            alert('You must be logged in to save a workout.');
+            return;
+        } else {
+            payload = {
+                username: user.username.toLowerCase().trim(),
+                workoutName: form.values.name.toLowerCase().trim(),
+                privacy: form.values.privacy,
+                exercises: form.values.exercises.map(exc => {
+                    return {
+                        index: exc.index,
+                        dbId: exc.dbId,
+                        exerciseName: exc.name.toLowerCase().trim(),
+                        repRangeLower: Number(exc.repRangeLower),
+                        repRangeHigher: Number(exc.repRangeHigher),
+                        targetMuscle: exc.targetMuscle,
+                        unilateralExercise: exc.isUnilateral,
+                        setOptionalUnilateral: exc.setOptionalUnilateral,
+                        setOptionalStraps: exc.setOptionalStraps,
+                        setOptionalBelt: exc.setOptionalBelt,
+                        sets: exc.sets.map(s => {
+                            return {
+                                index: s.id,
+                                setType: s.type.toLowerCase().trim(),
+                                unilateralSet: s.isUnilateral
+                            }
+                        })
+                    }
+                })
+            }
+        }
+
+        const res = await createWorkout(payload);    
     }
     // <-------- TO COMPLETE: MOVE STYLES TO EXTERNAL FILE -------->
     const styles = StyleSheet.create({
