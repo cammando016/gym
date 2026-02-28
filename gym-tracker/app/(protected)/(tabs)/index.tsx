@@ -1,3 +1,4 @@
+import { useAuth } from '@/contexts/AuthContext';
 import React from 'react';
 import { Button, ScrollView, StyleSheet, Text, View } from 'react-native';
 
@@ -79,9 +80,11 @@ const HomePage = ( props: Props ) => {
 }
 
 export default function App() {
+  const { user } = useAuth();
+  console.log(user);
   return (
     <HomePage
-      username='Cameron'
+      username={`${user?.firstname}`}
       session='Chest & Back'
       lastDate={new Date()}
       lastDuration={54.5}

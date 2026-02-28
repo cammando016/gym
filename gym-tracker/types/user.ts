@@ -40,7 +40,7 @@ interface AuthContextType {
     user: User | null;
     isLoggedIn: boolean;
     isLoading: boolean;
-    login: (token: string) => void;
+    login: (token: string, user: User) => void;
     logout: () => void;
 }
 

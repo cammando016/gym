@@ -18,7 +18,7 @@ export default function LogonForm() {
         const res = await logon(form);
         if (res.status === 200) {
             alert('Successful Logon');
-            login();
+            login(res.token, res.user);
         }
         else alert (`Logon Error: ${res.message}`);
     }
@@ -50,9 +50,9 @@ export default function LogonForm() {
                 </Pressable>
             </View>
 
-            <Pressable onPress={() => login()}>
+            {/* <Pressable onPress={() => login()}>
                 <Text>Login Test</Text>
-            </Pressable>
+            </Pressable> */}
         </View>
     )
 }

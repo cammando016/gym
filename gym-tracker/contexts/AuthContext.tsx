@@ -22,14 +22,13 @@ export function AuthProvider({ children } : {children: React.ReactNode}) {
                 //Check if user already exists in local storage
                 const userString = await AsyncStorage.getItem('user');
 
-                //Set user to stored user if found, or attempt to decode user to set if not
                 if (userString) {
                     const storedUser: User = JSON.parse(userString);
                     setUser(storedUser);
                 } else {
-                    const decodedUser = jwtDecode<User>(token);
-                    setUser(decodedUser);
-                    await AsyncStorage.setItem('user', JSON.stringify(decodedUser));
+                    await AsyncStorage.removeItem('token');
+                    setUser(null);
+                    setIsLoggedIn(false);
                 }
 
                 setIsLoggedIn(true);
@@ -45,22 +44,33 @@ export function AuthProvider({ children } : {children: React.ReactNode}) {
         };
 
         loadUser();
-    }, [])
+    }, []);
+
+    const login = async (token: string, userData: User) => {
+        await AsyncStorage.setItem('token', token);
+        await AsyncStorage.setItem('user', JSON.stringify(userData));
+
+        setUser(userData);
+        setIsLoggedIn(true);
+    }
+
+    const logout = async () => {
+        await AsyncStorage.removeItem('token');
+        await AsyncStorage.removeItem('user');
+
+        setUser(null);
+        setIsLoggedIn(false);
+    }
 
     return (
-        <AuthContext.Provider
-            value={{
-                isLoggedIn,
-                isLoading,
-                login: () => setIsLoggedIn(true),
-                logout: () => setIsLoggedIn(false),
-            }}
-        >
+        <AuthContext.Provider value={{ user, isLoggedIn, isLoading, login, logout }}>
             {children}
         </AuthContext.Provider>
     )
 }
 
-
-
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = () => {
+    const context = useContext(AuthContext);
+    if (!context) throw new Error('useAuth must be used inside AuthProvider');
+    return context;
+}
