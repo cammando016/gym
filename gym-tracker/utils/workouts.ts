@@ -18,3 +18,8 @@ export const createWorkout = async (details: FormPayload) => {
         ...response
     }
 };
+
+export const fetchWorkouts = async (username: string) => {
+    const res = await fetch(`http://localhost:3000/api/workouts?searchString=${encodeURIComponent(username)}`);
+    return await res.json();
+}

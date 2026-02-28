@@ -154,4 +154,16 @@ interface ExerciseSearchResultType {
     exercise_id: string;
 }
 
-export { setTypes, SetType, muscleGroups, Muscle, WorkoutSet, Exercise, SetTracker, FormValues, FormStateWithValidation, privacyTypes, PrivacyType, ExerciseSearchResultType, CreatedExercise, WorkoutAction, ErrorShape, FormPayload };
+interface WorkoutTemplateType {
+    workoutid: string;
+    workoutname: string;
+    privacy: string;
+    exercises: {
+        exerciseName: string;
+        exerciseIndex: number;
+        repRangeLower: number;
+        repRangeUpper: number
+    } []
+}
+
+export { setTypes, SetType, muscleGroups, Muscle, WorkoutSet, Exercise, SetTracker, FormValues, FormStateWithValidation, privacyTypes, PrivacyType, ExerciseSearchResultType, CreatedExercise, WorkoutAction, ErrorShape, FormPayload, WorkoutTemplateType };

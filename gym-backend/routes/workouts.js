@@ -5,6 +5,44 @@ import pool from '../db/pool.js';
 dotenv.config();
 const router = express.Router();
 
+router.get('/', async (req, res) => {
+    const {searchString} = req.query;
+    try {
+        console.log(`Received request for list of workouts from user ${searchString}`);
+
+        //CHeck for username in DB
+        const userQuery = await pool.query(`SELECT id FROM users WHERE username = $1`, [searchString.toLowerCase().trim()]);
+        if (userQuery.rows.length === 0) throw new Error('Username not found');
+        const userId = userQuery.rows[0].id;
+
+        const workoutTemplatesQuery = await pool.query(
+            `SELECT w.workout_name AS workoutName, w.privacy AS privacy, w.id AS workoutId,
+                array_agg(json_build_object(
+                    'exerciseIndex', e.exercise_index,
+                    'exerciseName', ex.name,
+                    'repRangeLower', e.rep_range_lower,
+                    'repRangeUpper', e.rep_range_upper
+                )) AS exercises
+            FROM workout_templates w
+            JOIN workout_template_exercises e ON w.id = e.workout_template_id
+            JOIN exercises ex ON e.exercise_id = ex.id
+            WHERE w.user_id = $1
+            GROUP BY w.id, w.workout_name, w.privacy`,
+            [userId]
+        );
+
+        console.log(workoutTemplatesQuery.rows);
+
+        return res.status(200).json({
+            workouts: workoutTemplatesQuery.rows,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            error: error.message
+        });
+    }
+});
+
 router.post('/templates/create', async(req, res) => {
     const client = await pool.connect();
 
