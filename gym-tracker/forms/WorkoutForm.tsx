@@ -6,6 +6,7 @@ import NewExercise from './NewExercise';
 import { useAuth } from '@/contexts/AuthContext';
 import { validateRequiredAlphanumericSymbolsField, validateRequiredAlphabeticalSpacesField, validateOptionalIntegerField, validateUpperRepsTarget } from '../utils/formValiditors';
 import { createWorkout } from '@/utils/workouts';
+import { useRouter } from 'expo-router';
 
 export default function WorkoutForm () {
     const { user } = useAuth();
@@ -14,6 +15,8 @@ export default function WorkoutForm () {
     const [activeSet, setActiveSet] = useState<SetTracker>({exercise: 0, set: 0});
     const [activeExercise, setActiveExercise] = useState<number>(0);
     const setCounters = useRef<Record<number, number>>({0: 1});
+
+    const router = useRouter();
 
     //Starting empty form for use in reducer and resetting form
     const initialFormState: FormStateWithValidation = { 
@@ -348,7 +351,7 @@ export default function WorkoutForm () {
     }
 
     // <-------- TO COMPLETE: FORM SUBMISSION FUNCTION --------->
-    const simSubmit = async () => {
+    const handleSubmit = async () => {
         const validatedState = workoutReducer(form, { type: 'VALIDATE_FULL_FORM' });
         dispatch({ type: 'VALIDATE_FULL_FORM' });
 
@@ -392,7 +395,11 @@ export default function WorkoutForm () {
             }
         }
 
-        const res = await createWorkout(payload);    
+        const res = await createWorkout(payload);
+        if (res.message) {
+            alert('Workout Successfully Created');
+            router.push('/(protected)/(tabs)/workouts');
+        } else alert(`Erorr creating workout: ${res.error}. Please try again.`);
     }
     // <-------- TO COMPLETE: MOVE STYLES TO EXTERNAL FILE -------->
     const styles = StyleSheet.create({
@@ -455,7 +462,7 @@ export default function WorkoutForm () {
                     <Button title='Cancel' />
                     {/* Still need to make sure reset clears set and exercise id counters */}
                     <Button title='Reset Form' onPress={() => dispatch({ type: 'RESET_FORM' })} />
-                    <Button title='Submit' onPress={simSubmit} />
+                    <Button title='Submit' onPress={handleSubmit} />
                 </View>
             </ScrollView>
         </View>
