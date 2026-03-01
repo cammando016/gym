@@ -22,7 +22,9 @@ router.get('/', async (req, res) => {
                     'exerciseName', ex.name,
                     'repRangeLower', e.rep_range_lower,
                     'repRangeUpper', e.rep_range_upper
-                )) AS exercises
+                )
+                ORDER BY e.exercise_index ASC
+                ) AS exercises
             FROM workout_templates w
             JOIN workout_template_exercises e ON w.id = e.workout_template_id
             JOIN exercises ex ON e.exercise_id = ex.id
