@@ -148,11 +148,21 @@ router.post('/split/create', async (req, res) => {
         await client.query('BEGIN');
         const { username, split, splitName } = req.body;
         console.log('Received new split from ', {username});
-
+        //Ensure username exists before adding split to db
         const usernameQuery = await client.query('SELECT id FROM users WHERE username = $1', [username]);
         if (usernameQuery.rows.length === 0) throw new Error('Username not found');
         const userId = usernameQuery.rows[0].id;
 
+        //Set all workouts from new split data to active, and deactivate any workouts no longer in use on the current split
+        const activeWorkoutIds = split.filter(s => !s.restDay && s.workoutTemplateId).map(s => s.workoutTemplateId);
+        await client.query(
+            `UPDATE workout_templates
+            SET active = id = ANY($2::uuid[])
+            WHERE user_id = $1`,
+            [userId, activeWorkoutIds]
+        );
+
+        //Create split shell to get the ID of split
         console.log('Creating new split...');
         const createSplit = await client.query(
             `INSERT INTO splits
@@ -164,6 +174,15 @@ router.post('/split/create', async (req, res) => {
         const splitId = createSplit.rows[0].split_id;
         console.log('Split Created');
 
+        //Update user record with the current active split
+        await client.query(
+            `UPDATE users
+            SET active_split = $1
+            WHERE id = $2`,
+            [splitId, userId]
+        );
+
+        //Add each day of the split with the tagged workout
         console.log('Adding workouts to each day of split');
         const values = [];
         const placeholders = [];
@@ -191,6 +210,6 @@ router.post('/split/create', async (req, res) => {
     } finally {
         client.release();
     }
-})
+});
 
 export default router;
