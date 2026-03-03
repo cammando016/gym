@@ -158,6 +158,7 @@ interface WorkoutTemplateType {
     workoutid: string;
     workoutname: string;
     privacy: string;
+    isactive: boolean;
     exercises: {
         exerciseName: string;
         exerciseIndex: number;

@@ -16,7 +16,7 @@ router.get('/', async (req, res) => {
         const userId = userQuery.rows[0].id;
 
         const workoutTemplatesQuery = await pool.query(
-            `SELECT w.workout_name AS workoutName, w.privacy AS privacy, w.id AS workoutId,
+            `SELECT w.workout_name AS workoutName, w.privacy AS privacy, w.active AS isActive, w.id AS workoutId,
                 array_agg(json_build_object(
                     'exerciseIndex', e.exercise_index,
                     'exerciseName', ex.name,
