@@ -7,9 +7,11 @@ import { useAuth } from '@/contexts/AuthContext';
 import { validateRequiredAlphanumericSymbolsField, validateRequiredAlphabeticalSpacesField, validateOptionalIntegerField, validateUpperRepsTarget } from '../utils/formValiditors';
 import { createWorkout } from '@/utils/workouts';
 import { useRouter } from 'expo-router';
+import { useQueryClient } from '@tanstack/react-query';
 
 export default function WorkoutForm () {
     const { user } = useAuth();
+    const queryClient = useQueryClient();
     //State objects for tracking number of sets and exercises, and tracking current exercise/set being interacted with by user
     const exerciseIndex = useRef<number>(1);
     const [activeSet, setActiveSet] = useState<SetTracker>({exercise: 0, set: 0});
@@ -398,6 +400,7 @@ export default function WorkoutForm () {
         const res = await createWorkout(payload);
         if (res.message) {
             alert('Workout Successfully Created');
+            queryClient.invalidateQueries({ queryKey: ['workouts', user?.username] });
             router.push('/(protected)/(tabs)/workouts');
         } else alert(`Erorr creating workout: ${res.error}. Please try again.`);
     }
