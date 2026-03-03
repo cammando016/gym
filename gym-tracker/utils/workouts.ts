@@ -23,3 +23,17 @@ export const fetchWorkouts = async (username: string) => {
     const res = await fetch(`http://localhost:3000/api/workouts?searchString=${encodeURIComponent(username)}`);
     return await res.json();
 }
+
+export const createSplit = async (details: any) => {
+    const res = await fetch(`http://localhost:3000/api/workouts/split/create`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(details),
+    })
+    const response = await res.json();
+
+    return {
+        status: res.status,
+        response
+    }
+}

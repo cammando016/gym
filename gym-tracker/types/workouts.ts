@@ -169,7 +169,16 @@ interface WorkoutTemplateType {
 interface SplitDay {
     dayIndex: number;
     workoutTemplateId: string;
+    workoutName: string;
     restDay: boolean;
 }
 
-export { setTypes, SetType, muscleGroups, Muscle, WorkoutSet, Exercise, SetTracker, FormValues, FormStateWithValidation, privacyTypes, PrivacyType, ExerciseSearchResultType, CreatedExercise, WorkoutAction, ErrorShape, FormPayload, WorkoutTemplateType, SplitDay };
+interface SplitFormPayload {
+    username: string,
+    split: {
+        workoutTemplateId: string,
+        dayIndex: number
+    } []
+}
+
+export { setTypes, SetType, muscleGroups, Muscle, WorkoutSet, Exercise, SetTracker, FormValues, FormStateWithValidation, privacyTypes, PrivacyType, ExerciseSearchResultType, CreatedExercise, WorkoutAction, ErrorShape, FormPayload, WorkoutTemplateType, SplitDay, SplitFormPayload };
