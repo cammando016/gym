@@ -5,6 +5,7 @@ import { Checkbox } from 'expo-checkbox';
 import { useWorkoutTemplates } from '@/hooks/useWorkoutTemplates';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
+import { createSplit } from '@/utils/workouts';
 
 // <--------- TO DO -------------->
 /*
@@ -20,6 +21,7 @@ export default function SplitForm() {
 
     const [newDayIndex, setNewDayIndex] = useState<number>(1);
     const [activeDay, setActiveDay] = useState<number>(0);
+    const [splitName, setSplitName] = useState<string>('');
     const [exerciseListOpen, setExerciseListOpen] = useState<boolean>(true);
     const [form, setForm] = useState<SplitDay[]>([{
         dayIndex: 0,
@@ -28,21 +30,28 @@ export default function SplitForm() {
         restDay: false,
     }]);
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         if (!user) {
             alert('You must be logged in to edit a split');
             return;
         }
         const formPayload : SplitFormPayload = {
             username: user.username,
+            splitName: splitName.toLowerCase().trim(),
             split: form.map((f, i) => {
                 return {
                     workoutTemplateId: f.restDay ? '' : f.workoutTemplateId,
+                    restDay: f.restDay,
                     dayIndex: i
                 }
             })
         }
-        console.log(formPayload);
+
+        const res = await createSplit(formPayload);
+        if (res.message) {
+            alert('Split successfully created');
+            router.back();
+        } else alert (`Error creating split: ${res.error}. Please try again`);
     }
 
     const handleAddDay = () => {
@@ -58,7 +67,7 @@ export default function SplitForm() {
         setNewDayIndex(newDayIndex + 1);
     }
 
-    const handleDeleteDay = (dayIndex: number) => { setForm(form.filter(fo => fo.dayIndex !== dayIndex)) }
+    const handleDeleteDay = (dayIndex: number) => { setForm(form.filter(f => f.dayIndex !== dayIndex)) }
 
     const handleSelectWorkout = (workoutId: string, workoutName: string, clickedIndex: number) => {
         setForm(prev => prev.map(p => p.dayIndex === clickedIndex ? {...p, workoutName: workoutName, workoutTemplateId: workoutId} : p));
@@ -67,6 +76,13 @@ export default function SplitForm() {
 
     return (
         <View>
+            <View>
+                <TextInput 
+                    placeholder='Enter a name for your split'
+                    value={splitName}
+                    onChangeText={(value: string) => setSplitName(value)}
+                />
+            </View>
             <View>
                 {
                     form.map((day, i) => {

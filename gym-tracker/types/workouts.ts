@@ -175,8 +175,10 @@ interface SplitDay {
 
 interface SplitFormPayload {
     username: string,
+    splitName: string,
     split: {
         workoutTemplateId: string,
+        restDay: boolean,
         dayIndex: number
     } []
 }

@@ -141,4 +141,56 @@ router.post('/templates/create', async(req, res) => {
     }
 })
 
+router.post('/split/create', async (req, res) => {
+    const client = await pool.connect();
+
+    try {
+        await client.query('BEGIN');
+        const { username, split, splitName } = req.body;
+        console.log('Received new split from ', {username});
+
+        const usernameQuery = await client.query('SELECT id FROM users WHERE username = $1', [username]);
+        if (usernameQuery.rows.length === 0) throw new Error('Username not found');
+        const userId = usernameQuery.rows[0].id;
+
+        console.log('Creating new split...');
+        const createSplit = await client.query(
+            `INSERT INTO splits
+            (user_id, split_name, current_split_day)
+            VALUES ($1, $2, $3)
+            RETURNING split_id`,
+            [userId, splitName, -1]
+        );
+        const splitId = createSplit.rows[0].split_id;
+        console.log('Split Created');
+
+        console.log('Adding workouts to each day of split');
+        const values = [];
+        const placeholders = [];
+
+        split.forEach(s => {
+            const baseIndex = values.length;
+            values.push(splitId, s.dayIndex, s.workoutTemplateId === '' ? null : s.workoutTemplateId, s.restDay);
+            placeholders.push(`($${baseIndex + 1}, $${baseIndex + 2}, $${baseIndex + 3}, $${baseIndex + 4})`);
+        });
+
+        await client.query(
+            `INSERT INTO split_workouts
+            (split_id, day_index, workout_id, is_rest_day)
+            VALUES ${placeholders.join(',')}`,
+            values
+        );
+        console.log('Split workouts added');
+
+        await client.query('COMMIT');
+        return res.status(201).json({ message: 'Split Created' });
+    } catch (error) {
+        await client.query('ROLLBACK');
+        console.error(error);
+        return res.status(500).json({ error: error.message });
+    } finally {
+        client.release();
+    }
+})
+
 export default router;

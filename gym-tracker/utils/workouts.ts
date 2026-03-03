@@ -1,4 +1,4 @@
-import { FormPayload } from "@/types/workouts";
+import { FormPayload, SplitFormPayload } from "@/types/workouts";
 
 export const dbExerciseSearch = async (search: string) => {
     const res = await fetch(`http://localhost:3000/api/exercise?searchString=${encodeURIComponent(search)}`);
@@ -24,7 +24,7 @@ export const fetchWorkouts = async (username: string) => {
     return await res.json();
 }
 
-export const createSplit = async (details: any) => {
+export const createSplit = async (details: SplitFormPayload) => {
     const res = await fetch(`http://localhost:3000/api/workouts/split/create`, {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
@@ -34,6 +34,6 @@ export const createSplit = async (details: any) => {
 
     return {
         status: res.status,
-        response
+        ...response
     }
 }
