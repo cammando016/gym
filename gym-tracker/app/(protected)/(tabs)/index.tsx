@@ -14,7 +14,6 @@ const styles = StyleSheet.create({
 })
 
 interface Props {
-  username: string, 
   session: string, 
   lastDate: Date, 
   lastDuration: number, 
@@ -22,10 +21,11 @@ interface Props {
 }
 
 const HomePage = ( props: Props ) => {
+    const { user } = useAuth();
     return (
       <ScrollView style={styles.colflex} >
         <View>
-          <Text>Hi, {props.username}</Text>
+          <Text>Hi, {user?.name}</Text>
         </View>
 
         <View style={styles.rowflex}>
@@ -80,11 +80,8 @@ const HomePage = ( props: Props ) => {
 }
 
 export default function App() {
-  const { user } = useAuth();
-  console.log(user);
   return (
     <HomePage
-      username={`${user?.name}`}
       session='Chest & Back'
       lastDate={new Date()}
       lastDuration={54.5}
