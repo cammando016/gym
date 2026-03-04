@@ -84,7 +84,7 @@ export default function App() {
   console.log(user);
   return (
     <HomePage
-      username={`${user?.firstname}`}
+      username={`${user?.name}`}
       session='Chest & Back'
       lastDate={new Date()}
       lastDuration={54.5}

@@ -33,7 +33,7 @@ interface LogonFormValues {
 
 interface User {
     username: string;
-    firstname: string;
+    name: string;
 }
 
 interface AuthContextType {
