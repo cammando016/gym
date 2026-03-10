@@ -9,8 +9,7 @@ export function useSplit() {
     return useQuery<UserSplit>({
         queryKey: ['activeSplit', user?.username],
         queryFn: async () => {
-            if (!user) throw new Error('Username not found');
-            const res = await getActiveSplit(user.username);
+            const res = await getActiveSplit(user!.username);
             return res.split;
         },
         enabled: !!user,

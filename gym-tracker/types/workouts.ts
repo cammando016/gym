@@ -185,9 +185,9 @@ interface SplitFormPayload {
 }
 
 interface UserSplit {
-    splitId: string;
-    splitName: string;
-    split: {
+    split_id: string;
+    split_name: string;
+    workouts: {
         workoutName: string;
         restDay: boolean;
         dayIndex: number;

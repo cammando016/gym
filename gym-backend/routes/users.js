@@ -30,16 +30,16 @@ router.get('/:username/active-split', async(req, res) => {
                 ) AS workouts
             FROM splits s
             JOIN split_workouts sw ON s.split_id = sw.split_id
-            JOIN workout_templates w ON sw.workout_id = w.id
+            LEFT JOIN workout_templates w ON sw.workout_id = w.id
             WHERE s.split_id = $1
             GROUP BY s.split_id, s.split_name`,
             [splitId]
         );
 
-        console.log(splitQuery.rows);
+        if(splitQuery.rows.length === 0) return res.status(404).json({ error: 'Split not found' });
 
         return res.status(200).json({
-            split: splitQuery.rows,
+            split: splitQuery.rows[0],
         });
     } catch (error) {
         console.log(error.message);

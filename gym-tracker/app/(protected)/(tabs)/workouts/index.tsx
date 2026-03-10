@@ -7,7 +7,8 @@ export default function WorkoutsPage() {
     const { data: workoutTemplateList, isLoading, error } = useWorkoutTemplates();
     const { data: split } = useSplit();
 
-    console.log(split);
+    console.log('Split:', split);
+    console.log('Workouts:', split?.workouts);
     return (
         <View>
             <View>
@@ -30,11 +31,12 @@ export default function WorkoutsPage() {
                 <Text style={{textAlign: 'center'}}>Split</Text>
                 <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
                     <View>
-                        <Text>CURRENT SPLIT NAME</Text>
-                        <Text>SPLIT DAY COUNT</Text>
+                        <Text>{split?.split_name}</Text>
+                        <Text>{split?.workouts?.length} Day Split</Text>
                     </View>
                     <View>
-                        <Link href='/workouts/EditSplit' withAnchor>Edit Split</Link>
+                        {split?.split_id && (<Link href={`/workouts/${split?.split_id}`}>View Split</Link>)}
+                        <Link href={{pathname: 'workouts/[splitId]', params: {splitId: split?.split_id}}} withAnchor>Edit Split</Link>
                     </View>
                 </View>
             </View>
