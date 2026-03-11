@@ -1,20 +1,20 @@
-import { useSplit } from '@/hooks/useSplit';
+import { useActiveSplit } from '@/hooks/useSplit';
 import { View, Text } from 'react-native';
 
 export default function ViewSplit () {
-    const { data: split } = useSplit();
+    const activeSplit = useActiveSplit();
     
     return (
-        !split ? <Text>Loading</Text> :
+        !activeSplit ? <Text>Loading</Text> :
         <View>
             <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
-                <Text>{split.split_name}</Text>
+                <Text>{activeSplit.splitName}</Text>
                 <Text>Edit Split Link</Text>
             </View>
             <Text>Workouts</Text>
             <View>
                 {
-                    split.workouts.map(w => {
+                    activeSplit.workouts.map(w => {
                         return (
                             <View key={w.dayIndex}>
                                 {

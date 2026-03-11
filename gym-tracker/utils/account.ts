@@ -23,7 +23,7 @@ export const logon = async (details: LogonFormValues) => {
     }
 };
 
-export const getActiveSplit = async (username : string) => {
+export const getSplits = async (username : string) => {
     if (!username) throw new Error('Username not found');
     const res = await fetch(`http://localhost:3000/api/users/${encodeURIComponent(username)}/active-split`);
     return res.json();

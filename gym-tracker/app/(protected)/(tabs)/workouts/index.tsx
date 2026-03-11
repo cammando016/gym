@@ -1,14 +1,15 @@
 import { Link } from 'expo-router';
 import { Text, View } from 'react-native';
 import { useWorkoutTemplates } from "@/hooks/useWorkoutTemplates";
-import { useSplit } from '@/hooks/useSplit';
+import { useActiveSplit } from '@/hooks/useSplit';
 
 export default function WorkoutsPage() {
     const { data: workoutTemplateList, isLoading, error } = useWorkoutTemplates();
-    const { data: split } = useSplit();
+    const activeSplit = useActiveSplit();
 
-    console.log('Split:', split);
-    console.log('Workouts:', split?.workouts);
+    console.log(activeSplit);
+
+    console.log('Split:', activeSplit);
     return (
         <View>
             <View>
@@ -31,12 +32,12 @@ export default function WorkoutsPage() {
                 <Text style={{textAlign: 'center'}}>Split</Text>
                 <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
                     <View>
-                        <Text>{split?.split_name}</Text>
-                        <Text>{split?.workouts?.length} Day Split</Text>
+                        <Text>{activeSplit?.splitName}</Text>
+                        <Text>{activeSplit?.workouts?.length} Day Split</Text>
                     </View>
                     <View>
-                        {split?.split_id && (<Link href={`/workouts/${split?.split_id}`}>View Split</Link>)}
-                        <Link href={{pathname: 'workouts/[splitId]', params: {splitId: split?.split_id}}} withAnchor>Edit Split</Link>
+                        {activeSplit?.splitId && (<Link href={`/workouts/${activeSplit.splitId}`}>View Split</Link>)}
+                        {/* <Link href={{pathname: 'workouts/[splitId]', params: {splitId: activeSplit?.splitId}}} withAnchor>Edit Split</Link> */}
                     </View>
                 </View>
             </View>

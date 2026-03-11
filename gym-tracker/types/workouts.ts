@@ -184,14 +184,20 @@ interface SplitFormPayload {
     } []
 }
 
-interface UserSplit {
-    split_id: string;
-    split_name: string;
+interface Split {
+    isActive: boolean;
+    splitId: string;
+    splitName: string;
     workouts: {
+        workoutId: string;
         workoutName: string;
         restDay: boolean;
         dayIndex: number;
     } []
 }
 
-export { setTypes, SetType, muscleGroups, Muscle, WorkoutSet, Exercise, SetTracker, FormValues, FormStateWithValidation, privacyTypes, PrivacyType, ExerciseSearchResultType, CreatedExercise, WorkoutAction, ErrorShape, FormPayload, WorkoutTemplateType, SplitDay, SplitFormPayload, UserSplit };
+interface UserSplits {
+    splits: Split []
+}
+
+export { setTypes, SetType, muscleGroups, Muscle, WorkoutSet, Exercise, SetTracker, FormValues, FormStateWithValidation, privacyTypes, PrivacyType, ExerciseSearchResultType, CreatedExercise, WorkoutAction, ErrorShape, FormPayload, WorkoutTemplateType, SplitDay, SplitFormPayload, Split, UserSplits };
