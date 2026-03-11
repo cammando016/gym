@@ -5,41 +5,69 @@ import pool from '../db/pool.js';
 dotenv.config();
 const router = express.Router();
 
-router.get('/:username/active-split', async(req, res) => {
+router.get('/:username/splits', async(req, res) => {
     console.log('Received request for user split');
     const { username } = req.params;
 
     try {
-        //Get split ID of user
-        console.log('Checking for split ID in user table')
-        const splitIdQuery = await pool.query(`SELECT active_split FROM users WHERE username = $1`, [username]);
-        //If no rows, username doesn't exist
-        if (splitIdQuery.rows.length === 0) throw new Error('Username not found');
-        const splitId = splitIdQuery.rows[0].active_split;
+        //Get ID of user
+        console.log('Checking for user ID in user table')
+        const userQuery = await pool.query(`SELECT id FROM users WHERE username = $1`, [username]);
+        if (userQuery.rows.length === 0) throw new Error('Username not found');
+        const userId = userQuery.rows[0].id;
 
         console.log('Getting split details');
         //Get split details
         const splitQuery = await pool.query(
-            `SELECT s.split_id, s.split_name, 
-                array_agg(json_build_object(
-                    'workoutName', w.workout_name,
-                    'dayIndex', sw.day_index,
-                    'restDay', sw.is_rest_day
+            `WITH split_days AS (
+                SELECT 
+                    sw.split_id,
+                    jsonb_agg(
+                        jsonb_build_object(
+                            'workoutId', sw.workout_id,
+                            'workoutName', w.workout_name,
+                            'dayIndex', sw.day_index,
+                            'restDay', sw.is_rest_day
+                        )
+                        ORDER BY sw.day_index
+                    ) AS workouts
+                FROM split_workouts sw
+                LEFT JOIN workout_templates w ON sw.workout_id = w.id
+                GROUP BY sw.split_id
+            ),
+            user_splits_data AS (
+                SELECT 
+                    s.split_id, 
+                    s.split_name, 
+                    (s.split_id = u.active_split) AS is_active, 
+                    COALESCE(sd.workouts, '[]'::jsonb) AS workouts
+                FROM users u
+                JOIN users_splits us ON u.id = us.user_id
+                JOIN splits s ON us.split_id = s.split_id
+                LEFT JOIN split_days sd ON sd.split_id = s.split_id
+                WHERE u.id = $1
+            )
+            SELECT jsonb_build_object(
+                'splits',
+                jsonb_agg(
+                    jsonb_build_object(
+                        'splitId', split_id,
+                        'splitName', split_name,
+                        'isActive', is_active,
+                        'workouts', workouts
+                    )
                 )
-                ORDER BY sw.day_index ASC
-                ) AS workouts
-            FROM splits s
-            JOIN split_workouts sw ON s.split_id = sw.split_id
-            LEFT JOIN workout_templates w ON sw.workout_id = w.id
-            WHERE s.split_id = $1
-            GROUP BY s.split_id, s.split_name`,
-            [splitId]
+            ) AS result
+            FROM user_splits_data`,
+            [userId]
         );
 
-        if(splitQuery.rows.length === 0) return res.status(404).json({ error: 'Split not found' });
+        if(splitQuery.rows.length === 0) return res.status(404).json({ error: 'No splits found' });
+
+        console.log(splitQuery.rows);
 
         return res.status(200).json({
-            split: splitQuery.rows[0],
+            splits: splitQuery.rows[0].result,
         });
     } catch (error) {
         console.log(error.message);
