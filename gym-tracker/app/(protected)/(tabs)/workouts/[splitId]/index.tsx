@@ -1,8 +1,9 @@
-import { useActiveSplit } from '@/hooks/useSplit';
+import { useSplits } from '@/hooks/useSplit';
 import { View, Text } from 'react-native';
 
 export default function ViewSplit () {
-    const activeSplit = useActiveSplit();
+    const { data } = useSplits();
+    const activeSplit = data?.activeSplit;
     
     return (
         !activeSplit ? <Text>Loading</Text> :

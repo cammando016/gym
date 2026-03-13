@@ -25,6 +25,6 @@ export const logon = async (details: LogonFormValues) => {
 
 export const getSplits = async (username : string) => {
     if (!username) throw new Error('Username not found');
-    const res = await fetch(`http://localhost:3000/api/users/${encodeURIComponent(username)}/active-split`);
+    const res = await fetch(`http://localhost:3000/api/users/${encodeURIComponent(username)}/splits`);
     return res.json();
 }

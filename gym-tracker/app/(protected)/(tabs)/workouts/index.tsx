@@ -1,12 +1,14 @@
 import { Link } from 'expo-router';
 import { Text, View } from 'react-native';
 import { useWorkoutTemplates } from "@/hooks/useWorkoutTemplates";
-import { useActiveSplit } from '@/hooks/useSplit';
+import { useSplits } from '@/hooks/useSplit';
 import SkeletonSmall from '@/components/SkeletonSmall';
 
 export default function WorkoutsPage() {
     const { data: workoutTemplateList, isLoading, error } = useWorkoutTemplates();
-    const activeSplit = useActiveSplit();
+    const { data } = useSplits();
+    const activeSplit = data?.activeSplit
+    console.log(activeSplit);
 
     return (
         <View>
@@ -33,7 +35,10 @@ export default function WorkoutsPage() {
             </View>
         
             <View style={{padding: 20}}>
-                <Text style={{textAlign: 'center'}}>Split</Text>
+                <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
+                    <Text style={{fontWeight: 'bold'}}>Split</Text>
+                    <Link href='/workouts/EditSplit' >Create New Split</Link>
+                </View>
                 <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
                     <View>
                         <Text>{activeSplit?.splitName}</Text>

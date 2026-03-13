@@ -1,9 +1,27 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import pool from '../db/pool.js';
+import { getUserId } from '../utils/user.js';
 
 dotenv.config();
 const router = express.Router();
+
+router.get('/:username/split-day', async (req, res) => {
+    console.log('Received request for day of user split');
+    const { username } = req.params;
+
+    try {
+        console.log('Checking for day of user split');
+        const userId = await getUserId(username);
+
+        const splitDayQuery = await pool.query(`SELECT current_split_day FROM users WHERE id = $1`, [userId]);
+
+        if (splitDayQuery.rows.length === 0) return res.status(404).json({ error: 'Split day not found' });
+        return res.status(200).json({splitDay: splitDayQuery.rows[0].current_split_day});
+    } catch (error) {
+        return res.status(500).json({error: error.message});
+    }
+});
 
 router.get('/:username/splits', async(req, res) => {
     console.log('Received request for user split');
@@ -64,10 +82,10 @@ router.get('/:username/splits', async(req, res) => {
 
         if(splitQuery.rows.length === 0) return res.status(404).json({ error: 'No splits found' });
 
-        console.log(splitQuery.rows);
+        console.log(splitQuery.rows[0].result.splits);
 
         return res.status(200).json({
-            splits: splitQuery.rows[0].result,
+            splits: splitQuery.rows[0].result.splits,
         });
     } catch (error) {
         console.log(error.message);
