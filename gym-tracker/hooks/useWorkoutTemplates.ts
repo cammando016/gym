@@ -10,7 +10,7 @@ export function useWorkoutTemplates() {
         queryKey: ['workouts', user?.username],
         queryFn: async () => {
             if (!user) throw new Error('Username not found to authenticate request for workout templates');
-            const res = await fetchWorkouts(user.username);
+            const res = await fetchWorkouts();
             return res.workouts;
         },
         enabled: !!user,

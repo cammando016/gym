@@ -10,6 +10,8 @@ export default function WorkoutsPage() {
     const activeSplit = data?.activeSplit
     console.log(activeSplit);
 
+    console.log(workoutTemplateList);
+
     return (
         <View>
             <View>
@@ -23,7 +25,7 @@ export default function WorkoutsPage() {
                     (
                         <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
                             <View>
-                                <Text>{workoutTemplateList?.filter(w => w.isactive === true).length} active workouts</Text>
+                                <Text>{workoutTemplateList?.filter(w => w.isActive === true).length} active workouts</Text>
                             </View>
                             <View>
                                 <Link href='/workouts/AddWorkout' withAnchor>Create New Template</Link>

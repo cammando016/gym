@@ -155,15 +155,20 @@ interface ExerciseSearchResultType {
 }
 
 interface WorkoutTemplateType {
-    workoutid: string;
-    workoutname: string;
+    workoutId: string;
+    workoutName: string;
     privacy: string;
-    isactive: boolean;
+    isActive: boolean;
     exercises: {
         exerciseName: string;
         exerciseIndex: number;
         repRangeLower: number;
-        repRangeUpper: number
+        repRangeUpper: number;
+        sets: {
+            setType: SetType;
+            setIndex: number;
+            isUnilateralSet: boolean;
+        } []
     } []
 }
 

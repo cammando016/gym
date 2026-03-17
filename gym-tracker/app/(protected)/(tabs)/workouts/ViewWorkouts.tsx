@@ -16,7 +16,7 @@ export default function ViewWorkouts() {
         <View>
             {workoutTemplateList ? (
                 workoutTemplateList.map(w => {
-                    return <WorkoutTemplate key={w.workoutid} workout={w} openDetails={activeWorkoutDetails} updateActiveWorkout={updateActiveWorkout} />
+                    return <WorkoutTemplate key={w.workoutId} workout={w} openDetails={activeWorkoutDetails} updateActiveWorkout={updateActiveWorkout} />
                 })
             ) : (
                 <Text>Loading Workout Templates</Text>

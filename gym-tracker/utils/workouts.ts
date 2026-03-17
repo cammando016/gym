@@ -20,8 +20,11 @@ export const createWorkout = async (details: FormPayload) => {
     }
 };
 
-export const fetchWorkouts = async (username: string) => {
-    const res = await fetch(`http://localhost:3000/api/workouts?searchString=${encodeURIComponent(username)}`);
+export const fetchWorkouts = async () => {
+    const token = await AsyncStorage.getItem('token');
+    const res = await fetch(`http://localhost:3000/api/workouts/templates`, {
+        headers: { Authorization: `Bearer ${token}`}
+    });
     return await res.json();
 }
 

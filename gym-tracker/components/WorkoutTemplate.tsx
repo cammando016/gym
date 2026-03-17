@@ -8,18 +8,18 @@ interface Props {
 } 
 
 export default function WorkoutTemplate (props: Props) {
-    const isActiveWorkout = props.workout.workoutid === props.openDetails;
+    const isActiveWorkout = props.workout.workoutId === props.openDetails;
     return (
-        <View>
+        <View style={{paddingTop: '10'}}>
             <View>
                 <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
                     <View>
-                        <Text>{`Workout Name: ${props.workout.workoutname}`}</Text>
+                        <Text>{`Workout Name: ${props.workout.workoutName}`}</Text>
                         <Text>{`Privacy: ${props.workout.privacy}`}</Text>
                         <Text>{`${props.workout.exercises.length} Exercises:`}</Text>
                     </View>
                     <View>
-                        <Pressable onPress={() => props.updateActiveWorkout(props.workout.workoutid)}><Text>{isActiveWorkout ? 'Hide' : 'Show'} Details</Text></Pressable>
+                        <Pressable onPress={() => props.updateActiveWorkout(props.workout.workoutId)}><Text>{isActiveWorkout ? 'Hide' : 'Show'} Details</Text></Pressable>
                     </View>
                 </View>
                 {isActiveWorkout && (

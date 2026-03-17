@@ -36,7 +36,7 @@ export default function App() {
   const testFetch: any = async (workoutId: string) => {
     const lastTrained = await fetchLastTrained(workoutId);
     console.log(lastTrained.workout.exercises);
-    lastTrained.workout.exercises.map(e => e.sets.map(s => console.log(s)))
+    lastTrained.workout.exercises.map((e: any) => e.sets.map((s: any) => console.log(s)))
     return lastTrained;
   }
 
