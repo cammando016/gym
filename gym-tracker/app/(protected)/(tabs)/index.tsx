@@ -43,7 +43,7 @@ export default function App() {
   return (
     <ScrollView style={styles.colflex} >
       {
-        splitDayLoading || splitsDataLoading || lastWorkoutLoading ? (
+        !splitDay || !splitsData || !lastWorkout ? (
           <View>
             <Text>Loading Homepage</Text>
           </View>
@@ -61,11 +61,11 @@ export default function App() {
             <View style={styles.colflex} >
               { splitDay && <Text>{`Last ${activeSplit?.workouts[splitDay].workoutName} Session`}</Text> }
               <View>
-                <Text>{`Date Trained: ${lastWorkout.datestarted.toString().slice(0, 10)}`}</Text>
-                <Text>{`DURATION: ${formatDateDifferenceHMS(dayjs(lastWorkout.dateended).diff(dayjs(lastWorkout.datestarted)))}`}</Text>
+                <Text>{`Date Trained: ${lastWorkout.dateStarted.toString().slice(0, 10)}`}</Text>
+                <Text>{`DURATION: ${formatDateDifferenceHMS(dayjs(lastWorkout.dateEnded).diff(dayjs(lastWorkout.dateStarted)))}`}</Text>
               </View>
               <Text>Last Session Notes</Text>
-              <Text>{lastWorkout.workoutnotes}</Text>
+              <Text>{lastWorkout.workoutNotes}</Text>
             </View>
 
             <View style={styles.rowflex}>

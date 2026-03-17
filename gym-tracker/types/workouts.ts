@@ -200,4 +200,57 @@ interface UserSplits {
     splits: Split []
 }
 
-export { setTypes, SetType, muscleGroups, Muscle, WorkoutSet, Exercise, SetTracker, FormValues, FormStateWithValidation, privacyTypes, PrivacyType, ExerciseSearchResultType, CreatedExercise, WorkoutAction, ErrorShape, FormPayload, WorkoutTemplateType, SplitDay, SplitFormPayload, Split, UserSplits };
+interface BaseLoggedSet {
+    setIndex: number,
+    weight: number,
+    setNotes?: string,
+    setType: string
+}
+
+interface BilateralReps {
+    fullReps: number,
+    assistedReps: number,
+    partialReps: number
+}   
+
+interface UnilateralSide {
+    fullReps: number,
+    assistedReps: number,
+    partialReps: number
+}
+
+interface UnilateralReps {
+    left: UnilateralSide,
+    right: UnilateralSide
+}
+
+type BilateralSet = BaseLoggedSet & {
+    isUnilateral: false,
+    reps: BilateralReps
+}
+
+type UnilateralSet = BaseLoggedSet & {
+    isUnilateral: true,
+    reps: UnilateralReps
+}
+
+type LoggedWorkoutSet = BilateralSet | UnilateralSet
+
+interface LoggedWorkoutExercise {
+    workoutExerciseId: string,
+    exerciseId: string,
+    exerciseIndex: number,
+    exerciseName: string,
+    exerciseNotes?: string,
+    sets: LoggedWorkoutSet [],
+}
+
+interface LoggedWorkout {
+    dateEnded: Date,
+    dateStarted: Date,
+    id: string,
+    workoutNotes?: string,
+    exercises: LoggedWorkoutExercise [],
+}
+
+export { setTypes, SetType, muscleGroups, Muscle, WorkoutSet, Exercise, SetTracker, FormValues, FormStateWithValidation, privacyTypes, PrivacyType, ExerciseSearchResultType, CreatedExercise, WorkoutAction, ErrorShape, FormPayload, WorkoutTemplateType, SplitDay, SplitFormPayload, Split, UserSplits, LoggedWorkout };

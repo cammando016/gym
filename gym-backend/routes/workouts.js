@@ -63,6 +63,7 @@ router.get('/:workoutId/last', authenticateToken, async (req, res) => {
                             'weight', s.weight,
                             'setNotes', s.set_notes,
                             'setType', st.name,
+                            'isUnilateral', s.is_unilateral,
                             'reps', CASE
                                 WHEN s.is_unilateral = true THEN jsonb_build_object(
                                     'left', jsonb_build_object(
@@ -110,9 +111,9 @@ router.get('/:workoutId/last', authenticateToken, async (req, res) => {
             )
             SELECT
                 w.id,
-                w.date_started AS dateStarted,
-                w.date_ended AS dateEnded,
-                w.workout_notes as workoutNotes,
+                w.date_started AS "dateStarted",
+                w.date_ended AS "dateEnded",
+                w.workout_notes as "workoutNotes",
                 COALESCE(el.exercise_list, '[]'::jsonb) AS exercises
             FROM workouts w
             JOIN users u ON w.user_id = u.id
