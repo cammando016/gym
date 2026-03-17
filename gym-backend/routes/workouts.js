@@ -1,6 +1,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import pool from '../db/pool.js';
+import { authenticateToken } from '../middleware/authenticateToken.js';
 
 dotenv.config();
 const router = express.Router();
@@ -39,6 +40,99 @@ router.get('/', async (req, res) => {
             workouts: workoutTemplatesQuery.rows,
         });
     } catch (error) {
+        return res.status(500).json({
+            error: error.message
+        });
+    }
+});
+
+router.get('/:workoutId/last', authenticateToken, async (req, res) => {
+    const userId = req.user.id;
+    const templateId = req.params.workoutId;
+
+    try {
+        console.log('Getting last workout')
+
+        const workoutQuery = await pool.query(
+            `WITH set_list AS (
+                SELECT
+                    s.workout_exercise_id,
+                    jsonb_agg(
+                        jsonb_build_object(
+                            'setIndex', s.set_index,
+                            'weight', s.weight,
+                            'setNotes', s.set_notes,
+                            'setType', st.name,
+                            'reps', CASE
+                                WHEN s.is_unilateral = true THEN jsonb_build_object(
+                                    'left', jsonb_build_object(
+                                        'fullReps', s.ull_full_reps,
+                                        'partialReps', s.ull_partial_reps,
+                                        'assistedReps', s.ull_assisted_reps
+                                    ),
+                                    'right', jsonb_build_object(
+                                        'fullReps', s.ulr_full_reps,
+                                        'partialReps', s.ulr_partial_reps,
+                                        'assistedReps', s.ulr_assisted_reps
+                                    )
+                                )
+                                ELSE jsonb_build_object(
+                                    'fullReps', s.full_reps,
+                                    'partialReps', s.partial_reps,
+                                    'assistedReps', s.assisted_reps
+                                )
+                            END
+                        )
+                        ORDER BY s.set_index
+                    ) AS sets
+                FROM workout_sets s
+                JOIN set_types st ON s.set_type = st.id
+                GROUP BY s.workout_exercise_id
+            ),
+            exercise_list AS (
+                SELECT
+                    we.workout_id,
+                    jsonb_agg(
+                        jsonb_build_object(
+                            'exerciseId', we.exercise_id,
+                            'workoutExerciseId', we.id,
+                            'exerciseName', e.name,
+                            'exerciseNotes', we.exercise_notes,
+                            'exerciseIndex', we.exercise_index,
+                            'sets', COALESCE(sl.sets, '[]'::jsonb)
+                        )
+                        ORDER BY we.exercise_index
+                    ) AS exercise_list
+                FROM workout_exercises we
+                JOIN exercises e ON we.exercise_id = e.id
+                JOIN set_list sl ON we.id = sl.workout_exercise_id
+                GROUP BY we.workout_id
+            )
+            SELECT
+                w.id,
+                w.date_started AS dateStarted,
+                w.date_ended AS dateEnded,
+                w.workout_notes as workoutNotes,
+                COALESCE(el.exercise_list, '[]'::jsonb) AS exercises
+            FROM workouts w
+            JOIN users u ON w.user_id = u.id
+            JOIN exercise_list el ON w.id = el.workout_id
+            WHERE u.id = $1
+            AND w.workout_template_id = $2
+            ORDER BY w.date_started DESC
+            LIMIT 1`, 
+            [userId, templateId]
+        );
+
+        if(workoutQuery.rows.length === 0) return res.status(404).json({error: 'No previous workout found'});
+
+        console.log(workoutQuery.rows[0]);
+
+        return res.status(200).json({
+            workout: workoutQuery.rows[0]
+        });
+    } catch (error) {
+        console.log(error.message);
         return res.status(500).json({
             error: error.message
         });

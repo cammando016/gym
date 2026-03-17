@@ -1,4 +1,5 @@
 import { FormPayload, SplitFormPayload } from "@/types/workouts";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const dbExerciseSearch = async (search: string) => {
     const res = await fetch(`http://localhost:3000/api/exercise?searchString=${encodeURIComponent(search)}`);
@@ -21,6 +22,14 @@ export const createWorkout = async (details: FormPayload) => {
 
 export const fetchWorkouts = async (username: string) => {
     const res = await fetch(`http://localhost:3000/api/workouts?searchString=${encodeURIComponent(username)}`);
+    return await res.json();
+}
+
+export const fetchLastTrained = async (workoutId: string) => {
+    const token = await AsyncStorage.getItem('token');
+    const res = await fetch(`http://localhost:3000/api/workouts/${workoutId}/last`, {
+        headers: { Authorization: `Bearer ${token}`}
+    });
     return await res.json();
 }
 

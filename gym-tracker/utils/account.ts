@@ -1,4 +1,5 @@
 import { SignupPayload, LogonFormValues } from "@/types/user"
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const signup = async (details: SignupPayload) => {
     const res = await fetch(`http://localhost:3000/api/signup`, {
@@ -16,6 +17,8 @@ export const logon = async (details: LogonFormValues) => {
         body: JSON.stringify(details),
     })
     const response = await res.json();
+
+    if (res.ok && response.token) await AsyncStorage.setItem('token', response.token);
 
     return {
         status: res.status,
