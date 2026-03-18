@@ -8,6 +8,7 @@ interface Props {
 }
 
 export default function LogExercise ( props: Props ) {
+    console.log(props.exerciseTemplate);
     return (
         <View>
             <Text>Exercise Name: {props.exerciseTemplate.exerciseName}</Text>
@@ -16,7 +17,7 @@ export default function LogExercise ( props: Props ) {
             {
                 props.lastTrainedExercise && (
                     props.lastTrainedExercise.sets.map(s => {
-                        return (<LogSet key={s.setIndex} set={s}></LogSet>)
+                        return (<LogSet key={s.setIndex} set={s} optionalSetModifiers={props.exerciseTemplate.optionalSetModifiers}></LogSet>)
                     })
                 )
             }

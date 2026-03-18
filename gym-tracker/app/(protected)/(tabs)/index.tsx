@@ -28,7 +28,7 @@ export default function App() {
   const activeSplit = splitsData?.activeSplit;
 
   const workoutTemplateId = useMemo(() => {
-    if (!activeSplit || !splitDay) return undefined;
+    if (!activeSplit || (splitDay < 0)) return undefined;
 
     const workout = activeSplit.workouts?.[splitDay]
     return workout?.workoutId
@@ -46,7 +46,7 @@ export default function App() {
   return (
     <ScrollView style={styles.colflex} >
       {
-        !splitDay || !splitsData || !lastWorkout ? (
+        !splitsData ? (
           <View>
             <Text>Loading Homepage</Text>
           </View>
@@ -57,7 +57,7 @@ export default function App() {
             </View>
 
             <View style={styles.rowflex}>
-              { splitDay && 
+              { !(splitDay < 0) && 
                 <Pressable
                   onPress={ () => startWorkout(`${workoutTemplateId}`) }
                   disabled={isPending}
@@ -72,15 +72,21 @@ export default function App() {
               <Pressable onPress={() => testFetch(workoutTemplateId)}><Text>MANUAL START</Text></Pressable>
             </View>
 
-            <View style={styles.colflex} >
-              { splitDay && <Text>{`Last ${activeSplit?.workouts[splitDay].workoutName} Session`}</Text> }
-              <View>
-                <Text>{`Date Trained: ${lastWorkout.dateStarted.toString().slice(0, 10)}`}</Text>
-                <Text>{`DURATION: ${formatDateDifferenceHMS(dayjs(lastWorkout.dateEnded).diff(dayjs(lastWorkout.dateStarted)))}`}</Text>
-              </View>
-              <Text>Last Session Notes</Text>
-              <Text>{lastWorkout.workoutNotes}</Text>
-            </View>
+            {
+              lastWorkout ? (
+                <View style={styles.colflex} >
+                  { !(splitDay < 0) && <Text>{`Last ${activeSplit?.workouts[splitDay].workoutName} Session`}</Text> }
+                  <View>
+                    <Text>{`Date Trained: ${lastWorkout.dateStarted.toString().slice(0, 10)}`}</Text>
+                    <Text>{`DURATION: ${formatDateDifferenceHMS(dayjs(lastWorkout.dateEnded).diff(dayjs(lastWorkout.dateStarted)))}`}</Text>
+                  </View>
+                  <Text>Last Session Notes</Text>
+                  <Text>{lastWorkout.workoutNotes}</Text>
+                </View>
+              ) : (
+                <Text>No previous workouts from this template.</Text>
+              )
+            }
 
             <View style={styles.rowflex}>
               <Button title='Prior Workouts' />
@@ -89,9 +95,9 @@ export default function App() {
 
             <View style={styles.colflex}>
               <Text>Schedule</Text>
-              { splitDay && <Text>{`Today: ${activeSplit?.workouts[splitDay].workoutName}`}</Text> }
+              { !(splitDay < 0) && <Text>{`Today: ${activeSplit?.workouts[splitDay].workoutName}`}</Text> }
               {
-                splitDay && splitDay + 1 !== activeSplit?.workouts.length ? (
+                !(splitDay < 0) && splitDay + 1 !== activeSplit?.workouts.length ? (
                   <Text>{`Tomorrow: ${activeSplit?.workouts[splitDay + 1].workoutName}`}</Text>
                 ) : (
                   <Text>{`Tomorrow: ${activeSplit?.workouts[0].workoutName}`}</Text>

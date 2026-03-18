@@ -216,7 +216,9 @@ interface BaseLoggedSet {
     setIndex: number,
     weight: number,
     setNotes?: string,
-    setType: string
+    setType: string,
+    usedBelt: boolean,
+    usedStraps: boolean,
 }
 
 interface BilateralReps {
