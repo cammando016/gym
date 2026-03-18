@@ -12,9 +12,11 @@ router.post('/sessions', authenticateToken, async (req, res) => {
     const { templateId } = req.body;
     const userId = req.user.id;
 
-
-
     try {
+        console.log('Getting Workout Name');
+        const workoutNameQuery = await pool.query(`SELECT workout_name FROM workout_templates WHERE id = $1`, [templateId]);
+        const workoutName = workoutNameQuery.rows[0].workout_name;
+
         console.log('Attempting to start workout')
         const session = await pool.query(
             `INSERT INTO workouts
@@ -27,7 +29,7 @@ router.post('/sessions', authenticateToken, async (req, res) => {
         const sessionId = session.rows[0].id;
 
         console.log('Workout started');
-        return res.status(200).json({ sessionId });
+        return res.status(200).json({ sessionId, workoutName, templateId });
     } catch (error) {
         console.log(error);
         return res.status(500).json({
@@ -66,6 +68,7 @@ router.get('/templates', authenticateToken, async (req, res) => {
                         jsonb_build_object(
                             'exerciseIndex', e.exercise_index,
                             'exerciseName', ex.name,
+                            'exerciseId', e.exercise_id,
                             'repRangeLower', e.rep_range_lower,
                             'repRangeUpper', e.rep_range_upper,
                             'sets', COALESCE(sl.sets, '[]'::jsonb)

@@ -164,6 +164,7 @@ interface WorkoutTemplateType {
         exerciseIndex: number;
         repRangeLower: number;
         repRangeUpper: number;
+        exerciseId: string;
         sets: {
             setType: SetType;
             setIndex: number;
@@ -258,4 +259,4 @@ interface LoggedWorkout {
     exercises: LoggedWorkoutExercise [],
 }
 
-export { setTypes, SetType, muscleGroups, Muscle, WorkoutSet, Exercise, SetTracker, FormValues, FormStateWithValidation, privacyTypes, PrivacyType, ExerciseSearchResultType, CreatedExercise, WorkoutAction, ErrorShape, FormPayload, WorkoutTemplateType, SplitDay, SplitFormPayload, Split, UserSplits, LoggedWorkout };
+export { setTypes, SetType, muscleGroups, Muscle, WorkoutSet, Exercise, SetTracker, FormValues, FormStateWithValidation, privacyTypes, PrivacyType, ExerciseSearchResultType, CreatedExercise, WorkoutAction, ErrorShape, FormPayload, WorkoutTemplateType, SplitDay, SplitFormPayload, Split, UserSplits, LoggedWorkout, LoggedWorkoutExercise, LoggedWorkoutSet };
