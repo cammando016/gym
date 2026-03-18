@@ -6,6 +6,8 @@ import { fetchLastTrained } from '@/utils/workouts';
 import React, { useMemo } from 'react';
 import { Button, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import dayjs from 'dayjs';
+import { Link } from 'expo-router';
+import { useStartWorkout } from '@/hooks/useStartWorkout';
 
 const styles = StyleSheet.create({
   colflex: {
@@ -22,6 +24,7 @@ export default function App() {
   const { user } = useAuth();
   const { data: splitDay, isLoading: splitDayLoading } = useDayOfSplit();
   const { data: splitsData, isLoading: splitsDataLoading } = useSplits();
+  const { mutate: startWorkout, isPending } = useStartWorkout();
   const activeSplit = splitsData?.activeSplit;
 
   const workoutTemplateId = useMemo(() => {
@@ -54,7 +57,18 @@ export default function App() {
             </View>
 
             <View style={styles.rowflex}>
-              { splitDay && <Button title={`Quickstart ${activeSplit?.workouts[splitDay].workoutName}`} /> }
+              { splitDay && 
+                <Pressable
+                  onPress={ () => startWorkout(`${workoutTemplateId}`) }
+                  disabled={isPending}
+                >
+                  <Text>
+                    {
+                      isPending ? 'Starting Workout...' : `Quickstart ${activeSplit?.workouts[splitDay].workoutName}`
+                    }
+                  </Text>
+                </Pressable>
+              }
               <Pressable onPress={() => testFetch(workoutTemplateId)}><Text>MANUAL START</Text></Pressable>
             </View>
 

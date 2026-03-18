@@ -49,3 +49,17 @@ export const createSplit = async (details: SplitFormPayload) => {
         ...response
     }
 }
+
+export const startWorkout = async ( templateId : string ) => {
+    const token = await AsyncStorage.getItem('token');
+    const res = await fetch(`http://localhost:3000/api/workouts/sessions`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({templateId}),
+    })
+    if(!res.ok) throw new Error('Failed to start workout');
+    return res.json();
+}

@@ -6,6 +6,36 @@ import { authenticateToken } from '../middleware/authenticateToken.js';
 dotenv.config();
 const router = express.Router();
 
+router.post('/sessions', authenticateToken, async (req, res) => {
+    
+    console.log(req.body);
+    const { templateId } = req.body;
+    const userId = req.user.id;
+
+
+
+    try {
+        console.log('Attempting to start workout')
+        const session = await pool.query(
+            `INSERT INTO workouts
+            (date_started, user_id, workout_template_id, status)
+            VALUES ($1, $2, $3, $4)
+            RETURNING id`,
+            [new Date(), userId, templateId, 'active']
+        );
+
+        const sessionId = session.rows[0].id;
+
+        console.log('Workout started');
+        return res.status(200).json({ sessionId });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            error: error.message
+        });
+    }
+});
+
 router.get('/templates', authenticateToken, async (req, res) => {
 
     const userId = req.user.id;
