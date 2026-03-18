@@ -165,6 +165,12 @@ interface WorkoutTemplateType {
         repRangeLower: number;
         repRangeUpper: number;
         exerciseId: string;
+        unilateralExercise: boolean;
+        optionalSetModifiers: {
+            unilateral: boolean;
+            belt: boolean;
+            straps: boolean;
+        };
         sets: {
             setType: SetType;
             setIndex: number;

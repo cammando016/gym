@@ -61,6 +61,17 @@ router.get('/templates', authenticateToken, async (req, res) => {
                     JOIN set_types st ON s.set_type = st.id
                     GROUP BY s.workout_template_exercise_id
             ),
+            optionalSetModifiers AS (
+                SELECT
+                    e.id,
+                    jsonb_build_object(
+                        'unilateral', e.opt_set_mod_unilateral,
+                        'belt', e.opt_set_mod_belt,
+                        'straps', e.opt_set_mod_straps
+                    ) AS optionalSetModifiers
+                FROM exercises e
+                GROUP BY e.id
+            ),
             exercises AS (
                 SELECT
                     e.workout_template_id,
@@ -71,12 +82,15 @@ router.get('/templates', authenticateToken, async (req, res) => {
                             'exerciseId', e.exercise_id,
                             'repRangeLower', e.rep_range_lower,
                             'repRangeUpper', e.rep_range_upper,
+                            'unilateralExercise', ex.is_unilateral,
+                            'optionalSetModifiers', osm.optionalSetModifiers,
                             'sets', COALESCE(sl.sets, '[]'::jsonb)
                         )
                         ORDER BY e.exercise_index ASC
                     ) AS exercises
                 FROM workout_template_exercises e
                 JOIN exercises ex ON e.exercise_id = ex.id
+                JOIN optionalSetModifiers osm ON ex.id = osm.id
                 JOIN sets sl ON e.id = sl.workout_template_exercise_id
                 GROUP BY e.workout_template_id
             )
@@ -122,6 +136,8 @@ router.get('/:workoutId/last', authenticateToken, async (req, res) => {
                             'weight', s.weight,
                             'setNotes', s.set_notes,
                             'setType', st.name,
+                            'usedBelt', s.used_belt,
+                            'usedStraps', s.used_straps,
                             'isUnilateral', s.is_unilateral,
                             'reps', CASE
                                 WHEN s.is_unilateral = true THEN jsonb_build_object(
