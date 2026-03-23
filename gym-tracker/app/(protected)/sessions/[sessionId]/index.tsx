@@ -6,7 +6,7 @@ export default function StartWorkout () {
     return (
         <>
             <Stack.Screen options={{ title: `Log ${workoutName} Workout` }} />
-            <LogWorkout sessionId={sessionId} templateId={templateId} />
+            <LogWorkout sessionId={sessionId} activeWorkout={true} templateId={templateId} />
         </>
     )
 }
