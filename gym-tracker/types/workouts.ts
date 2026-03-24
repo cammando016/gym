@@ -165,6 +165,7 @@ interface WorkoutTemplateType {
         repRangeLower: number;
         repRangeUpper: number;
         exerciseId: string;
+        exerciseNotes: string;
         unilateralExercise: boolean;
         optionalSetModifiers: {
             unilateral: boolean;
@@ -251,10 +252,8 @@ type UnilateralSet = BaseLoggedSet & {
 type LoggedWorkoutSet = BilateralSet | UnilateralSet
 
 interface LoggedWorkoutExercise {
-    workoutExerciseId: string,
     exerciseId: string,
     exerciseIndex: number,
-    exerciseName: string,
     exerciseNotes?: string,
     sets: LoggedWorkoutSet [],
 }
@@ -267,4 +266,31 @@ interface LoggedWorkout {
     exercises: LoggedWorkoutExercise [],
 }
 
-export { setTypes, SetType, muscleGroups, Muscle, WorkoutSet, Exercise, SetTracker, FormValues, FormStateWithValidation, privacyTypes, PrivacyType, ExerciseSearchResultType, CreatedExercise, WorkoutAction, ErrorShape, FormPayload, WorkoutTemplateType, SplitDay, SplitFormPayload, Split, UserSplits, LoggedWorkout, LoggedWorkoutExercise, LoggedWorkoutSet };
+interface LogWorkoutForm {
+    values: {
+        workoutNotes: string,
+        exercises: LoggedWorkoutExercise [],
+    }
+}
+
+type LogWorkoutAction = 
+| { type: 'UPDATE_WORKOUT_NOTES'; value: string }
+| { type: 'UPDATE_EXERCISE_NOTES'; value: string; exerciseIndex: number }
+| { type: 'UPDATE_SET_IS_UNILATERAL'; value: boolean; exerciseIndex: number; setIndex: number }
+| { type: 'UPDATE_SET_TYPE'; value: SetType; exerciseIndex: number; setIndex: number }
+| { type: 'UPDATE_SET_WEIGHT'; value: string; exerciseIndex: number; setIndex: number }
+| { type: 'UPDATE_SET_NOTES'; value: string; exerciseIndex: number; setIndex: number }
+| { type: 'UPDATE_SET_BELT'; value: boolean; exerciseIndex: number; setIndex: number }
+| { type: 'UPDATE_SET_STRAPS'; value: boolean; exerciseIndex: number; setIndex: number }
+| { type: 'UPDATE_SET_FULL_REPS'; value: string; exerciseIndex: number; setIndex: number }
+| { type: 'UPDATE_SET_ASTD_REPS'; value: string; exerciseIndex: number; setIndex: number }
+| { type: 'UPDATE_SET_PRTL_REPS'; value: string; exerciseIndex: number; setIndex: number }
+| { type: 'UPDATE_SET_LEFT_FULL_REPS'; value: string; exerciseIndex: number; setIndex: number }
+| { type: 'UPDATE_SET_LEFT_ASTD_REPS'; value: string; exerciseIndex: number; setIndex: number }
+| { type: 'UPDATE_SET_LEFT_PRTL_REPS'; value: string; exerciseIndex: number; setIndex: number }
+| { type: 'UPDATE_SET_RIGHT_FULL_REPS'; value: string; exerciseIndex: number; setIndex: number }
+| { type: 'UPDATE_SET_RIGHT_ASTD_REPS'; value: string; exerciseIndex: number; setIndex: number }
+| { type: 'UPDATE_SET_RIGHT_PRTL_REPS'; value: string; exerciseIndex: number; setIndex: number }
+| { type: ''; value: string }
+
+export { setTypes, SetType, muscleGroups, Muscle, WorkoutSet, Exercise, SetTracker, FormValues, FormStateWithValidation, privacyTypes, PrivacyType, ExerciseSearchResultType, CreatedExercise, WorkoutAction, ErrorShape, FormPayload, WorkoutTemplateType, SplitDay, SplitFormPayload, Split, UserSplits, LoggedWorkout, LoggedWorkoutExercise, LoggedWorkoutSet, LogWorkoutForm, LogWorkoutAction };

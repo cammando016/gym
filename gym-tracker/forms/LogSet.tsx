@@ -1,10 +1,15 @@
-import { LoggedWorkoutSet, WorkoutTemplateType } from '@/types/workouts';
+import { LoggedWorkoutSet, LogWorkoutAction, WorkoutTemplateType } from '@/types/workouts';
+import { Dispatch } from 'react';
 import { View, Text, TextInput } from 'react-native';
 import layoutStyles from '../styles/layoutStyles.js';
 
 interface Props {
+    dispatch: Dispatch<LogWorkoutAction>,
     activeWorkout: boolean,
-    set: WorkoutTemplateType["exercises"][0]["sets"][0],
+    setData: LoggedWorkoutSet,
+    setTemplate: WorkoutTemplateType["exercises"][0]["sets"][0],
+    setIndex: number,
+    exerciseIndex: number,
     exerciseTemplate: WorkoutTemplateType["exercises"][0],
     optionalSetModifiers: {
         unilateral: boolean,
@@ -19,19 +24,25 @@ export default function LogSet (props: Props) {
         {
             props.activeWorkout ? (
                 <View>
-                    <Text>Set {props.set.setIndex + 1}</Text>
+                    <Text>Set {props.setIndex + 1}</Text>
                     <View>
                         <View style={[layoutStyles.rowFlex, ]}>
                             <View style={[layoutStyles.rowFlex, {flexGrow: 1}]}>
                                 <Text>Set Type</Text>
-                                <TextInput placeholder='Select Set Type' value={props.set.setType}></TextInput>
+                                <TextInput placeholder='Select Set Type' value={props.setData.setType}></TextInput>
                                 <Text>Weight</Text>
-                                <TextInput placeholder='00'></TextInput>
+                                <TextInput 
+                                    placeholder='00'
+                                    value={props.setData.weight.toString()}
+                                    onChangeText={(s: string) => {
+                                        props.dispatch({ type: 'UPDATE_SET_WEIGHT', value: s, exerciseIndex: props.exerciseIndex, setIndex: props.setIndex })
+                                    }}
+                                ></TextInput>
                             </View>
                             {
-                                props.exerciseTemplate.optionalSetModifiers.belt ||
+                                (props.exerciseTemplate.optionalSetModifiers.belt ||
                                 props.exerciseTemplate.optionalSetModifiers.straps ||
-                                props.exerciseTemplate.optionalSetModifiers.unilateral && (
+                                props.exerciseTemplate.optionalSetModifiers.unilateral) && (
                                     <View style={[layoutStyles.rowFlex,]}>
                                         {props.exerciseTemplate.optionalSetModifiers.belt && <Text>BE</Text>}
                                         {props.exerciseTemplate.optionalSetModifiers.straps && <Text>ST</Text>}
@@ -42,7 +53,7 @@ export default function LogSet (props: Props) {
                         </View>
                         <View style={[layoutStyles.rowFlex,]}>
                             {
-                                props.set.isUnilateralSet ? (
+                                props.setData.isUnilateral ? (
                                     <View style={{flexGrow: 1}}>
                                         <View style={[layoutStyles.rowFlex,]}>
                                             <Text>Left Reps</Text>
@@ -67,7 +78,13 @@ export default function LogSet (props: Props) {
                                     <View style={[layoutStyles.rowFlex,]}>
                                         <Text>Reps</Text>
                                         <Text>Full:</Text>
-                                        <TextInput placeholder='00' />
+                                        <TextInput 
+                                            placeholder='00' 
+                                            value={props.setData.reps.fullReps.toString()}
+                                            onChangeText={(s: string) => {
+                                                props.dispatch({ type: 'UPDATE_SET_FULL_REPS', value: s, exerciseIndex: props.exerciseIndex, setIndex: props.setIndex })
+                                            }}
+                                        />
                                         <Text>Partial:</Text>
                                         <TextInput placeholder='00' />
                                         <Text>Assisted:</Text>
