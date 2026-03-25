@@ -218,6 +218,7 @@ interface BaseLoggedSet {
     weight: number,
     setNotes?: string,
     setType: string,
+    showSetTypeDropdown: boolean,
     usedBelt: boolean,
     usedStraps: boolean,
 }
@@ -291,6 +292,7 @@ type LogWorkoutAction =
 | { type: 'UPDATE_SET_RIGHT_FULL_REPS'; value: string; exerciseIndex: number; setIndex: number }
 | { type: 'UPDATE_SET_RIGHT_ASTD_REPS'; value: string; exerciseIndex: number; setIndex: number }
 | { type: 'UPDATE_SET_RIGHT_PRTL_REPS'; value: string; exerciseIndex: number; setIndex: number }
+| { type: 'TOGGLE_SET_TYPE_DROPDOWN'; exerciseIndex: number; setIndex: number }
 | { type: ''; value: string }
 
 export { setTypes, SetType, muscleGroups, Muscle, WorkoutSet, Exercise, SetTracker, FormValues, FormStateWithValidation, privacyTypes, PrivacyType, ExerciseSearchResultType, CreatedExercise, WorkoutAction, ErrorShape, FormPayload, WorkoutTemplateType, SplitDay, SplitFormPayload, Split, UserSplits, LoggedWorkout, LoggedWorkoutExercise, LoggedWorkoutSet, LogWorkoutForm, LogWorkoutAction };

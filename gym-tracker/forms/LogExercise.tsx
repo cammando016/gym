@@ -10,6 +10,7 @@ interface Props {
     activeWorkout: boolean,
     exerciseTemplate: WorkoutTemplateType["exercises"][0],
     lastTrainedExercise?: LoggedWorkoutExercise,
+    activeExerciseAndSet: {activeExercise: number, activeSet: number},
 }
 
 export default function LogExercise ( props: Props ) {
@@ -33,6 +34,7 @@ export default function LogExercise ( props: Props ) {
                             exerciseIndex={props.exerciseIndex}
                             exerciseTemplate={props.exerciseTemplate} 
                             optionalSetModifiers={props.exerciseTemplate.optionalSetModifiers}
+                            activeExerciseAndSet={props.activeExerciseAndSet}
                         ></LogSet>)
                 })
             }

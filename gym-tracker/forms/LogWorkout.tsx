@@ -19,6 +19,9 @@ export default function LogWorkout (props: Props) {
     
     const { data: lastTrained } = useWorkoutHistory(props.templateId);
 
+    //Keep track of focused set and exercise for showing previous logged sets, and drop down for active set set type
+    const [activeSet, setActiveSet] = useState<{activeExercise: number, activeSet: number}>({activeExercise: 0, activeSet: 0})
+
     const initialFormState: LogWorkoutForm = {
         values : {
             workoutNotes: '',
@@ -32,6 +35,7 @@ export default function LogWorkout (props: Props) {
                             isUnilateral: true,
                             setIndex: s.setIndex,
                             setType: s.setType,
+                            showSetTypeDropdown: false,
                             weight: 0,
                             setNotes: '',
                             usedBelt: false,
@@ -53,6 +57,7 @@ export default function LogWorkout (props: Props) {
                             isUnilateral: false,
                             setIndex: s.setIndex,
                             setType: s.setType,
+                            showSetTypeDropdown: false,
                             weight: 0,
                             setNotes: '',
                             usedBelt: false,
@@ -111,7 +116,25 @@ export default function LogWorkout (props: Props) {
             //     }
             // }
             case 'UPDATE_SET_TYPE' : {
-
+                return {
+                    ...state,
+                    values: {
+                        ...state.values,
+                        exercises: state.values.exercises.map(e => {
+                            if (e.exerciseIndex !== action.exerciseIndex) return e
+                            return {
+                                ...e,
+                                sets: e.sets.map(s => {
+                                    if (s.setIndex !== action.setIndex) return s
+                                    return {
+                                        ...s,
+                                        setType: action.value
+                                    }
+                                })
+                            }
+                        })
+                    }
+                }
             }
             case 'UPDATE_SET_WEIGHT': {
                 return {
@@ -222,26 +245,243 @@ export default function LogWorkout (props: Props) {
                 }
             }
             case 'UPDATE_SET_ASTD_REPS': {
+                return {
+                    ...state,
+                    values: {
+                        ...state.values,
+                        exercises: state.values.exercises.map(e => {
+                            if (e.exerciseIndex !== action.exerciseIndex) return e 
+                            return {
+                                ...e,
+                                sets: e.sets.map(s => {
+                                    if (s.setIndex !== action.setIndex || s.isUnilateral) return s
+                                    return {
+                                        ...s,
+                                        reps: {
+                                            ...s.reps,
+                                            assistedReps: Number(action.value)
+                                        }
+                                    }
+                                })
+                            }
+                        })
+                    }
+                }
             }
             case 'UPDATE_SET_PRTL_REPS': {
+                return {
+                    ...state,
+                    values: {
+                        ...state.values,
+                        exercises: state.values.exercises.map(e => {
+                            if (e.exerciseIndex !== action.exerciseIndex) return e 
+                            return {
+                                ...e,
+                                sets: e.sets.map(s => {
+                                    if (s.setIndex !== action.setIndex || s.isUnilateral) return s
+                                    return {
+                                        ...s,
+                                        reps: {
+                                            ...s.reps,
+                                            partialReps: Number(action.value)
+                                        }
+                                    }
+                                })
+                            }
+                        })
+                    }
+                }
             }
             case 'UPDATE_SET_LEFT_FULL_REPS': {
-
+                return {
+                    ...state,
+                    values: {
+                        ...state.values,
+                        exercises: state.values.exercises.map(e => {
+                            if (e.exerciseIndex !== action.exerciseIndex) return e 
+                            return {
+                                ...e,
+                                sets: e.sets.map(s => {
+                                    if (s.setIndex !== action.setIndex || !s.isUnilateral) return s
+                                    return {
+                                        ...s,
+                                        reps: {
+                                            ...s.reps,
+                                            left: {
+                                                ...s.reps.left,
+                                                fullReps: Number(action.value)
+                                            }
+                                        }
+                                    }
+                                })
+                            }
+                        })
+                    }
+                }
             }
             case 'UPDATE_SET_LEFT_ASTD_REPS': {
-
+                return {
+                    ...state,
+                    values: {
+                        ...state.values,
+                        exercises: state.values.exercises.map(e => {
+                            if (e.exerciseIndex !== action.exerciseIndex) return e 
+                            return {
+                                ...e,
+                                sets: e.sets.map(s => {
+                                    if (s.setIndex !== action.setIndex || !s.isUnilateral) return s
+                                    return {
+                                        ...s,
+                                        reps: {
+                                            ...s.reps,
+                                            left: {
+                                                ...s.reps.left,
+                                                assistedReps: Number(action.value)
+                                            }
+                                        }
+                                    }
+                                })
+                            }
+                        })
+                    }
+                }
             }
             case 'UPDATE_SET_LEFT_PRTL_REPS': {
-                
+                return {
+                    ...state,
+                    values: {
+                        ...state.values,
+                        exercises: state.values.exercises.map(e => {
+                            if (e.exerciseIndex !== action.exerciseIndex) return e 
+                            return {
+                                ...e,
+                                sets: e.sets.map(s => {
+                                    if (s.setIndex !== action.setIndex || !s.isUnilateral) return s
+                                    return {
+                                        ...s,
+                                        reps: {
+                                            ...s.reps,
+                                            left: {
+                                                ...s.reps.left,
+                                                partialReps: Number(action.value)
+                                            }
+                                        }
+                                    }
+                                })
+                            }
+                        })
+                    }
+                }
             }
             case 'UPDATE_SET_RIGHT_FULL_REPS': {
-
+                return {
+                    ...state,
+                    values: {
+                        ...state.values,
+                        exercises: state.values.exercises.map(e => {
+                            if (e.exerciseIndex !== action.exerciseIndex) return e 
+                            return {
+                                ...e,
+                                sets: e.sets.map(s => {
+                                    if (s.setIndex !== action.setIndex || !s.isUnilateral) return s
+                                    return {
+                                        ...s,
+                                        reps: {
+                                            ...s.reps,
+                                            right: {
+                                                ...s.reps.right,
+                                                fullReps: Number(action.value)
+                                            }
+                                        }
+                                    }
+                                })
+                            }
+                        })
+                    }
+                }
             }
             case 'UPDATE_SET_RIGHT_ASTD_REPS': {
-
+                return {
+                    ...state,
+                    values: {
+                        ...state.values,
+                        exercises: state.values.exercises.map(e => {
+                            if (e.exerciseIndex !== action.exerciseIndex) return e 
+                            return {
+                                ...e,
+                                sets: e.sets.map(s => {
+                                    if (s.setIndex !== action.setIndex || !s.isUnilateral) return s
+                                    return {
+                                        ...s,
+                                        reps: {
+                                            ...s.reps,
+                                            right: {
+                                                ...s.reps.right,
+                                                assistedReps: Number(action.value)
+                                            }
+                                        }
+                                    }
+                                })
+                            }
+                        })
+                    }
+                }
             }
             case 'UPDATE_SET_RIGHT_PRTL_REPS': {
-                
+                return {
+                    ...state,
+                    values: {
+                        ...state.values,
+                        exercises: state.values.exercises.map(e => {
+                            if (e.exerciseIndex !== action.exerciseIndex) return e 
+                            return {
+                                ...e,
+                                sets: e.sets.map(s => {
+                                    if (s.setIndex !== action.setIndex || !s.isUnilateral) return s
+                                    return {
+                                        ...s,
+                                        reps: {
+                                            ...s.reps,
+                                            right: {
+                                                ...s.reps.right,
+                                                partialReps: Number(action.value)
+                                            }
+                                        }
+                                    }
+                                })
+                            }
+                        })
+                    }
+                }
+            }
+            case 'TOGGLE_SET_TYPE_DROPDOWN': {
+                return {
+                    ...state,
+                    values: {
+                        ...state.values,
+                        exercises: state.values.exercises.map(e => {
+                            if (e.exerciseIndex === action.exerciseIndex) return {
+                                ...e,
+                                sets: e.sets.map(s => {
+                                    if (s.setIndex === action.setIndex) return {
+                                        ...s,
+                                        showSetTypeDropdown: !s.showSetTypeDropdown
+                                    }
+                                    return {
+                                        ...s,
+                                        showSetTypeDropdown: false
+                                    }
+                                })
+                            }
+                            return {
+                                ...e,
+                                sets: e.sets.map(s => {
+                                    return {...s, showSetTypeDropdown: false}
+                                })
+                            }
+                        }) 
+                    }
+                }
             }
 
             default: return state;
@@ -266,6 +506,7 @@ export default function LogWorkout (props: Props) {
                                     activeWorkout={props.activeWorkout} 
                                     exerciseTemplate={workoutTemplate.exercises.find(exc => exc.exerciseId === e.exerciseId)!} 
                                     lastTrainedExercise={lastTrained?.exercises.find(exc => exc.exerciseId === e.exerciseId)}
+                                    activeExerciseAndSet={activeSet}
                                 ></LogExercise>)
                         })
                     }

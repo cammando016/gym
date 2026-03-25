@@ -1,6 +1,6 @@
-import { LoggedWorkoutSet, LogWorkoutAction, WorkoutTemplateType } from '@/types/workouts';
-import { Dispatch } from 'react';
-import { View, Text, TextInput } from 'react-native';
+import { LoggedWorkoutSet, LogWorkoutAction, WorkoutTemplateType, setTypes } from '@/types/workouts';
+import { Dispatch, useState } from 'react';
+import { View, Text, TextInput, Pressable } from 'react-native';
 import layoutStyles from '../styles/layoutStyles.js';
 
 interface Props {
@@ -16,6 +16,7 @@ interface Props {
         belt: boolean,
         straps: boolean,
     },
+    activeExerciseAndSet: {activeExercise: number, activeSet: number},
 }
 
 export default function LogSet (props: Props) {
@@ -29,7 +30,33 @@ export default function LogSet (props: Props) {
                         <View style={[layoutStyles.rowFlex, ]}>
                             <View style={[layoutStyles.rowFlex, {flexGrow: 1}]}>
                                 <Text>Set Type</Text>
-                                <TextInput placeholder='Select Set Type' value={props.setData.setType}></TextInput>
+                                <View>
+                                    <Pressable onPress={() => props.dispatch({ type: 'TOGGLE_SET_TYPE_DROPDOWN', exerciseIndex: props.exerciseIndex, setIndex: props.setIndex })} >
+                                        <Text>{props.setData.setType}</Text>
+                                    </Pressable>
+                                    {
+                                        props.setData.showSetTypeDropdown &&
+                                        props.exerciseIndex === props.activeExerciseAndSet.activeExercise &&
+                                        props.setIndex === props.activeExerciseAndSet.activeSet && 
+                                            <View>
+                                            {
+                                                setTypes.filter(s => s.value !== props.setData.setType).map(st => {
+                                                    return (
+                                                        <Pressable
+                                                            key={st.value}
+                                                            onPress={() => {
+                                                                props.dispatch({ type: 'TOGGLE_SET_TYPE_DROPDOWN', exerciseIndex: props.exerciseIndex, setIndex: props.setIndex });
+                                                                props.dispatch({ type: 'UPDATE_SET_TYPE', value: st.value, exerciseIndex: props.exerciseIndex, setIndex: props.setIndex });
+                                                            }}
+                                                        >
+                                                            <Text>{st.label}</Text>
+                                                        </Pressable>
+                                                    )
+                                                })
+                                            }
+                                            </View>
+                                    }
+                                </View>
                                 <Text>Weight</Text>
                                 <TextInput 
                                     placeholder='00'
@@ -58,20 +85,56 @@ export default function LogSet (props: Props) {
                                         <View style={[layoutStyles.rowFlex,]}>
                                             <Text>Left Reps</Text>
                                             <Text>Full:</Text>
-                                            <TextInput placeholder='00' />
+                                            <TextInput 
+                                                placeholder='00' 
+                                                value={props.setData.reps.left.fullReps.toString()}
+                                                onChangeText={(s: string) => {
+                                                    props.dispatch({ type: 'UPDATE_SET_LEFT_FULL_REPS', value: s, exerciseIndex: props.exerciseIndex, setIndex: props.setIndex })
+                                                }}
+                                            />
                                             <Text>Partial:</Text>
-                                            <TextInput placeholder='00' />
+                                            <TextInput 
+                                                placeholder='00' 
+                                                value={props.setData.reps.left.partialReps.toString()}
+                                                onChangeText={(s: string) => {
+                                                    props.dispatch({ type: 'UPDATE_SET_LEFT_PRTL_REPS', value: s, exerciseIndex: props.exerciseIndex, setIndex: props.setIndex })
+                                                }}
+                                            />
                                             <Text>Assisted:</Text>
-                                            <TextInput placeholder='00' />
+                                            <TextInput 
+                                                placeholder='00' 
+                                                value={props.setData.reps.left.assistedReps.toString()}
+                                                onChangeText={(s: string) => {
+                                                    props.dispatch({ type: 'UPDATE_SET_LEFT_ASTD_REPS', value: s, exerciseIndex: props.exerciseIndex, setIndex: props.setIndex })
+                                                }}
+                                            />
                                         </View>
                                         <View style={[layoutStyles.rowFlex,]}>
                                             <Text>Right Reps</Text>
                                             <Text>Full:</Text>
-                                            <TextInput placeholder='00' />
+                                            <TextInput 
+                                                placeholder='00' 
+                                                value={props.setData.reps.right.fullReps.toString()}
+                                                onChangeText={(s: string) => {
+                                                    props.dispatch({ type: 'UPDATE_SET_RIGHT_FULL_REPS', value: s, exerciseIndex: props.exerciseIndex, setIndex: props.setIndex })
+                                                }}
+                                            />
                                             <Text>Partial:</Text>
-                                            <TextInput placeholder='00' />
+                                            <TextInput 
+                                                placeholder='00' 
+                                                value={props.setData.reps.right.partialReps.toString()}
+                                                onChangeText={(s: string) => {
+                                                    props.dispatch({ type: 'UPDATE_SET_RIGHT_PRTL_REPS', value: s, exerciseIndex: props.exerciseIndex, setIndex: props.setIndex })
+                                                }}
+                                            />
                                             <Text>Assisted:</Text>
-                                            <TextInput placeholder='00' />
+                                            <TextInput 
+                                                placeholder='00' 
+                                                value={props.setData.reps.right.assistedReps.toString()}
+                                                onChangeText={(s: string) => {
+                                                    props.dispatch({ type: 'UPDATE_SET_RIGHT_ASTD_REPS', value: s, exerciseIndex: props.exerciseIndex, setIndex: props.setIndex })
+                                                }}
+                                            />
                                         </View>
                                     </View>
                                 ) : (
@@ -86,9 +149,21 @@ export default function LogSet (props: Props) {
                                             }}
                                         />
                                         <Text>Partial:</Text>
-                                        <TextInput placeholder='00' />
+                                        <TextInput 
+                                            placeholder='00' 
+                                            value={props.setData.reps.partialReps.toString()}
+                                            onChangeText={(s: string) => {
+                                                props.dispatch({ type: 'UPDATE_SET_PRTL_REPS', value: s, exerciseIndex: props.exerciseIndex, setIndex: props.setIndex })
+                                            }}
+                                        />
                                         <Text>Assisted:</Text>
-                                        <TextInput placeholder='00' />
+                                        <TextInput 
+                                            placeholder='00' 
+                                            value={props.setData.reps.assistedReps.toString()}
+                                            onChangeText={(s: string) => {
+                                                props.dispatch({ type: 'UPDATE_SET_ASTD_REPS', value: s, exerciseIndex: props.exerciseIndex, setIndex: props.setIndex })
+                                            }}
+                                        />
                                     </View>
                                 )
                             }
