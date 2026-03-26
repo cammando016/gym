@@ -277,7 +277,7 @@ interface LogWorkoutForm {
 type LogWorkoutAction = 
 | { type: 'UPDATE_WORKOUT_NOTES'; value: string }
 | { type: 'UPDATE_EXERCISE_NOTES'; value: string; exerciseIndex: number }
-| { type: 'UPDATE_SET_IS_UNILATERAL'; value: boolean; exerciseIndex: number; setIndex: number }
+| { type: 'TOGGLE_SET_UNILATERAL'; exerciseIndex: number; setIndex: number }
 | { type: 'UPDATE_SET_TYPE'; value: SetType; exerciseIndex: number; setIndex: number }
 | { type: 'UPDATE_SET_WEIGHT'; value: string; exerciseIndex: number; setIndex: number }
 | { type: 'UPDATE_SET_NOTES'; value: string; exerciseIndex: number; setIndex: number }
@@ -293,6 +293,8 @@ type LogWorkoutAction =
 | { type: 'UPDATE_SET_RIGHT_ASTD_REPS'; value: string; exerciseIndex: number; setIndex: number }
 | { type: 'UPDATE_SET_RIGHT_PRTL_REPS'; value: string; exerciseIndex: number; setIndex: number }
 | { type: 'TOGGLE_SET_TYPE_DROPDOWN'; exerciseIndex: number; setIndex: number }
-| { type: ''; value: string }
+| { type: 'TOGGLE_SET_USE_BELT'; exerciseIndex: number; setIndex: number }
+| { type: 'TOGGLE_SET_USE_STRAPS'; exerciseIndex: number; setIndex: number }
+| { type: 'SET_DROPDOWN_FALSE'; }
 
 export { setTypes, SetType, muscleGroups, Muscle, WorkoutSet, Exercise, SetTracker, FormValues, FormStateWithValidation, privacyTypes, PrivacyType, ExerciseSearchResultType, CreatedExercise, WorkoutAction, ErrorShape, FormPayload, WorkoutTemplateType, SplitDay, SplitFormPayload, Split, UserSplits, LoggedWorkout, LoggedWorkoutExercise, LoggedWorkoutSet, LogWorkoutForm, LogWorkoutAction };

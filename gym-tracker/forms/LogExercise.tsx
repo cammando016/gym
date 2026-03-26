@@ -10,7 +10,6 @@ interface Props {
     activeWorkout: boolean,
     exerciseTemplate: WorkoutTemplateType["exercises"][0],
     lastTrainedExercise?: LoggedWorkoutExercise,
-    activeExerciseAndSet: {activeExercise: number, activeSet: number},
 }
 
 export default function LogExercise ( props: Props ) {
@@ -34,7 +33,6 @@ export default function LogExercise ( props: Props ) {
                             exerciseIndex={props.exerciseIndex}
                             exerciseTemplate={props.exerciseTemplate} 
                             optionalSetModifiers={props.exerciseTemplate.optionalSetModifiers}
-                            activeExerciseAndSet={props.activeExerciseAndSet}
                         ></LogSet>)
                 })
             }
@@ -42,6 +40,7 @@ export default function LogExercise ( props: Props ) {
             <TextInput 
                 placeholder='Leave any notes for next session here'
                 value={props.exerciseData.exerciseNotes}
+                onFocus={() => props.dispatch({ type: 'SET_DROPDOWN_FALSE' })}
                 onChangeText={(s: string) => props.dispatch({ type: 'UPDATE_EXERCISE_NOTES', value: s, exerciseIndex: props.exerciseIndex })}
             />
         </View>

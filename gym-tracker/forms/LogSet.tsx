@@ -1,7 +1,8 @@
 import { LoggedWorkoutSet, LogWorkoutAction, WorkoutTemplateType, setTypes } from '@/types/workouts';
-import { Dispatch, useState } from 'react';
-import { View, Text, TextInput, Pressable } from 'react-native';
+import { Dispatch } from 'react';
+import { View, Text, TextInput, Pressable, Image } from 'react-native';
 import layoutStyles from '../styles/layoutStyles.js';
+import workoutStyles from '../styles/workouts.js';
 
 interface Props {
     dispatch: Dispatch<LogWorkoutAction>,
@@ -16,17 +17,16 @@ interface Props {
         belt: boolean,
         straps: boolean,
     },
-    activeExerciseAndSet: {activeExercise: number, activeSet: number},
 }
 
 export default function LogSet (props: Props) {
     return (
-        <View>
+        <View style={{paddingTop: 5, paddingBottom: 5}}>
         {
             props.activeWorkout ? (
-                <View>
-                    <Text>Set {props.setIndex + 1}</Text>
+                <View style={[layoutStyles.rowFlex, ]}>
                     <View>
+                        <Text>Set {props.setIndex + 1}</Text>
                         <View style={[layoutStyles.rowFlex, ]}>
                             <View style={[layoutStyles.rowFlex, {flexGrow: 1}]}>
                                 <Text>Set Type</Text>
@@ -36,8 +36,6 @@ export default function LogSet (props: Props) {
                                     </Pressable>
                                     {
                                         props.setData.showSetTypeDropdown &&
-                                        props.exerciseIndex === props.activeExerciseAndSet.activeExercise &&
-                                        props.setIndex === props.activeExerciseAndSet.activeSet && 
                                             <View>
                                             {
                                                 setTypes.filter(s => s.value !== props.setData.setType).map(st => {
@@ -61,22 +59,12 @@ export default function LogSet (props: Props) {
                                 <TextInput 
                                     placeholder='00'
                                     value={props.setData.weight.toString()}
+                                    onFocus={() => props.dispatch({ type: 'SET_DROPDOWN_FALSE' })}
                                     onChangeText={(s: string) => {
                                         props.dispatch({ type: 'UPDATE_SET_WEIGHT', value: s, exerciseIndex: props.exerciseIndex, setIndex: props.setIndex })
                                     }}
                                 ></TextInput>
                             </View>
-                            {
-                                (props.exerciseTemplate.optionalSetModifiers.belt ||
-                                props.exerciseTemplate.optionalSetModifiers.straps ||
-                                props.exerciseTemplate.optionalSetModifiers.unilateral) && (
-                                    <View style={[layoutStyles.rowFlex,]}>
-                                        {props.exerciseTemplate.optionalSetModifiers.belt && <Text>BE</Text>}
-                                        {props.exerciseTemplate.optionalSetModifiers.straps && <Text>ST</Text>}
-                                        {props.exerciseTemplate.optionalSetModifiers.unilateral && <Text>UL</Text>}
-                                    </View>
-                                )
-                            }
                         </View>
                         <View style={[layoutStyles.rowFlex,]}>
                             {
@@ -88,6 +76,7 @@ export default function LogSet (props: Props) {
                                             <TextInput 
                                                 placeholder='00' 
                                                 value={props.setData.reps.left.fullReps.toString()}
+                                                onFocus={() => props.dispatch({ type: 'SET_DROPDOWN_FALSE' })}
                                                 onChangeText={(s: string) => {
                                                     props.dispatch({ type: 'UPDATE_SET_LEFT_FULL_REPS', value: s, exerciseIndex: props.exerciseIndex, setIndex: props.setIndex })
                                                 }}
@@ -96,6 +85,7 @@ export default function LogSet (props: Props) {
                                             <TextInput 
                                                 placeholder='00' 
                                                 value={props.setData.reps.left.partialReps.toString()}
+                                                onFocus={() => props.dispatch({ type: 'SET_DROPDOWN_FALSE' })}
                                                 onChangeText={(s: string) => {
                                                     props.dispatch({ type: 'UPDATE_SET_LEFT_PRTL_REPS', value: s, exerciseIndex: props.exerciseIndex, setIndex: props.setIndex })
                                                 }}
@@ -104,6 +94,7 @@ export default function LogSet (props: Props) {
                                             <TextInput 
                                                 placeholder='00' 
                                                 value={props.setData.reps.left.assistedReps.toString()}
+                                                onFocus={() => props.dispatch({ type: 'SET_DROPDOWN_FALSE' })}
                                                 onChangeText={(s: string) => {
                                                     props.dispatch({ type: 'UPDATE_SET_LEFT_ASTD_REPS', value: s, exerciseIndex: props.exerciseIndex, setIndex: props.setIndex })
                                                 }}
@@ -115,6 +106,7 @@ export default function LogSet (props: Props) {
                                             <TextInput 
                                                 placeholder='00' 
                                                 value={props.setData.reps.right.fullReps.toString()}
+                                                onFocus={() => props.dispatch({ type: 'SET_DROPDOWN_FALSE' })}
                                                 onChangeText={(s: string) => {
                                                     props.dispatch({ type: 'UPDATE_SET_RIGHT_FULL_REPS', value: s, exerciseIndex: props.exerciseIndex, setIndex: props.setIndex })
                                                 }}
@@ -123,6 +115,7 @@ export default function LogSet (props: Props) {
                                             <TextInput 
                                                 placeholder='00' 
                                                 value={props.setData.reps.right.partialReps.toString()}
+                                                onFocus={() => props.dispatch({ type: 'SET_DROPDOWN_FALSE' })}
                                                 onChangeText={(s: string) => {
                                                     props.dispatch({ type: 'UPDATE_SET_RIGHT_PRTL_REPS', value: s, exerciseIndex: props.exerciseIndex, setIndex: props.setIndex })
                                                 }}
@@ -131,6 +124,7 @@ export default function LogSet (props: Props) {
                                             <TextInput 
                                                 placeholder='00' 
                                                 value={props.setData.reps.right.assistedReps.toString()}
+                                                onFocus={() => props.dispatch({ type: 'SET_DROPDOWN_FALSE' })}
                                                 onChangeText={(s: string) => {
                                                     props.dispatch({ type: 'UPDATE_SET_RIGHT_ASTD_REPS', value: s, exerciseIndex: props.exerciseIndex, setIndex: props.setIndex })
                                                 }}
@@ -144,6 +138,7 @@ export default function LogSet (props: Props) {
                                         <TextInput 
                                             placeholder='00' 
                                             value={props.setData.reps.fullReps.toString()}
+                                            onFocus={() => props.dispatch({ type: 'SET_DROPDOWN_FALSE' })}
                                             onChangeText={(s: string) => {
                                                 props.dispatch({ type: 'UPDATE_SET_FULL_REPS', value: s, exerciseIndex: props.exerciseIndex, setIndex: props.setIndex })
                                             }}
@@ -152,6 +147,7 @@ export default function LogSet (props: Props) {
                                         <TextInput 
                                             placeholder='00' 
                                             value={props.setData.reps.partialReps.toString()}
+                                            onFocus={() => props.dispatch({ type: 'SET_DROPDOWN_FALSE' })}
                                             onChangeText={(s: string) => {
                                                 props.dispatch({ type: 'UPDATE_SET_PRTL_REPS', value: s, exerciseIndex: props.exerciseIndex, setIndex: props.setIndex })
                                             }}
@@ -160,6 +156,7 @@ export default function LogSet (props: Props) {
                                         <TextInput 
                                             placeholder='00' 
                                             value={props.setData.reps.assistedReps.toString()}
+                                            onFocus={() => props.dispatch({ type: 'SET_DROPDOWN_FALSE' })}
                                             onChangeText={(s: string) => {
                                                 props.dispatch({ type: 'UPDATE_SET_ASTD_REPS', value: s, exerciseIndex: props.exerciseIndex, setIndex: props.setIndex })
                                             }}
@@ -167,9 +164,94 @@ export default function LogSet (props: Props) {
                                     </View>
                                 )
                             }
-                            <Text>Note</Text>
                         </View>
+                        <Text>Set Notes:</Text>
+                        <TextInput 
+                            placeholder='Enter set notes here'
+                            value={props.setData.setNotes}
+                            onFocus={() => props.dispatch({ type: 'SET_DROPDOWN_FALSE' })}
+                            onChangeText={(s: string) => {
+                                props.dispatch({ type: 'UPDATE_SET_NOTES', value: s, exerciseIndex: props.exerciseIndex, setIndex: props.setIndex })
+                            }}
+                        />
                     </View>
+                    {
+                        (props.exerciseTemplate.optionalSetModifiers.belt ||
+                        props.exerciseTemplate.optionalSetModifiers.straps ||
+                        props.exerciseTemplate.optionalSetModifiers.unilateral) && (
+                            <View style={[layoutStyles.rowFlex,]}>
+                                {props.exerciseTemplate.optionalSetModifiers.belt && (
+                                    <Pressable
+                                        onPress={() => {
+                                            props.dispatch({ type: 'TOGGLE_SET_USE_BELT', exerciseIndex: props.exerciseIndex, setIndex: props.setIndex })
+                                            props.dispatch({ type: 'SET_DROPDOWN_FALSE' })
+                                        }}
+                                    >
+                                    {
+                                        props.setData.usedBelt ? 
+                                        <Image 
+                                            source={require('../assets/images/liftingBeltGreen.png')}
+                                            borderRadius={2}
+                                            style={[workoutStyles.setModifier, workoutStyles.trueSetModifier]}
+                                        /> 
+                                        :
+                                        <Image 
+                                            source={require('../assets/images/liftingBelt.png')}
+                                            borderRadius={2}
+                                            style={workoutStyles.setModifier}
+                                        />
+                                    }
+                                    </Pressable>
+                                )}
+                                {props.exerciseTemplate.optionalSetModifiers.straps && (
+                                    <Pressable
+                                        onPress={() => {
+                                            props.dispatch({ type: 'TOGGLE_SET_USE_STRAPS', exerciseIndex: props.exerciseIndex, setIndex: props.setIndex })
+                                            props.dispatch({ type: 'SET_DROPDOWN_FALSE' })
+                                        }}
+                                    >
+                                    {
+                                        props.setData.usedStraps ? 
+                                        <Image 
+                                            source={require('../assets/images/strapsGreen.png')}
+                                            borderRadius={2}
+                                            style={[workoutStyles.setModifier, workoutStyles.trueSetModifier]}
+                                        /> 
+                                        :
+                                        <Image 
+                                            source={require('../assets/images/straps.png')}
+                                            borderRadius={2}
+                                            style={workoutStyles.setModifier}
+                                        />
+                                    }
+                                    </Pressable>
+                                )}
+                                {props.exerciseTemplate.optionalSetModifiers.unilateral && (
+                                    <Pressable
+                                        onPress={() => {
+                                            props.dispatch({ type: 'TOGGLE_SET_UNILATERAL', exerciseIndex: props.exerciseIndex, setIndex: props.setIndex })
+                                            props.dispatch({ type: 'SET_DROPDOWN_FALSE' })
+                                        }}
+                                    >
+                                        {
+                                            props.setData.isUnilateral ? 
+                                            <Image 
+                                                source={require('../assets/images/unilateralDarkGreenNoLetters.png')}
+                                                borderRadius={2}
+                                                style={[workoutStyles.setModifier, workoutStyles.trueSetModifier]}
+                                            /> 
+                                            :
+                                            <Image 
+                                                source={require('../assets/images/unilateralOff.png')}
+                                                borderRadius={2}
+                                                style={workoutStyles.setModifier}
+                                            />
+                                        }
+                                    </Pressable>
+                                )}
+                            </View>
+                        )
+                    }
                 </View>
             ) : (
                 <View>

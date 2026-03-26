@@ -1,6 +1,6 @@
 import { Text, View, TextInput, ScrollView } from 'react-native';
 import { useReducer, useState } from 'react';
-import { LogWorkoutAction, LogWorkoutForm, WorkoutTemplateType, LoggedWorkoutExercise } from '@/types/workouts';
+import { LogWorkoutAction, LogWorkoutForm, WorkoutTemplateType, LoggedWorkoutExercise, LoggedWorkoutSet } from '@/types/workouts';
 import { useWorkoutTemplates } from '@/hooks/useWorkoutTemplates';
 import LogExercise from './LogExercise';
 import { useWorkoutHistory } from '@/hooks/useWorkoutHistory';
@@ -18,9 +18,6 @@ export default function LogWorkout (props: Props) {
     if (!workoutTemplate) return <View><Text>Loading Workout Template</Text></View>
     
     const { data: lastTrained } = useWorkoutHistory(props.templateId);
-
-    //Keep track of focused set and exercise for showing previous logged sets, and drop down for active set set type
-    const [activeSet, setActiveSet] = useState<{activeExercise: number, activeSet: number}>({activeExercise: 0, activeSet: 0})
 
     const initialFormState: LogWorkoutForm = {
         values : {
@@ -74,7 +71,7 @@ export default function LogWorkout (props: Props) {
         }
     }
 
-    const logWorkoutReducer = (state: LogWorkoutForm, action: LogWorkoutAction) => {
+    const logWorkoutReducer = (state: LogWorkoutForm, action: LogWorkoutAction) : LogWorkoutForm => {
         switch (action.type) {
             case 'UPDATE_WORKOUT_NOTES': {
                 return {
@@ -94,27 +91,48 @@ export default function LogWorkout (props: Props) {
                     }
                 }
             }
-            // case 'UPDATE_SET_IS_UNILATERAL': { //STILL NEEDS TO HANDLE CHANGING REPS STRUCTURE BETWEEN BI/UNILATERAL
-            //     return {
-            //         ...state,
-            //         values: {
-            //             ...state.values,
-            //             exercises: state.values.exercises.map(e => {
-            //                 if(e.exerciseIndex === action.exerciseIndex) return {
-            //                     ...e,
-            //                     sets: e.sets.map(s => {
-            //                         if (s.setIndex === action.setIndex) return {
-            //                             ...s,
-            //                             isUnilateral: action.value
-            //                         }
-            //                         return s
-            //                     })
-            //                 }
-            //                 return e
-            //             })
-            //         }
-            //     }
-            // }
+            case 'TOGGLE_SET_UNILATERAL': {
+                return {
+                    ...state,
+                    values: {
+                        ...state.values,
+                        exercises: state.values.exercises.map(e => {
+                            if(e.exerciseIndex !== action.exerciseIndex) return e
+                            return {
+                                ...e,
+                                sets: e.sets.map(s => {
+                                    if (s.setIndex !== action.setIndex) return s 
+                                    else if (s.isUnilateral) return {
+                                        ...s,
+                                        isUnilateral: false,
+                                        reps: {
+                                            fullReps: 0,
+                                            assistedReps: 0,
+                                            partialReps: 0
+                                        }
+                                    }
+                                    return {
+                                        ...s,
+                                        isUnilateral: true,
+                                        reps: {
+                                            left: {
+                                                fullReps: 0,
+                                                assistedReps: 0,
+                                                partialReps: 0
+                                            },
+                                            right: {
+                                                fullReps: 0,
+                                                assistedReps: 0,
+                                                partialReps: 0
+                                            }
+                                        }
+                                    }
+                                })
+                            }
+                        })
+                    }
+                }
+            }
             case 'UPDATE_SET_TYPE' : {
                 return {
                     ...state,
@@ -467,19 +485,78 @@ export default function LogWorkout (props: Props) {
                                         ...s,
                                         showSetTypeDropdown: !s.showSetTypeDropdown
                                     }
+                                    if (!s.showSetTypeDropdown) return s
                                     return {
                                         ...s,
                                         showSetTypeDropdown: false
                                     }
                                 })
                             }
+                            if (e.sets.every(s => !s.showSetTypeDropdown)) return e
                             return {
                                 ...e,
                                 sets: e.sets.map(s => {
+                                    if (!s.showSetTypeDropdown) return s
                                     return {...s, showSetTypeDropdown: false}
                                 })
                             }
                         }) 
+                    }
+                }
+            }
+            case 'SET_DROPDOWN_FALSE': {
+                return {
+                    ...state,
+                    values: {
+                        ...state.values,
+                        exercises: state.values.exercises.map(e => {
+                            return {
+                                ...e,
+                                sets: e.sets.map(s => {return {...s, showSetTypeDropdown: false}})
+                            }
+                        })
+                    }
+                }
+            }
+            case 'TOGGLE_SET_USE_BELT': {
+                return {
+                    ...state,
+                    values: {
+                        ...state.values,
+                        exercises: state.values.exercises.map(e => {
+                            if (e.exerciseIndex !== action.exerciseIndex) return e
+                            return {
+                                ...e,
+                                sets: e.sets.map(s => {
+                                    if (s.setIndex !== action.setIndex) return s
+                                    return {
+                                        ...s,
+                                        usedBelt: !s.usedBelt
+                                    }
+                                })
+                            }
+                        })
+                    }
+                }
+            }
+            case 'TOGGLE_SET_USE_STRAPS': {
+                return {
+                    ...state,
+                    values: {
+                        ...state.values,
+                        exercises: state.values.exercises.map(e => {
+                            if (e.exerciseIndex !== action.exerciseIndex) return e
+                            return {
+                                ...e,
+                                sets: e.sets.map(s => {
+                                    if (s.setIndex !== action.setIndex) return s
+                                    return {
+                                        ...s,
+                                        usedStraps: !s.usedStraps
+                                    }
+                                })
+                            }
+                        })
                     }
                 }
             }
@@ -506,7 +583,6 @@ export default function LogWorkout (props: Props) {
                                     activeWorkout={props.activeWorkout} 
                                     exerciseTemplate={workoutTemplate.exercises.find(exc => exc.exerciseId === e.exerciseId)!} 
                                     lastTrainedExercise={lastTrained?.exercises.find(exc => exc.exerciseId === e.exerciseId)}
-                                    activeExerciseAndSet={activeSet}
                                 ></LogExercise>)
                         })
                     }
@@ -521,5 +597,5 @@ export default function LogWorkout (props: Props) {
                 </View>
             </View>
         </ScrollView>
-    )
+)
 }
