@@ -9,6 +9,22 @@ const workoutStyles = StyleSheet.create({
         borderWidth: 2,
         borderColor: 'green'
     },
+    exerciseContainer: {
+        borderWidth: 1,
+        borderColor: '#619888',
+        borderRadius: '2%',
+        margin: 2,
+    },
+    exerciseHeader: {
+        backgroundColor: '#619888',
+        borderRadius: '2%',
+    },
+    headerText: {
+        color: 'white'
+    },
+    headerTextBold: {
+        fontWeight: 'bold'
+    }
 })
 
 export default workoutStyles

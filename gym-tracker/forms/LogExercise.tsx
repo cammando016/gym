@@ -1,5 +1,6 @@
 import { LoggedWorkoutExercise, LogWorkoutAction, WorkoutTemplateType } from '@/types/workouts';
-import { View, Text, TextInput } from 'react-native';
+import { View, Text, TextInput, Pressable } from 'react-native';
+import workoutStyles from '@/styles/workouts';
 import { Dispatch } from 'react';
 import LogSet from './LogSet';
 
@@ -14,17 +15,38 @@ interface Props {
 
 export default function LogExercise ( props: Props ) {
     return (
-        <View style={{padding: 10}}>
-            <Text>Exercise Name: {props.exerciseTemplate.exerciseName}</Text>
-            <Text>Exercise Index: {props.exerciseData.exerciseIndex}</Text>
-            {/* <Text>Setup Notes: {props.exerciseTemplate.exerciseNotes}</Text> */}
-            <Text>Target Working Set Reps: {props.exerciseTemplate.repRangeLower} to {props.exerciseTemplate.repRangeUpper}</Text>
-            <Text>Last session exercise notes: {props.lastTrainedExercise?.exerciseNotes}</Text>
+        <View style={workoutStyles.exerciseContainer}>
+            <View style={workoutStyles.exerciseHeader}>
+                <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
+                    <View style={{display: 'flex', flexDirection: 'row'}}>
+                        <Text style={[workoutStyles.headerTextBold, workoutStyles.headerText]}>Exercise: </Text>
+                        <Text style={workoutStyles.headerText}>{props.exerciseTemplate.exerciseName}</Text>
+                    </View>
+                    <Pressable onPress={() => props.dispatch({ type: 'REMOVE_EXERCISE', exerciseIndex: props.exerciseIndex })}>
+                        <Text style={workoutStyles.headerText}>Delete Exercise</Text>
+                    </Pressable>
+                </View>
+                {
+                    props.exerciseTemplate.exerciseNotes && 
+                    <View>
+                        <Text style={[workoutStyles.headerTextBold, workoutStyles.headerText]}>Setup Notes:</Text>
+                        <Text style={workoutStyles.headerText}>{props.exerciseTemplate.exerciseNotes}</Text>
+                    </View>
+                }
+                <View style={{display: 'flex', flexDirection: 'row'}}>
+                    <Text style={[workoutStyles.headerTextBold, workoutStyles.headerText]}>Target Reps: </Text> 
+                    <Text style={workoutStyles.headerText}>{props.exerciseTemplate.repRangeLower} to {props.exerciseTemplate.repRangeUpper}</Text>
+                </View>
+                <View style={{display: 'flex', flexDirection: 'row'}}>
+                    <Text style={[workoutStyles.headerTextBold, workoutStyles.headerText]}>Last session notes: </Text>
+                    <Text style={workoutStyles.headerText}>{props.lastTrainedExercise?.exerciseNotes}</Text>
+                </View>
+            </View>
             {
                 props.exerciseData.sets.map(s => {
                     return (
                         <LogSet 
-                            key={s.setIndex} 
+                            key={s.setId} 
                             dispatch={props.dispatch}
                             activeWorkout={props.activeWorkout}
                             setData={s} 

@@ -26,10 +26,9 @@ export default function LogSet (props: Props) {
             props.activeWorkout ? (
                 <View style={[layoutStyles.rowFlex, ]}>
                     <View>
-                        <Text>Set {props.setIndex + 1}</Text>
                         <View style={[layoutStyles.rowFlex, ]}>
                             <View style={[layoutStyles.rowFlex, {flexGrow: 1}]}>
-                                <Text>Set Type</Text>
+                                <Text>Set {props.setIndex + 1} Type</Text>
                                 <View>
                                     <Pressable onPress={() => props.dispatch({ type: 'TOGGLE_SET_TYPE_DROPDOWN', exerciseIndex: props.exerciseIndex, setIndex: props.setIndex })} >
                                         <Text>{props.setData.setType}</Text>
@@ -174,6 +173,14 @@ export default function LogSet (props: Props) {
                                 props.dispatch({ type: 'UPDATE_SET_NOTES', value: s, exerciseIndex: props.exerciseIndex, setIndex: props.setIndex })
                             }}
                         />
+                        <View style={[layoutStyles.rowFlex]}>
+                            <Pressable onPress={() => props.dispatch({ type: 'ADD_SET', exerciseIndex: props.exerciseIndex, setIndexAddedAfter: props.setIndex })}>
+                                <Text>Add Set</Text>
+                            </Pressable>
+                            <Pressable onPress={() => props.dispatch({ type: 'REMOVE_SET', exerciseIndex: props.exerciseIndex, setIndex: props.setIndex })}>
+                                <Text>Delete Set</Text>
+                            </Pressable>
+                        </View>
                     </View>
                     {
                         (props.exerciseTemplate.optionalSetModifiers.belt ||

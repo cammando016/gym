@@ -215,6 +215,7 @@ interface UserSplits {
 
 interface BaseLoggedSet {
     setIndex: number,
+    setId: string,
     weight: number,
     setNotes?: string,
     setType: string,
@@ -296,5 +297,9 @@ type LogWorkoutAction =
 | { type: 'TOGGLE_SET_USE_BELT'; exerciseIndex: number; setIndex: number }
 | { type: 'TOGGLE_SET_USE_STRAPS'; exerciseIndex: number; setIndex: number }
 | { type: 'SET_DROPDOWN_FALSE'; }
+| { type: 'ADD_SET'; setIndexAddedAfter: number, exerciseIndex: number }
+| { type: 'REMOVE_SET'; exerciseIndex: number; setIndex: number }
+| { type: 'ADD_EXERCISE'; exerciseIndexAddedAfter: number }
+| { type: 'REMOVE_EXERCISE'; exerciseIndex: number }
 
 export { setTypes, SetType, muscleGroups, Muscle, WorkoutSet, Exercise, SetTracker, FormValues, FormStateWithValidation, privacyTypes, PrivacyType, ExerciseSearchResultType, CreatedExercise, WorkoutAction, ErrorShape, FormPayload, WorkoutTemplateType, SplitDay, SplitFormPayload, Split, UserSplits, LoggedWorkout, LoggedWorkoutExercise, LoggedWorkoutSet, LogWorkoutForm, LogWorkoutAction };

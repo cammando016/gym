@@ -4,6 +4,7 @@ import { LogWorkoutAction, LogWorkoutForm, WorkoutTemplateType, LoggedWorkoutExe
 import { useWorkoutTemplates } from '@/hooks/useWorkoutTemplates';
 import LogExercise from './LogExercise';
 import { useWorkoutHistory } from '@/hooks/useWorkoutHistory';
+import { randomUUID } from 'expo-crypto'
 
 interface Props {
     activeWorkout: boolean, //True for when logging working, false when viewing past workout
@@ -31,6 +32,7 @@ export default function LogWorkout (props: Props) {
                         if (s.isUnilateralSet) return {
                             isUnilateral: true,
                             setIndex: s.setIndex,
+                            setId: randomUUID(),
                             setType: s.setType,
                             showSetTypeDropdown: false,
                             weight: 0,
@@ -53,6 +55,7 @@ export default function LogWorkout (props: Props) {
                         else return {
                             isUnilateral: false,
                             setIndex: s.setIndex,
+                            setId: randomUUID(),
                             setType: s.setType,
                             showSetTypeDropdown: false,
                             weight: 0,
@@ -557,6 +560,70 @@ export default function LogWorkout (props: Props) {
                                 })
                             }
                         })
+                    }
+                }
+            }
+            case 'ADD_SET': {
+                return {
+                    ...state,
+                    values: {
+                        ...state.values,
+                        exercises: state.values.exercises.map(e => {
+                            if (e.exerciseIndex !== action.exerciseIndex) return e
+                            return {
+                                ...e,
+                                sets: [
+                                    ...e.sets.slice(0, action.setIndexAddedAfter + 1),
+                                    {
+                                        isUnilateral: false,
+                                        setIndex: action.setIndexAddedAfter + 1,
+                                        setId: randomUUID(),
+                                        setType: 'working',
+                                        showSetTypeDropdown: false,
+                                        weight: 0,
+                                        setNotes: '',
+                                        usedBelt: false,
+                                        usedStraps: false,
+                                        reps: {
+                                            fullReps: 0,
+                                            assistedReps: 0,
+                                            partialReps: 0
+                                        }
+
+                                    },
+                                    ...e.sets.slice(action.setIndexAddedAfter + 1).map(st => {
+                                        return {
+                                            ...st,
+                                            setIndex: st.setIndex + 1
+                                        }
+                                    })
+                                ]
+                            }
+                        })
+                    }
+                }
+            }
+            case 'REMOVE_SET': {
+                return {
+                    ...state,
+                    values: {
+                        ...state.values,
+                        exercises: state.values.exercises.map(e => {
+                            if (e.exerciseIndex !== action.exerciseIndex) return e
+                            return {
+                                ...e,
+                                sets: e.sets.filter(s => s.setIndex !== action.setIndex)
+                            }
+                        })
+                    }
+                }
+            }
+            case 'REMOVE_EXERCISE': {
+                return {
+                    ...state,
+                    values: {
+                        ...state.values,
+                        exercises: state.values.exercises.filter(e => e.exerciseIndex !== action.exerciseIndex)
                     }
                 }
             }
