@@ -17,19 +17,21 @@ router.post('/sessions', authenticateToken, async (req, res) => {
         const workoutNameQuery = await pool.query(`SELECT workout_name FROM workout_templates WHERE id = $1`, [templateId]);
         const workoutName = workoutNameQuery.rows[0].workout_name;
 
+        const dateStarted = new Date();
+
         console.log('Attempting to start workout')
         const session = await pool.query(
             `INSERT INTO workouts
             (date_started, user_id, workout_template_id, status)
             VALUES ($1, $2, $3, $4)
             RETURNING id`,
-            [new Date(), userId, templateId, 'active']
+            [dateStarted, userId, templateId, 'active']
         );
 
         const sessionId = session.rows[0].id;
 
         console.log('Workout started');
-        return res.status(200).json({ sessionId, workoutName, templateId });
+        return res.status(200).json({ sessionId, workoutName, templateId, dateStarted });
     } catch (error) {
         console.log(error);
         return res.status(500).json({

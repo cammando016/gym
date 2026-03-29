@@ -6,11 +6,11 @@ export function useStartWorkout() {
     const router = useRouter();
     return useMutation({
         mutationFn: startWorkout,
-        onSuccess: (data : {sessionId: string, templateId: string, workoutName: string}) => {
+        onSuccess: (data : {sessionId: string, templateId: string, workoutName: string, dateStarted: string}) => {
             console.log('SUCCESS:', data);
             router.replace({
                 pathname: `/sessions/${data.sessionId}`,
-                params: { templateId: data.templateId, workoutName: data.workoutName }
+                params: { templateId: data.templateId, workoutName: data.workoutName, dateStarted: data.dateStarted }
             });
         },
         onError: (err) => {
