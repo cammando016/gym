@@ -702,10 +702,8 @@ export default function LogWorkout (props: Props) {
                                 <LogExercise 
                                     key={e.exerciseId} 
                                     dispatch={dispatch} 
-                                    exerciseData={e} 
-                                    exerciseIndex={e.exerciseIndex} 
+                                    exerciseData={e}
                                     activeWorkout={props.activeWorkout} 
-                                    exerciseTemplate={workoutTemplate.exercises.find(exc => exc.exerciseId === e.exerciseId)!} 
                                     lastTrainedExercise={lastTrained?.exercises.find(exc => exc.exerciseId === e.exerciseId)}
                                 ></LogExercise>)
                         })

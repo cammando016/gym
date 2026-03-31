@@ -11,9 +11,7 @@ import ExerciseSearchResult from '@/components/ExerciseSearchResult';
 interface Props {
     dispatch: Dispatch<LogWorkoutAction>,
     exerciseData: LoggedWorkoutExercise,
-    exerciseIndex: number,
     activeWorkout: boolean,
-    exerciseTemplate: WorkoutTemplateType["exercises"][0],
     lastTrainedExercise?: LoggedWorkoutExercise,
 }
 
@@ -112,7 +110,7 @@ export default function LogExercise ( props: Props ) {
                                 props.dispatch({ 
                                     type: 'ADD_EXERCISE', 
                                     exerciseName: newExercise.exerciseName, 
-                                    exerciseIndexAddedAfter: props.exerciseIndex, 
+                                    exerciseIndexAddedAfter: props.exerciseData.exerciseIndex, 
                                     exericseId: newExercise.exerciseId, 
                                     repsLower: newExercise.repsLower.toString(), 
                                     repsUpper: newExercise.repsLower.toString(),
@@ -154,7 +152,7 @@ export default function LogExercise ( props: Props ) {
                 </View>
 
                 <View>
-                    <Pressable onPress={() => props.dispatch({ type: 'REMOVE_EXERCISE', exerciseIndex: props.exerciseIndex })}>
+                    <Pressable onPress={() => props.dispatch({ type: 'REMOVE_EXERCISE', exerciseIndex: props.exerciseData.exerciseIndex })}>
                         <Text style={workoutStyles.headerText}>Delete Exercise</Text>
                     </Pressable>
                     <Pressable onPress={() => setShowAddExercise(true)}>
@@ -169,11 +167,8 @@ export default function LogExercise ( props: Props ) {
                             key={s.setId} 
                             dispatch={props.dispatch}
                             activeWorkout={props.activeWorkout}
-                            setData={s} 
-                            // setTemplate={props.exerciseTemplate.sets[0]} 
-                            setIndex={s.setIndex}
-                            exerciseIndex={props.exerciseIndex}
-                            // exerciseTemplate={props.exerciseTemplate} 
+                            setData={s}
+                            exerciseIndex={props.exerciseData.exerciseIndex}
                             optionalSetModifiers={props.exerciseData.optionalSetModifiers}
                         ></LogSet>)
                 })
@@ -183,7 +178,7 @@ export default function LogExercise ( props: Props ) {
                 placeholder='Leave any notes for next session here'
                 value={props.exerciseData.exerciseNotes}
                 onFocus={() => props.dispatch({ type: 'SET_DROPDOWN_FALSE' })}
-                onChangeText={(s: string) => props.dispatch({ type: 'UPDATE_EXERCISE_NOTES', value: s, exerciseIndex: props.exerciseIndex })}
+                onChangeText={(s: string) => props.dispatch({ type: 'UPDATE_EXERCISE_NOTES', value: s, exerciseIndex: props.exerciseData.exerciseIndex })}
             />
         </View>
     )
