@@ -819,6 +819,7 @@ export default function LogWorkout (props: Props) {
                                     dispatch={dispatch} 
                                     exerciseData={e}
                                     activeWorkout={props.activeWorkout} 
+                                    exerciseCount={workoutForm.values.exercises.length}
                                     lastTrainedExercise={lastTrained?.exercises.find(exc => exc.exerciseId === e.exerciseId)}
                                 ></LogExercise>)
                         })

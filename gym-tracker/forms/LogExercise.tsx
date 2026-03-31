@@ -13,10 +13,13 @@ interface Props {
     dispatch: Dispatch<LogWorkoutAction>,
     exerciseData: LoggedWorkoutExercise,
     activeWorkout: boolean,
+    exerciseCount: number,
     lastTrainedExercise?: LoggedWorkoutExercise,
 }
 
 export default function LogExercise ( props: Props ) {
+    //Toggle showing full set list for each exercise
+    const [showSets, setShowSets] = useState<boolean>(true);
     //Show modal for adding a new exercise into workout
     const [showAddExercise, setShowAddExercise] = useState<boolean>(false);
     //Substitute exercise modal
@@ -184,32 +187,88 @@ export default function LogExercise ( props: Props ) {
                                 <Text style={workoutStyles.headerText}>{props.exerciseData.exerciseName}</Text>
                             }
                         </View>
+                        <View style={{display: 'flex', flexDirection: 'row'}}>
+                            <Text style={[workoutStyles.headerTextBold, workoutStyles.headerText]}>Target Reps: </Text> 
+                            <Text style={workoutStyles.headerText}>{props.exerciseData.exerciseRepsLower} to {props.exerciseData.exerciseRepsUpper}</Text>
+                        </View>
                     </View>
                     {
-                        props.exerciseData.setupNotes && 
-                        <View>
-                            <Text style={[workoutStyles.headerTextBold, workoutStyles.headerText]}>Setup Notes:</Text>
-                            <Text style={workoutStyles.headerText}>{props.exerciseData.setupNotes}</Text>
-                        </View>
+                        showSets ? (
+                            <View>
+                                {
+                                    props.exerciseData.setupNotes && 
+                                    <View>
+                                        <Text style={[workoutStyles.headerTextBold, workoutStyles.headerText]}>Setup Notes:</Text>
+                                        <Text style={workoutStyles.headerText}>{props.exerciseData.setupNotes}</Text>
+                                    </View>
+                                }
+                                {
+                                    props.lastTrainedExercise?.exerciseNotes &&
+                                    <View style={{display: 'flex', flexDirection: 'row'}}>
+                                        <Text style={[workoutStyles.headerTextBold, workoutStyles.headerText]}>Last session notes: </Text>
+                                        <Text style={workoutStyles.headerText}>{props.lastTrainedExercise?.exerciseNotes}</Text>
+                                    </View>
+                                }
+                            </View>
+                        ) : (
+                            <View style={[layoutStyles.rowFlex]}>
+                                <Text style={[workoutStyles.headerTextBold, workoutStyles.headerText]}>Sets: </Text>
+                                <Text style={workoutStyles.headerText}>{props.exerciseData.sets.length}</Text>
+                            </View>
+                        )
                     }
-                    <View style={{display: 'flex', flexDirection: 'row'}}>
-                        <Text style={[workoutStyles.headerTextBold, workoutStyles.headerText]}>Target Reps: </Text> 
-                        <Text style={workoutStyles.headerText}>{props.exerciseData.exerciseRepsLower} to {props.exerciseData.exerciseRepsUpper}</Text>
-                    </View>
-                    <View style={{display: 'flex', flexDirection: 'row'}}>
-                        <Text style={[workoutStyles.headerTextBold, workoutStyles.headerText]}>Last session notes: </Text>
-                        <Text style={workoutStyles.headerText}>{props.lastTrainedExercise?.exerciseNotes}</Text>
-                    </View>
                 </View>
+                <View style={{paddingLeft: 20, paddingRight: 15, alignSelf: 'center'}}>
+                    <Pressable onPress={() => setShowSets(!showSets)}>
+                        <Text style={workoutStyles.headerText}>{`<`}</Text>
+                    </Pressable>
+                </View>
+            </View>
+            {
+                showSets && (
+                    <View>
+                        { props.lastTrainedExercise?.sets[0] && <LastTrainedSet lastTrainedSet={props.lastTrainedExercise?.sets[0]} /> }
+                        {
+                            props.exerciseData.sets.map(s => {
+                            return (
+                                <LogSet 
+                                    key={s.setId} 
+                                    dispatch={props.dispatch}
+                                    activeWorkout={props.activeWorkout}
+                                    setData={s}
+                                    exerciseIndex={props.exerciseData.exerciseIndex}
+                                    unilateralExercise={props.exerciseData.subbedExercise?.subbedExerciseId ? props.exerciseData.subbedExercise.unilateralExercise : props.exerciseData.unilateralExercise}
+                                    optionalSetModifiers={props.exerciseData.subbedExercise?.subbedExerciseId ? props.exerciseData.subbedExercise.optionalSetModifiers : props.exerciseData.optionalSetModifiers}
+                                />
+                            )})
+                        }
 
-                <View style={{alignSelf: 'flex-end'}}>
-                    <Pressable onPress={() => props.dispatch({ type: 'REMOVE_EXERCISE', exerciseIndex: props.exerciseData.exerciseIndex })}>
-                        <Text style={workoutStyles.headerText}>Delete Exercise</Text>
-                    </Pressable>
-                    <Pressable onPress={() => setShowAddExercise(true)}>
-                        <Text style={workoutStyles.headerText}>Add Exercise</Text>
-                    </Pressable>
-                    {props.exerciseData.subbedExercise?.subbedExerciseId ? 
+                        <View style={[layoutStyles.rowFlex]}>
+                            <Text>Exercise Notes: </Text>
+                            <TextInput 
+                                placeholder='Leave any notes for next session here'
+                                value={props.exerciseData.exerciseNotes}
+                                onFocus={() => props.dispatch({ type: 'SET_DROPDOWN_FALSE' })}
+                                onChangeText={(s: string) => props.dispatch({ type: 'UPDATE_EXERCISE_NOTES', value: s, exerciseIndex: props.exerciseData.exerciseIndex })}
+                            />
+                        </View>
+                    </View>
+                )
+
+            }
+            {
+                
+            }
+
+            <View style={[layoutStyles.rowFlex, workoutStyles.exerciseHeader, {padding: 3, justifyContent: 'space-evenly'}]}>
+                <Pressable onPress={() => props.dispatch({ type: 'REMOVE_EXERCISE', exerciseIndex: props.exerciseData.exerciseIndex })}>
+                    <Text style={workoutStyles.headerText}>Delete Exercise</Text>
+                </Pressable>
+                <Pressable onPress={() => setShowAddExercise(true)}>
+                    <Text style={workoutStyles.headerText}>Add Exercise</Text>
+                </Pressable>
+                {
+                    props.exerciseData.subbedExercise?.subbedExerciseId ? 
                         <Pressable onPress={() => props.dispatch({ type: 'CLEAR_SUB', exerciseIndex: props.exerciseData.exerciseIndex })}>
                             <Text style={workoutStyles.headerText}>Reset Sub</Text>
                         </Pressable>
@@ -217,35 +276,20 @@ export default function LogExercise ( props: Props ) {
                         <Pressable onPress={() => setSubExercise(true)}>
                             <Text style={workoutStyles.headerText}>Sub Exercise</Text>
                         </Pressable>
-                    }
-                </View>
+                }
+                {
+                    props.exerciseData.exerciseIndex > 0 && 
+                        <Pressable>
+                            <Text style={workoutStyles.headerText}>U</Text>
+                        </Pressable>
+                }
+                {
+                    props.exerciseData.exerciseIndex < props.exerciseCount - 1 &&
+                        <Pressable>
+                            <Text style={workoutStyles.headerText}>D</Text>
+                        </Pressable>
+                }
             </View>
-            {props.lastTrainedExercise?.sets[0] &&
-                <LastTrainedSet 
-                    lastTrainedSet={props.lastTrainedExercise?.sets[0]}
-                />
-            }
-            {
-                props.exerciseData.sets.map(s => {
-                    return (
-                        <LogSet 
-                            key={s.setId} 
-                            dispatch={props.dispatch}
-                            activeWorkout={props.activeWorkout}
-                            setData={s}
-                            exerciseIndex={props.exerciseData.exerciseIndex}
-                            unilateralExercise={props.exerciseData.subbedExercise?.subbedExerciseId ? props.exerciseData.subbedExercise.unilateralExercise : props.exerciseData.unilateralExercise}
-                            optionalSetModifiers={props.exerciseData.subbedExercise?.subbedExerciseId ? props.exerciseData.subbedExercise.optionalSetModifiers : props.exerciseData.optionalSetModifiers}
-                        />
-                )})
-            }
-            <Text>Exercise Notes:</Text>
-            <TextInput 
-                placeholder='Leave any notes for next session here'
-                value={props.exerciseData.exerciseNotes}
-                onFocus={() => props.dispatch({ type: 'SET_DROPDOWN_FALSE' })}
-                onChangeText={(s: string) => props.dispatch({ type: 'UPDATE_EXERCISE_NOTES', value: s, exerciseIndex: props.exerciseData.exerciseIndex })}
-            />
         </View>
     )
 }
