@@ -7,6 +7,7 @@ import layoutStyles from '@/styles/layoutStyles';
 import useDebounce from '@/utils/search';
 import { dbExerciseSearch } from '@/utils/workouts';
 import ExerciseSearchResult from '@/components/ExerciseSearchResult';
+import LastTrainedSet from '@/components/LastTrainedSet';
 
 interface Props {
     dispatch: Dispatch<LogWorkoutAction>,
@@ -25,7 +26,8 @@ export default function LogExercise ( props: Props ) {
     const debouncedExerciseName = useDebounce(exerciseSearchString, 1000);
     //Store results of search in array to show options to user
     const [searchResults, setSearchResults] = useState<ExerciseSearchResultType[]>([]);
-    const [newExercise, setNewExercise] = useState({
+
+    const newExerciseValues = {
         exerciseName: '', 
         exerciseId: '', 
         repsLower: 0, 
@@ -34,7 +36,8 @@ export default function LogExercise ( props: Props ) {
         optionalSetModifiers: {
             belt: false, unilateral: false, straps: false
         }
-    });
+    }
+    const [newExercise, setNewExercise] = useState(newExerciseValues);
     //Run exercise search whenever search field updated by user
     useEffect(() => {
         if (!debouncedExerciseName) {
@@ -85,8 +88,11 @@ export default function LogExercise ( props: Props ) {
                             <Text>Search Exercises:</Text>
                             <TextInput 
                                 placeholder='Enter exercise search...'
-                                value={exerciseSearchString}
-                                onChangeText={(s: string) => setExerciseSearchString(s.toLowerCase())}
+                                value={newExercise.exerciseName}
+                                onChangeText={(s: string) => {
+                                    setNewExercise({...newExercise, exerciseName: s})
+                                    setExerciseSearchString(s.toLowerCase())
+                                }}
                             />
                         </View>
                         {
@@ -116,10 +122,16 @@ export default function LogExercise ( props: Props ) {
                             )
                         }
                         <View style={layoutStyles.rowFlex}>
-                            <Pressable onPress={() => {setShowAddExercise(false); setSubExercise(false);}}><Text>Cancel</Text></Pressable>
+                            <Pressable onPress={() => {
+                                setNewExercise(newExerciseValues);
+                                setExerciseSearchString('');
+                                setShowAddExercise(false); 
+                                setSubExercise(false);
+                            }}>
+                                <Text>Cancel</Text>
+                            </Pressable>
                             {showAddExercise ? 
                                 <Pressable onPress={() => {
-                                    setShowAddExercise(false)
                                     props.dispatch({ 
                                         type: 'ADD_EXERCISE', 
                                         exerciseName: newExercise.exerciseName, 
@@ -132,12 +144,14 @@ export default function LogExercise ( props: Props ) {
                                         beltOption: newExercise.optionalSetModifiers.belt,
                                         strapsOption: newExercise.optionalSetModifiers.straps
                                     })
+                                    setNewExercise(newExerciseValues);
+                                    setExerciseSearchString('');
+                                    setShowAddExercise(false)
                                 }}>
                                     <Text>Add</Text>
                                 </Pressable>
                                 :
                                 <Pressable onPress={() => {
-                                    setSubExercise(false);
                                     props.dispatch({
                                         type: 'SUBSTITUTE_EXERCISE',
                                         exerciseIndex: props.exerciseData.exerciseIndex,
@@ -148,6 +162,9 @@ export default function LogExercise ( props: Props ) {
                                         beltOption: newExercise.optionalSetModifiers.belt,
                                         strapsOption: newExercise.optionalSetModifiers.straps
                                     })
+                                    setNewExercise(newExerciseValues);
+                                    setExerciseSearchString('');
+                                    setSubExercise(false);
                                 }}>
                                     <Text>Set Substitute</Text>
                                 </Pressable>
@@ -203,6 +220,11 @@ export default function LogExercise ( props: Props ) {
                     }
                 </View>
             </View>
+            {props.lastTrainedExercise?.sets[0] &&
+                <LastTrainedSet 
+                    lastTrainedSet={props.lastTrainedExercise?.sets[0]}
+                />
+            }
             {
                 props.exerciseData.sets.map(s => {
                     return (
