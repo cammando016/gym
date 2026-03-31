@@ -11,10 +11,20 @@ router.get('/exercise', async (req, res) => {
         const {searchString} = req.query;
 
         const exercisesQuery = await pool.query(
-            `SELECT e.name AS exercise_name, e.is_unilateral AS exercise_unilateral, e.id AS exercise_id, m.name AS muscle_name
+            `SELECT 
+                e.name AS exercise_name, 
+                e.is_unilateral AS exercise_unilateral, 
+                e.id AS exercise_id, 
+                m.name AS muscle_name,
+                jsonb_build_object(
+                    'unilateral', e.opt_set_mod_unilateral,
+                    'belt', e.opt_set_mod_belt,
+                    'straps', e.opt_set_mod_straps
+                ) AS "optionalSetModifiers"
             FROM exercises e
             JOIN muscle_groups m ON e.target_muscle = m.id
             WHERE e.name ILIKE $1
+            GROUP BY e.name, e.is_unilateral, e.id, m.name
             LIMIT 10`,
             [`%${searchString.toLowerCase()}%`]
         );
@@ -25,6 +35,7 @@ router.get('/exercise', async (req, res) => {
             exercises: exercisesQuery.rows
         });
     } catch (error) {
+        console.log(error);
         return res.status(500).json({error: 'An error occurred searching for exercises'})
     }
 });

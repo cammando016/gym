@@ -152,6 +152,11 @@ interface ExerciseSearchResultType {
     exercise_unilateral: boolean;
     muscle_name: string;
     exercise_id: string;
+    optionalSetModifiers: {
+        unilateral: boolean,
+        belt: boolean,
+        straps: boolean,
+    }
 }
 
 interface WorkoutTemplateType {
@@ -257,6 +262,16 @@ interface LoggedWorkoutExercise {
     exerciseId: string,
     exerciseIndex: number,
     exerciseNotes?: string,
+    setupNotes: string,
+    exerciseName: string,
+    exerciseRepsLower: number,
+    exerciseRepsUpper: number,
+    unilateralExercise: boolean,
+    optionalSetModifiers: {
+        unilateral: boolean,
+        belt: boolean,
+        straps: boolean,
+    }
     sets: LoggedWorkoutSet [],
 }
 
@@ -299,7 +314,7 @@ type LogWorkoutAction =
 | { type: 'SET_DROPDOWN_FALSE'; }
 | { type: 'ADD_SET'; setIndexAddedAfter: number, exerciseIndex: number }
 | { type: 'REMOVE_SET'; exerciseIndex: number; setIndex: number }
-| { type: 'ADD_EXERCISE'; exerciseIndexAddedAfter: number }
+| { type: 'ADD_EXERCISE'; exerciseIndexAddedAfter: number, exerciseName: string, exericseId: string, repsLower: string, repsUpper: string, unilateralOption: boolean, beltOption: boolean, strapsOption: boolean, unilateralExercise: boolean }
 | { type: 'REMOVE_EXERCISE'; exerciseIndex: number }
 
 export { setTypes, SetType, muscleGroups, Muscle, WorkoutSet, Exercise, SetTracker, FormValues, FormStateWithValidation, privacyTypes, PrivacyType, ExerciseSearchResultType, CreatedExercise, WorkoutAction, ErrorShape, FormPayload, WorkoutTemplateType, SplitDay, SplitFormPayload, Split, UserSplits, LoggedWorkout, LoggedWorkoutExercise, LoggedWorkoutSet, LogWorkoutForm, LogWorkoutAction };

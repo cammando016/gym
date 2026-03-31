@@ -27,7 +27,17 @@ export default function LogWorkout (props: Props) {
                 return {
                     exerciseId: e.exerciseId,
                     exerciseIndex: e.exerciseIndex,
+                    exerciseName: e.exerciseName,
+                    exerciseRepsLower: e.repRangeLower,
+                    exerciseRepsUpper: e.repRangeUpper,
+                    setupNotes: e.exerciseNotes,
                     exerciseNotes: '',
+                    optionalSetModifiers: {
+                        unilateral: e.optionalSetModifiers.unilateral,
+                        belt: e.optionalSetModifiers.belt,
+                        straps: e.optionalSetModifiers.straps
+                    },
+                    unilateralExercise: e.unilateralExercise,
                     sets: e.sets.map(s => {
                         if (s.isUnilateralSet) return {
                             isUnilateral: true,
@@ -615,6 +625,53 @@ export default function LogWorkout (props: Props) {
                                 sets: e.sets.filter(s => s.setIndex !== action.setIndex)
                             }
                         })
+                    }
+                }
+            }
+            case 'ADD_EXERCISE': {
+                return {
+                    ...state,
+                    values: {
+                        ...state.values,
+                        exercises: [
+                            ...state.values.exercises.slice(0, action.exerciseIndexAddedAfter + 1),
+                            {
+                                exerciseId: action.exericseId,
+                                exerciseName: action.exerciseName,
+                                exerciseIndex: action.exerciseIndexAddedAfter + 1,
+                                setupNotes: '',
+                                exerciseRepsLower: Number(action.repsLower),
+                                exerciseRepsUpper: Number(action.repsUpper),
+                                unilateralExercise: action.unilateralExercise,
+                                optionalSetModifiers: {
+                                    unilateral: action.unilateralOption,
+                                    belt: action.beltOption,
+                                    straps: action.strapsOption
+                                },
+                                sets: [{
+                                    isUnilateral: false,
+                                    setIndex: 0,
+                                    setId: randomUUID(),
+                                    setType: 'working',
+                                    showSetTypeDropdown: false,
+                                    weight: 0,
+                                    setNotes: '',
+                                    usedBelt: false,
+                                    usedStraps: false,
+                                    reps: {
+                                        fullReps: 0,
+                                        assistedReps: 0,
+                                        partialReps: 0
+                                    }
+                                }]
+                            },
+                            ...state.values.exercises.slice(action.exerciseIndexAddedAfter + 1).map(e => {
+                                return {
+                                    ...e,
+                                    exerciseIndex: e.exerciseIndex + 1
+                                }
+                            })
+                        ]
                     }
                 }
             }

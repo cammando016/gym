@@ -8,10 +8,10 @@ interface Props {
     dispatch: Dispatch<LogWorkoutAction>,
     activeWorkout: boolean,
     setData: LoggedWorkoutSet,
-    setTemplate: WorkoutTemplateType["exercises"][0]["sets"][0],
+    // setTemplate: WorkoutTemplateType["exercises"][0]["sets"][0],
     setIndex: number,
     exerciseIndex: number,
-    exerciseTemplate: WorkoutTemplateType["exercises"][0],
+    // exerciseTemplate: WorkoutTemplateType["exercises"][0],
     optionalSetModifiers: {
         unilateral: boolean,
         belt: boolean,
@@ -63,6 +63,15 @@ export default function LogSet (props: Props) {
                                         props.dispatch({ type: 'UPDATE_SET_WEIGHT', value: s, exerciseIndex: props.exerciseIndex, setIndex: props.setIndex })
                                     }}
                                 ></TextInput>
+                                
+                                <View style={[layoutStyles.rowFlex]}>
+                                    <Pressable onPress={() => props.dispatch({ type: 'ADD_SET', exerciseIndex: props.exerciseIndex, setIndexAddedAfter: props.setIndex })}>
+                                        <Text>Add Set</Text>
+                                    </Pressable>
+                                    <Pressable onPress={() => props.dispatch({ type: 'REMOVE_SET', exerciseIndex: props.exerciseIndex, setIndex: props.setIndex })}>
+                                        <Text>Delete Set</Text>
+                                    </Pressable>
+                                </View>
                             </View>
                         </View>
                         <View style={[layoutStyles.rowFlex,]}>
@@ -164,30 +173,24 @@ export default function LogSet (props: Props) {
                                 )
                             }
                         </View>
-                        <Text>Set Notes:</Text>
-                        <TextInput 
-                            placeholder='Enter set notes here'
-                            value={props.setData.setNotes}
-                            onFocus={() => props.dispatch({ type: 'SET_DROPDOWN_FALSE' })}
-                            onChangeText={(s: string) => {
-                                props.dispatch({ type: 'UPDATE_SET_NOTES', value: s, exerciseIndex: props.exerciseIndex, setIndex: props.setIndex })
-                            }}
-                        />
                         <View style={[layoutStyles.rowFlex]}>
-                            <Pressable onPress={() => props.dispatch({ type: 'ADD_SET', exerciseIndex: props.exerciseIndex, setIndexAddedAfter: props.setIndex })}>
-                                <Text>Add Set</Text>
-                            </Pressable>
-                            <Pressable onPress={() => props.dispatch({ type: 'REMOVE_SET', exerciseIndex: props.exerciseIndex, setIndex: props.setIndex })}>
-                                <Text>Delete Set</Text>
-                            </Pressable>
+                            <Text>Set Notes:</Text>
+                            <TextInput 
+                                placeholder='Enter set notes here'
+                                value={props.setData.setNotes}
+                                onFocus={() => props.dispatch({ type: 'SET_DROPDOWN_FALSE' })}
+                                onChangeText={(s: string) => {
+                                    props.dispatch({ type: 'UPDATE_SET_NOTES', value: s, exerciseIndex: props.exerciseIndex, setIndex: props.setIndex })
+                                }}
+                            />
                         </View>
                     </View>
                     {
-                        (props.exerciseTemplate.optionalSetModifiers.belt ||
-                        props.exerciseTemplate.optionalSetModifiers.straps ||
-                        props.exerciseTemplate.optionalSetModifiers.unilateral) && (
+                        (props.optionalSetModifiers.belt ||
+                        props.optionalSetModifiers.straps ||
+                        props.optionalSetModifiers.unilateral) && (
                             <View style={[layoutStyles.rowFlex,]}>
-                                {props.exerciseTemplate.optionalSetModifiers.belt && (
+                                {props.optionalSetModifiers.belt && (
                                     <Pressable
                                         onPress={() => {
                                             props.dispatch({ type: 'TOGGLE_SET_USE_BELT', exerciseIndex: props.exerciseIndex, setIndex: props.setIndex })
@@ -210,7 +213,7 @@ export default function LogSet (props: Props) {
                                     }
                                     </Pressable>
                                 )}
-                                {props.exerciseTemplate.optionalSetModifiers.straps && (
+                                {props.optionalSetModifiers.straps && (
                                     <Pressable
                                         onPress={() => {
                                             props.dispatch({ type: 'TOGGLE_SET_USE_STRAPS', exerciseIndex: props.exerciseIndex, setIndex: props.setIndex })
@@ -233,7 +236,7 @@ export default function LogSet (props: Props) {
                                     }
                                     </Pressable>
                                 )}
-                                {props.exerciseTemplate.optionalSetModifiers.unilateral && (
+                                {props.optionalSetModifiers.unilateral && (
                                     <Pressable
                                         onPress={() => {
                                             props.dispatch({ type: 'TOGGLE_SET_UNILATERAL', exerciseIndex: props.exerciseIndex, setIndex: props.setIndex })
