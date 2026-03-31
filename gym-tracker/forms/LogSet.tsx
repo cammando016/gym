@@ -9,6 +9,7 @@ interface Props {
     activeWorkout: boolean,
     setData: LoggedWorkoutSet,
     exerciseIndex: number,
+    unilateralExercise: boolean,
     optionalSetModifiers: {
         unilateral: boolean,
         belt: boolean,
@@ -18,7 +19,7 @@ interface Props {
 
 export default function LogSet (props: Props) {
     return (
-        <View style={{paddingTop: 5, paddingBottom: 5}}>
+        <View style={{padding: 5, borderBottomWidth: 1, borderBottomColor: '#619888', borderRadius: '5%'}}>
         {
             props.activeWorkout ? (
                 <View style={[layoutStyles.rowFlex, ]}>
@@ -233,7 +234,7 @@ export default function LogSet (props: Props) {
                                     }
                                     </Pressable>
                                 )}
-                                {props.optionalSetModifiers.unilateral && (
+                                {props.optionalSetModifiers.unilateral && !props.unilateralExercise && (
                                     <Pressable
                                         onPress={() => {
                                             props.dispatch({ type: 'TOGGLE_SET_UNILATERAL', exerciseIndex: props.exerciseIndex, setIndex: props.setData.setIndex })

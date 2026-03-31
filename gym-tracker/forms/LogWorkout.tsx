@@ -39,7 +39,7 @@ export default function LogWorkout (props: Props) {
                     },
                     unilateralExercise: e.unilateralExercise,
                     sets: e.sets.map(s => {
-                        if (s.isUnilateralSet) return {
+                        if (s.isUnilateralSet || e.unilateralExercise) return {
                             isUnilateral: true,
                             setIndex: s.setIndex,
                             setId: randomUUID(),
@@ -584,6 +584,22 @@ export default function LogWorkout (props: Props) {
                                 ...e,
                                 sets: [
                                     ...e.sets.slice(0, action.setIndexAddedAfter + 1),
+                                    e.unilateralExercise ? 
+                                    {
+                                        isUnilateral: true,
+                                        setIndex: action.setIndexAddedAfter + 1,
+                                        setId: randomUUID(),
+                                        setType: 'working',
+                                        showSetTypeDropdown: false,
+                                        weight: 0,
+                                        setNotes: '',
+                                        usedBelt: false,
+                                        usedStraps: false,
+                                        reps: {
+                                            left: { fullReps: 0, assistedReps: 0, partialReps: 0 },
+                                            right: { fullReps: 0, assistedReps: 0, partialReps: 0 }
+                                        }
+                                    } :
                                     {
                                         isUnilateral: false,
                                         setIndex: action.setIndexAddedAfter + 1,
@@ -654,22 +670,39 @@ export default function LogWorkout (props: Props) {
                                     belt: action.beltOption,
                                     straps: action.strapsOption
                                 },
-                                sets: [{
-                                    isUnilateral: false,
-                                    setIndex: 0,
-                                    setId: randomUUID(),
-                                    setType: 'working',
-                                    showSetTypeDropdown: false,
-                                    weight: 0,
-                                    setNotes: '',
-                                    usedBelt: false,
-                                    usedStraps: false,
-                                    reps: {
-                                        fullReps: 0,
-                                        assistedReps: 0,
-                                        partialReps: 0
-                                    }
-                                }]
+                                sets: action.unilateralExercise ?
+                                    [{
+                                        isUnilateral: true,
+                                        setIndex: 0,
+                                        setId: randomUUID(),
+                                        setType: 'working',
+                                        showSetTypeDropdown: false,
+                                        weight: 0,
+                                        setNotes: '',
+                                        usedBelt: false,
+                                        usedStraps: false,
+                                        reps: {
+                                            left: { fullReps: 0, assistedReps: 0, partialReps: 0 },
+                                            right: { fullReps: 0, assistedReps: 0, partialReps: 0 }
+                                        }
+                                    }] 
+                                    :
+                                    [{
+                                        isUnilateral: false,
+                                        setIndex: 0,
+                                        setId: randomUUID(),
+                                        setType: 'working',
+                                        showSetTypeDropdown: false,
+                                        weight: 0,
+                                        setNotes: '',
+                                        usedBelt: false,
+                                        usedStraps: false,
+                                        reps: {
+                                            fullReps: 0,
+                                            assistedReps: 0,
+                                            partialReps: 0
+                                        }
+                                    }]
                             },
                             ...state.values.exercises.slice(action.exerciseIndexAddedAfter + 1).map(e => {
                                 return {
@@ -696,7 +729,77 @@ export default function LogWorkout (props: Props) {
                     }
                 }
             }
-
+            case 'SUBSTITUTE_EXERCISE': {
+                return {
+                    ...state,
+                    values: {
+                        ...state.values,
+                        exercises: state.values.exercises.map(e => {
+                            if (e.exerciseIndex !== action.exerciseIndex) return e
+                            return {
+                                ...e,
+                                subbedExercise: {
+                                    subbedExerciseId: action.newExerciseId,
+                                    exerciseName: action.exerciseName,
+                                    unilateralExercise: action.unilateralExercise,
+                                    optionalSetModifiers: {
+                                        unilateral: action.unilateralOption,
+                                        belt: action.beltOption,
+                                        straps: action.strapsOption,
+                                    }
+                                },
+                                sets: e.sets.map(s => {
+                                    if (s.isUnilateral === action.unilateralExercise) return s
+                                    if (action.unilateralExercise) return {
+                                        ...s,
+                                        isUnilateral: true,
+                                        reps: {
+                                            left: { fullReps: 0, assistedReps: 0, partialReps: 0 },
+                                            right: { fullReps: 0, assistedReps: 0, partialReps: 0 }
+                                        }
+                                    }
+                                    return {
+                                        ...s,
+                                        isUnilateral: false,
+                                        reps: { fullReps: 0, assistedReps: 0, partialReps: 0 }
+                                    }
+                                })
+                            }
+                        })
+                    }
+                }
+            }
+            case 'CLEAR_SUB': {
+                return {
+                    ...state,
+                    values: {
+                        ...state.values,
+                        exercises: state.values.exercises.map(e => {
+                            if (e.exerciseIndex !== action.exerciseIndex) return e
+                            return {
+                                ...e, 
+                                subbedExercise: undefined,
+                                sets: e.sets.map(s => {
+                                    if (s.isUnilateral === e.unilateralExercise) return s
+                                    if (e.unilateralExercise) return {
+                                        ...s,
+                                        isUnilateral: true,
+                                        reps: {
+                                            left: { fullReps: 0, assistedReps: 0, partialReps: 0 },
+                                            right: { fullReps: 0, assistedReps: 0, partialReps: 0 }
+                                        }
+                                    }
+                                    return {
+                                        ...s,
+                                        isUnilateral: false,
+                                        reps: { fullReps: 0, assistedReps: 0, partialReps: 0 }
+                                    }
+                                })
+                            }
+                        })
+                    }
+                }
+            }
             default: return state;
         }
     }
@@ -731,5 +834,5 @@ export default function LogWorkout (props: Props) {
                 </View>
             </View>
         </ScrollView>
-)
+    )
 }

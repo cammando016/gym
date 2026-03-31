@@ -18,6 +18,8 @@ interface Props {
 export default function LogExercise ( props: Props ) {
     //Show modal for adding a new exercise into workout
     const [showAddExercise, setShowAddExercise] = useState<boolean>(false);
+    //Substitute exercise modal
+    const [subExercise, setSubExercise] = useState<boolean>(false);
     //Store search input value and pass into debounce to look for exercise once user stops typing
     const [exerciseSearchString, setExerciseSearchString] = useState<string>('');
     const debouncedExerciseName = useDebounce(exerciseSearchString, 1000);
@@ -50,29 +52,35 @@ export default function LogExercise ( props: Props ) {
 
     return (
         <View style={workoutStyles.exerciseContainer}>
-            {/* Add new exercise modal */}
-            {showAddExercise && (
+            {/* Modal to search DB for exercises to either add an exercise or substitute exercise */}
+            {(showAddExercise || subExercise) && (
                 <Modal>
                     <View style={{maxHeight: '80%', marginTop: '10%', padding: 20, paddingTop: 50}}>
                         <View style={[layoutStyles.rowFlex, {justifyContent: 'space-between'}]}>
-                            <Text>Add New Exercise</Text>
+                            {showAddExercise ?
+                                <Text>Add New Exercise</Text>
+                                :
+                                <Text>Substitute {props.exerciseData.exerciseName}</Text>
+                            }
                         </View>
-                        <View>
-                            <Text>Target Reps</Text>
-                            <View style={layoutStyles.rowFlex}>
-                                <TextInput
-                                    value={newExercise.repsLower.toString()}
-                                    onChangeText={(s: string) => setNewExercise({...newExercise, repsLower: Number(s)})}
-                                    placeholder='0'
-                                />
-                                <Text>to</Text>
-                                <TextInput 
-                                    value={newExercise.repsUpper.toString()}
-                                    onChangeText={(s: string) => setNewExercise({...newExercise, repsUpper: Number(s)})}
-                                    placeholder='0'
-                                />
+                        {showAddExercise && (
+                            <View>
+                                <Text>Target Reps</Text>
+                                <View style={layoutStyles.rowFlex}>
+                                    <TextInput
+                                        value={newExercise.repsLower.toString()}
+                                        onChangeText={(s: string) => setNewExercise({...newExercise, repsLower: Number(s)})}
+                                        placeholder='0'
+                                    />
+                                    <Text>to</Text>
+                                    <TextInput 
+                                        value={newExercise.repsUpper.toString()}
+                                        onChangeText={(s: string) => setNewExercise({...newExercise, repsUpper: Number(s)})}
+                                        placeholder='0'
+                                    />
+                                </View>
                             </View>
-                        </View>
+                        )}
                         <View>
                             <Text>Search Exercises:</Text>
                             <TextInput 
@@ -97,7 +105,7 @@ export default function LogExercise ( props: Props ) {
                                                     unilateralExercise: s.exercise_unilateral,
                                                     optionalSetModifiers: {
                                                         belt: s.optionalSetModifiers.belt, 
-                                                        straps: s.optionalSetModifiers.belt, 
+                                                        straps: s.optionalSetModifiers.straps, 
                                                         unilateral: s.optionalSetModifiers.unilateral
                                                     }
                                                 });
@@ -108,34 +116,56 @@ export default function LogExercise ( props: Props ) {
                             )
                         }
                         <View style={layoutStyles.rowFlex}>
-                            <Pressable onPress={() => setShowAddExercise(false)}><Text>Cancel</Text></Pressable>
-                            <Pressable onPress={() => {
-                                setShowAddExercise(false)
-                                props.dispatch({ 
-                                    type: 'ADD_EXERCISE', 
-                                    exerciseName: newExercise.exerciseName, 
-                                    exerciseIndexAddedAfter: props.exerciseData.exerciseIndex, 
-                                    exericseId: newExercise.exerciseId, 
-                                    repsLower: newExercise.repsLower.toString(), 
-                                    repsUpper: newExercise.repsLower.toString(),
-                                    unilateralExercise: newExercise.unilateralExercise,
-                                    unilateralOption: newExercise.optionalSetModifiers.unilateral,
-                                    beltOption: newExercise.optionalSetModifiers.belt,
-                                    strapsOption: newExercise.optionalSetModifiers.straps
-                                })
-                            }}>
-                                <Text>Add</Text>
-                            </Pressable>
+                            <Pressable onPress={() => {setShowAddExercise(false); setSubExercise(false);}}><Text>Cancel</Text></Pressable>
+                            {showAddExercise ? 
+                                <Pressable onPress={() => {
+                                    setShowAddExercise(false)
+                                    props.dispatch({ 
+                                        type: 'ADD_EXERCISE', 
+                                        exerciseName: newExercise.exerciseName, 
+                                        exerciseIndexAddedAfter: props.exerciseData.exerciseIndex, 
+                                        exericseId: newExercise.exerciseId, 
+                                        repsLower: newExercise.repsLower.toString(), 
+                                        repsUpper: newExercise.repsLower.toString(),
+                                        unilateralExercise: newExercise.unilateralExercise,
+                                        unilateralOption: newExercise.optionalSetModifiers.unilateral,
+                                        beltOption: newExercise.optionalSetModifiers.belt,
+                                        strapsOption: newExercise.optionalSetModifiers.straps
+                                    })
+                                }}>
+                                    <Text>Add</Text>
+                                </Pressable>
+                                :
+                                <Pressable onPress={() => {
+                                    setSubExercise(false);
+                                    props.dispatch({
+                                        type: 'SUBSTITUTE_EXERCISE',
+                                        exerciseIndex: props.exerciseData.exerciseIndex,
+                                        newExerciseId: newExercise.exerciseId,
+                                        exerciseName: newExercise.exerciseName,
+                                        unilateralExercise: newExercise.unilateralExercise,
+                                        unilateralOption: newExercise.optionalSetModifiers.unilateral,
+                                        beltOption: newExercise.optionalSetModifiers.belt,
+                                        strapsOption: newExercise.optionalSetModifiers.straps
+                                    })
+                                }}>
+                                    <Text>Set Substitute</Text>
+                                </Pressable>
+                            }
                         </View>
                     </View>
                 </Modal>
             )}
             <View style={[workoutStyles.exerciseHeader, layoutStyles.rowFlex]}>
-                <View>
+                <View style={{flexGrow: 1}}>
                     <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
                         <View style={{display: 'flex', flexDirection: 'row'}}>
                             <Text style={[workoutStyles.headerTextBold, workoutStyles.headerText]}>Exercise: </Text>
-                            <Text style={workoutStyles.headerText}>{props.exerciseData.exerciseName}</Text>
+                            {props.exerciseData.subbedExercise?.subbedExerciseId ?
+                                <Text>{props.exerciseData.subbedExercise.exerciseName}</Text>
+                                :
+                                <Text style={workoutStyles.headerText}>{props.exerciseData.exerciseName}</Text>
+                            }
                         </View>
                     </View>
                     {
@@ -155,13 +185,22 @@ export default function LogExercise ( props: Props ) {
                     </View>
                 </View>
 
-                <View>
+                <View style={{alignSelf: 'flex-end'}}>
                     <Pressable onPress={() => props.dispatch({ type: 'REMOVE_EXERCISE', exerciseIndex: props.exerciseData.exerciseIndex })}>
                         <Text style={workoutStyles.headerText}>Delete Exercise</Text>
                     </Pressable>
                     <Pressable onPress={() => setShowAddExercise(true)}>
                         <Text style={workoutStyles.headerText}>Add Exercise</Text>
                     </Pressable>
+                    {props.exerciseData.subbedExercise?.subbedExerciseId ? 
+                        <Pressable onPress={() => props.dispatch({ type: 'CLEAR_SUB', exerciseIndex: props.exerciseData.exerciseIndex })}>
+                            <Text style={workoutStyles.headerText}>Reset Sub</Text>
+                        </Pressable>
+                        :
+                        <Pressable onPress={() => setSubExercise(true)}>
+                            <Text style={workoutStyles.headerText}>Sub Exercise</Text>
+                        </Pressable>
+                    }
                 </View>
             </View>
             {
@@ -173,9 +212,10 @@ export default function LogExercise ( props: Props ) {
                             activeWorkout={props.activeWorkout}
                             setData={s}
                             exerciseIndex={props.exerciseData.exerciseIndex}
-                            optionalSetModifiers={props.exerciseData.optionalSetModifiers}
-                        ></LogSet>)
-                })
+                            unilateralExercise={props.exerciseData.subbedExercise?.subbedExerciseId ? props.exerciseData.subbedExercise.unilateralExercise : props.exerciseData.unilateralExercise}
+                            optionalSetModifiers={props.exerciseData.subbedExercise?.subbedExerciseId ? props.exerciseData.subbedExercise.optionalSetModifiers : props.exerciseData.optionalSetModifiers}
+                        />
+                )})
             }
             <Text>Exercise Notes:</Text>
             <TextInput 
