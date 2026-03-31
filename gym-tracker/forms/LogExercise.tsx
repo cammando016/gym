@@ -16,10 +16,13 @@ interface Props {
 }
 
 export default function LogExercise ( props: Props ) {
+    //Show modal for adding a new exercise into workout
     const [showAddExercise, setShowAddExercise] = useState<boolean>(false);
+    //Store search input value and pass into debounce to look for exercise once user stops typing
     const [exerciseSearchString, setExerciseSearchString] = useState<string>('');
-    const [searchResults, setSearchResults] = useState<ExerciseSearchResultType[]>([]);
     const debouncedExerciseName = useDebounce(exerciseSearchString, 1000);
+    //Store results of search in array to show options to user
+    const [searchResults, setSearchResults] = useState<ExerciseSearchResultType[]>([]);
     const [newExercise, setNewExercise] = useState({
         exerciseName: '', 
         exerciseId: '', 
@@ -30,7 +33,7 @@ export default function LogExercise ( props: Props ) {
             belt: false, unilateral: false, straps: false
         }
     });
-
+    //Run exercise search whenever search field updated by user
     useEffect(() => {
         if (!debouncedExerciseName) {
             setSearchResults([]);
@@ -47,6 +50,7 @@ export default function LogExercise ( props: Props ) {
 
     return (
         <View style={workoutStyles.exerciseContainer}>
+            {/* Add new exercise modal */}
             {showAddExercise && (
                 <Modal>
                     <View style={{maxHeight: '80%', marginTop: '10%', padding: 20, paddingTop: 50}}>

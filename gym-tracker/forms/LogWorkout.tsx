@@ -622,7 +622,13 @@ export default function LogWorkout (props: Props) {
                             if (e.exerciseIndex !== action.exerciseIndex) return e
                             return {
                                 ...e,
-                                sets: e.sets.filter(s => s.setIndex !== action.setIndex)
+                                sets: e.sets.filter(s => s.setIndex !== action.setIndex).map(st => {
+                                    if (st.setIndex < action.setIndex) return st
+                                    return {
+                                        ...st,
+                                        setIndex: st.setIndex - 1
+                                    }
+                                })
                             }
                         })
                     }
@@ -680,7 +686,13 @@ export default function LogWorkout (props: Props) {
                     ...state,
                     values: {
                         ...state.values,
-                        exercises: state.values.exercises.filter(e => e.exerciseIndex !== action.exerciseIndex)
+                        exercises: state.values.exercises.filter(e => e.exerciseIndex !== action.exerciseIndex).map(ex => {
+                            if (ex.exerciseIndex < action.exerciseIndex) return ex
+                            return {
+                                ...ex,
+                                exerciseIndex: ex.exerciseIndex - 1
+                            }
+                        })
                     }
                 }
             }
