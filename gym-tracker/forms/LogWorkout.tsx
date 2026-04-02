@@ -1,6 +1,6 @@
 import { Text, View, TextInput, ScrollView } from 'react-native';
-import { useReducer, useState } from 'react';
-import { LogWorkoutAction, LogWorkoutForm, WorkoutTemplateType, LoggedWorkoutExercise, LoggedWorkoutSet } from '@/types/workouts';
+import { useReducer } from 'react';
+import { LogWorkoutAction, LogWorkoutForm, WorkoutTemplateType } from '@/types/workouts';
 import { useWorkoutTemplates } from '@/hooks/useWorkoutTemplates';
 import LogExercise from './LogExercise';
 import { useWorkoutHistory } from '@/hooks/useWorkoutHistory';
@@ -32,6 +32,9 @@ export default function LogWorkout (props: Props) {
                     exerciseRepsUpper: e.repRangeUpper,
                     setupNotes: e.exerciseNotes,
                     exerciseNotes: '',
+                    changedExerciseIndex: {
+                        originalIndex: e.exerciseIndex
+                    },
                     optionalSetModifiers: {
                         unilateral: e.optionalSetModifiers.unilateral,
                         belt: e.optionalSetModifiers.belt,
@@ -665,6 +668,9 @@ export default function LogWorkout (props: Props) {
                                 exerciseRepsLower: Number(action.repsLower),
                                 exerciseRepsUpper: Number(action.repsUpper),
                                 unilateralExercise: action.unilateralExercise,
+                                changedExerciseIndex: {
+                                    originalIndex: action.exerciseIndexAddedAfter + 1,
+                                },
                                 optionalSetModifiers: {
                                     unilateral: action.unilateralOption,
                                     belt: action.beltOption,
@@ -707,7 +713,11 @@ export default function LogWorkout (props: Props) {
                             ...state.values.exercises.slice(action.exerciseIndexAddedAfter + 1).map(e => {
                                 return {
                                     ...e,
-                                    exerciseIndex: e.exerciseIndex + 1
+                                    exerciseIndex: e.exerciseIndex + 1,
+                                    changedExerciseIndex: {
+                                        ...e.changedExerciseIndex,
+                                        updatedExerciseIndex: e.exerciseIndex + 1
+                                    }
                                 }
                             })
                         ]
@@ -800,6 +810,60 @@ export default function LogWorkout (props: Props) {
                     }
                 }
             }
+            case 'MOVE_EXERCISE_UP': {
+                return {
+                    ...state,
+                    values: {
+                        ...state.values,
+                        exercises: state.values.exercises.map(e => {
+                            if (e.exerciseIndex === action.exerciseIndex) return {
+                                ...e,
+                                exerciseIndex: action.exerciseIndex - 1,
+                                changedExerciseIndex: {
+                                    ...e.changedExerciseIndex,
+                                    updatedExerciseIndex: action.exerciseIndex - 1
+                                }
+                            }
+                            if (e.exerciseIndex === action.exerciseIndex - 1) return {
+                                ...e,
+                                exerciseIndex: action.exerciseIndex,
+                                changedExerciseIndex: {
+                                    ...e.changedExerciseIndex,
+                                    updatedExerciseIndex: action.exerciseIndex
+                                }
+                            }
+                            return e
+                        })
+                    }
+                }
+            }
+            case 'MOVE_EXERCISE_DOWN': {
+                return {
+                    ...state,
+                    values: {
+                        ...state.values,
+                        exercises: state.values.exercises.map(e => {
+                            if (e.exerciseIndex === action.exerciseIndex) return {
+                                ...e,
+                                exerciseIndex: action.exerciseIndex + 1,
+                                changedExerciseIndex: {
+                                    ...e.changedExerciseIndex,
+                                    updatedExerciseIndex: action.exerciseIndex + 1
+                                }
+                            }
+                            if (e.exerciseIndex === action.exerciseIndex + 1) return {
+                                ...e,
+                                exerciseIndex: action.exerciseIndex,
+                                changedExerciseIndex: {
+                                    ...e.changedExerciseIndex,
+                                    updatedExerciseIndex: action.exerciseIndex
+                                }
+                            }
+                            return e
+                        })
+                    }
+                }
+            }
             default: return state;
         }
     }
@@ -812,7 +876,7 @@ export default function LogWorkout (props: Props) {
                 <Text>Last {workoutTemplate?.workoutName} session notes: {lastTrained?.workoutNotes}</Text>
                 <View>
                     {
-                        workoutForm.values.exercises.map(e => {
+                        workoutForm.values.exercises.slice().sort((a, b) => a.exerciseIndex - b.exerciseIndex).map(e => {
                             return (
                                 <LogExercise 
                                     key={e.exerciseId} 

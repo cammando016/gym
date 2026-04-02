@@ -267,6 +267,10 @@ interface LoggedWorkoutExercise {
     exerciseRepsLower: number,
     exerciseRepsUpper: number,
     unilateralExercise: boolean,
+    changedExerciseIndex: {
+        originalIndex: number,
+        updatedExerciseIndex?: number,
+    }
     optionalSetModifiers: {
         unilateral: boolean,
         belt: boolean,
@@ -328,5 +332,7 @@ type LogWorkoutAction =
 | { type: 'REMOVE_EXERCISE'; exerciseIndex: number }
 | { type: 'SUBSTITUTE_EXERCISE'; exerciseIndex: number, newExerciseId: string, exerciseName: string, unilateralExercise: boolean, unilateralOption: boolean, beltOption: boolean, strapsOption: boolean }
 | { type: 'CLEAR_SUB'; exerciseIndex: number }
+| { type: 'MOVE_EXERCISE_UP'; exerciseIndex: number }
+| { type: 'MOVE_EXERCISE_DOWN'; exerciseIndex: number }
 
 export { setTypes, SetType, muscleGroups, Muscle, WorkoutSet, Exercise, SetTracker, FormValues, FormStateWithValidation, privacyTypes, PrivacyType, ExerciseSearchResultType, CreatedExercise, WorkoutAction, ErrorShape, FormPayload, WorkoutTemplateType, SplitDay, SplitFormPayload, Split, UserSplits, LoggedWorkout, LoggedWorkoutExercise, LoggedWorkoutSet, LogWorkoutForm, LogWorkoutAction };
