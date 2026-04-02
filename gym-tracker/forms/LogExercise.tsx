@@ -1,4 +1,4 @@
-import { ExerciseSearchResultType, LoggedWorkoutExercise, LogWorkoutAction, WorkoutTemplateType } from '@/types/workouts';
+import { ExerciseSearchResultType, LoggedWorkoutExercise, LogWorkoutAction } from '@/types/workouts';
 import { View, Text, TextInput, Pressable, Modal } from 'react-native';
 import workoutStyles from '@/styles/workouts';
 import { Dispatch, useEffect, useState } from 'react';
@@ -7,7 +7,6 @@ import layoutStyles from '@/styles/layoutStyles';
 import useDebounce from '@/utils/search';
 import { dbExerciseSearch } from '@/utils/workouts';
 import ExerciseSearchResult from '@/components/ExerciseSearchResult';
-import LastTrainedSet from '@/components/LastTrainedSet';
 
 interface Props {
     dispatch: Dispatch<LogWorkoutAction>,
@@ -228,7 +227,6 @@ export default function LogExercise ( props: Props ) {
             {
                 showSets && (
                     <View>
-                        { props.lastTrainedExercise?.sets[0] && <LastTrainedSet lastTrainedSet={props.lastTrainedExercise?.sets[0]} /> }
                         {
                             props.exerciseData.sets.map(s => {
                             return (

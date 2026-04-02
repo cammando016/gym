@@ -1,10 +1,12 @@
-import { Text, View, TextInput, ScrollView } from 'react-native';
-import { useReducer } from 'react';
+import { Text, View, TextInput, ScrollView, Pressable } from 'react-native';
+import { useReducer, useState } from 'react';
 import { LogWorkoutAction, LogWorkoutForm, WorkoutTemplateType } from '@/types/workouts';
 import { useWorkoutTemplates } from '@/hooks/useWorkoutTemplates';
 import LogExercise from './LogExercise';
 import { useWorkoutHistory } from '@/hooks/useWorkoutHistory';
 import { randomUUID } from 'expo-crypto'
+import LastTrainedSet from '@/components/LastTrainedSet';
+import layoutStyles from '@/styles/layoutStyles';
 
 interface Props {
     activeWorkout: boolean, //True for when logging working, false when viewing past workout
@@ -19,6 +21,11 @@ export default function LogWorkout (props: Props) {
     if (!workoutTemplate) return <View><Text>Loading Workout Template</Text></View>
     
     const { data: lastTrained } = useWorkoutHistory(props.templateId);
+
+    const [activeSet, setActiveSet] = useState({activeExercise: 0, activeSet: 0})
+    const [fullPastSetList, setFullPastSetList] = useState<boolean>(false);
+
+    const toggleFullPastSetList = () => {setFullPastSetList(!fullPastSetList); console.log('Ran')}
 
     const initialFormState: LogWorkoutForm = {
         values : {
@@ -870,10 +877,36 @@ export default function LogWorkout (props: Props) {
 
     const [workoutForm, dispatch] = useReducer(logWorkoutReducer, initialFormState);
 
+    console.log(JSON.stringify(lastTrained));
+
     return (
         <ScrollView>
             <View>
                 <Text>Last {workoutTemplate?.workoutName} session notes: {lastTrained?.workoutNotes}</Text>
+                <View style={[layoutStyles.rowFlex]}>
+                    <View>
+                        { lastTrained?.exercises[activeSet.activeExercise] && (
+                            fullPastSetList ? 
+                            lastTrained.exercises[activeSet.activeExercise].sets.map(s => {
+                                return (
+                                    <LastTrainedSet 
+                                        key={s.setIndex}
+                                        lastTrainedExercise={lastTrained.exercises[activeSet.activeExercise]} 
+                                        activeSetIndex={s.setIndex}
+                                    /> 
+                                )
+                            })
+                            :
+                            <LastTrainedSet 
+                                lastTrainedExercise={lastTrained.exercises[activeSet.activeExercise]} 
+                                activeSetIndex={activeSet.activeSet}
+                            /> 
+                        )}
+                    </View>
+                    <Pressable onPress={toggleFullPastSetList}>
+                        <Text>Toggle</Text>
+                    </Pressable>
+                </View>
                 <View>
                     {
                         workoutForm.values.exercises.slice().sort((a, b) => a.exerciseIndex - b.exerciseIndex).map(e => {

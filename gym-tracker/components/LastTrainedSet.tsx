@@ -1,11 +1,12 @@
 import { useAuth } from '@/contexts/AuthContext';
 import workoutStyles from '@/styles/workouts';
-import { LoggedWorkoutSet } from '@/types/workouts';
-import { View, Text, Image } from 'react-native';
+import { LoggedWorkoutExercise, LoggedWorkoutSet } from '@/types/workouts';
+import { View, Text, Image, Pressable } from 'react-native';
 import layoutStyles from '../styles/layoutStyles'
 
 interface Props {
-    lastTrainedSet: LoggedWorkoutSet
+    lastTrainedExercise: LoggedWorkoutExercise,
+    activeSetIndex: number,
 }
 
 export default function LastTrainedSet(props: Props) {
@@ -14,59 +15,59 @@ export default function LastTrainedSet(props: Props) {
         <View style={[layoutStyles.rowFlex]}>
             <View>
                 <View style={[layoutStyles.rowFlex]}>
-                    <Text>Last {props.lastTrainedSet.setType} Set {props.lastTrainedSet.setIndex + 1} </Text>
-                    <Text>{props.lastTrainedSet.weight} KG/LB</Text>
+                    <Text>Last {props.lastTrainedExercise.sets[props.activeSetIndex].setType} Set {props.lastTrainedExercise.sets[props.activeSetIndex].setIndex + 1} </Text>
+                    <Text>{props.lastTrainedExercise.sets[props.activeSetIndex].weight} KG/LB</Text>
                 </View>
-                {props.lastTrainedSet.isUnilateral ? (
+                {props.lastTrainedExercise.sets[props.activeSetIndex].isUnilateral ? (
                     <View>
                         <View style={[layoutStyles.rowFlex]}>
                             <Text>L:</Text>
                             {/* Always show full reps even if 0 */}
-                            <Text>Full Reps: {props.lastTrainedSet.reps.left.fullReps}</Text>
+                            <Text>Full Reps: {props.lastTrainedExercise.sets[props.activeSetIndex].reps.left.fullReps}</Text>
                             {/* Only show partial or assisted reps if any logged */}
                             {/* Show partial or assisted reps for both sides, if either side has any logged */}
-                            { props.lastTrainedSet.reps.left.partialReps || props.lastTrainedSet.reps.right.partialReps &&
-                                <Text>Partials: {props.lastTrainedSet.reps.left.partialReps}</Text>
+                            { props.lastTrainedExercise.sets[props.activeSetIndex].reps.left.partialReps || props.lastTrainedExercise.sets[props.activeSetIndex].reps.right.partialReps &&
+                                <Text>Partials: {props.lastTrainedExercise.sets[props.activeSetIndex].reps.left.partialReps}</Text>
                             }
-                            { props.lastTrainedSet.reps.left.assistedReps || props.lastTrainedSet.reps.right.assistedReps &&
-                                <Text>Assisted: {props.lastTrainedSet.reps.left.assistedReps}</Text>
+                            { props.lastTrainedExercise.sets[props.activeSetIndex].reps.left.assistedReps || props.lastTrainedExercise.sets[props.activeSetIndex].reps.right.assistedReps &&
+                                <Text>Assisted: {props.lastTrainedExercise.sets[props.activeSetIndex].reps.left.assistedReps}</Text>
                             }
                         </View>
                         <View>
                             <Text>R:</Text>
                             {/* Always show full reps even if 0 */}
-                            <Text>Full Reps: {props.lastTrainedSet.reps.right.fullReps}</Text>
+                            <Text>Full Reps: {props.lastTrainedExercise.sets[props.activeSetIndex].reps.right.fullReps}</Text>
                             {/* Only show partial or assisted reps if any logged */}
                             {/* Show partial or assisted reps for both sides, if either side has any logged */}
-                            { props.lastTrainedSet.reps.left.partialReps || props.lastTrainedSet.reps.right.partialReps &&
-                                <Text>Partials: {props.lastTrainedSet.reps.right.partialReps}</Text>
+                            { props.lastTrainedExercise.sets[props.activeSetIndex].reps.left.partialReps || props.lastTrainedExercise.sets[props.activeSetIndex].reps.right.partialReps &&
+                                <Text>Partials: {props.lastTrainedExercise.sets[props.activeSetIndex].reps.right.partialReps}</Text>
                             }
-                            { props.lastTrainedSet.reps.left.assistedReps || props.lastTrainedSet.reps.right.assistedReps &&
-                                <Text>Assisted: {props.lastTrainedSet.reps.right.assistedReps}</Text>
+                            { props.lastTrainedExercise.sets[props.activeSetIndex].reps.left.assistedReps || props.lastTrainedExercise.sets[props.activeSetIndex].reps.right.assistedReps &&
+                                <Text>Assisted: {props.lastTrainedExercise.sets[props.activeSetIndex].reps.right.assistedReps}</Text>
                             }
                         </View>
                     </View>
                 ) : (
                     <View style={[layoutStyles.rowFlex]}>
                         {/* Always show full reps even if 0 */}
-                        <Text>Full Reps: {props.lastTrainedSet.reps.fullReps} </Text>
+                        <Text>Full Reps: {props.lastTrainedExercise.sets[props.activeSetIndex].reps.fullReps} </Text>
                         {/* Only show partial or assisted if any logged */}
-                        { props.lastTrainedSet.reps.partialReps && <Text>Partials: {props.lastTrainedSet.reps.partialReps} </Text> }
-                        { props.lastTrainedSet.reps.assistedReps && <Text>Assisted: {props.lastTrainedSet.reps.assistedReps} </Text> }
+                        { props.lastTrainedExercise.sets[props.activeSetIndex].reps.partialReps && <Text>Partials: {props.lastTrainedExercise.sets[props.activeSetIndex].reps.partialReps} </Text> }
+                        { props.lastTrainedExercise.sets[props.activeSetIndex].reps.assistedReps && <Text>Assisted: {props.lastTrainedExercise.sets[props.activeSetIndex].reps.assistedReps} </Text> }
                     </View>
                 )}
-                { props.lastTrainedSet.setNotes && <Text>Notes: {props.lastTrainedSet.setNotes}</Text> }
+                { props.lastTrainedExercise.sets[props.activeSetIndex].setNotes && <Text>Notes: {props.lastTrainedExercise.sets[props.activeSetIndex].setNotes}</Text> }
             </View>
-            { (props.lastTrainedSet.usedBelt || props.lastTrainedSet.usedStraps) &&
+            { (props.lastTrainedExercise.sets[props.activeSetIndex].usedBelt || props.lastTrainedExercise.sets[props.activeSetIndex].usedStraps) &&
                 <View style={[layoutStyles.rowFlex, {justifyContent: 'flex-end'}]}>
-                    { props.lastTrainedSet.usedStraps && 
+                    { props.lastTrainedExercise.sets[props.activeSetIndex].usedStraps && 
                         <Image
                             source={require('../assets/images/strapsGreen.png')}
                             borderRadius={2}
                             style={[workoutStyles.setModifier ,workoutStyles.trueSetModifier]}
                         />
                     }
-                    { props.lastTrainedSet.usedBelt && 
+                    { props.lastTrainedExercise.sets[props.activeSetIndex].usedBelt && 
                         <Image 
                             source={require('../assets/images/liftingBeltGreen.png')}
                             borderRadius={2}
