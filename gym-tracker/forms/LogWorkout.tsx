@@ -1,6 +1,6 @@
 import { Text, View, TextInput, ScrollView, Pressable } from 'react-native';
 import { useReducer, useState } from 'react';
-import { LogWorkoutAction, LogWorkoutForm, WorkoutTemplateType } from '@/types/workouts';
+import { activeSetType, LogWorkoutAction, LogWorkoutForm, WorkoutTemplateType } from '@/types/workouts';
 import { useWorkoutTemplates } from '@/hooks/useWorkoutTemplates';
 import LogExercise from './LogExercise';
 import { useWorkoutHistory } from '@/hooks/useWorkoutHistory';
@@ -22,10 +22,38 @@ export default function LogWorkout (props: Props) {
     
     const { data: lastTrained } = useWorkoutHistory(props.templateId);
 
-    const [activeSet, setActiveSet] = useState({activeExercise: 0, activeSet: 0})
-    const [fullPastSetList, setFullPastSetList] = useState<boolean>(false);
+    //Track the current focused set for showing the matching set from last session
+    const [activeSet, setActiveSet] = useState<activeSetType>({activeExerciseId: workoutTemplate.exercises[0].exerciseId, activeSetType: 'working', activeSetIndex: 0})
+    const updateActiveSet = (exerciseId: string, setId: string, setType: string) => {
+        //Check exercise is in previous session at all
+        const exerciseFromLastTrained = lastTrained?.exercises.find(e => e.exerciseId === exerciseId);
+        if (!exerciseFromLastTrained) {setActiveSet({activeExerciseId: exerciseId, activeSetType: setType, activeSetIndex: undefined}); return;}
+ 
+        //If exercise found, check for any logged sets (should never be null, no exercise should be logged without sets but fallback for possible error in previous log)
+        const lastSessionSets = lastTrained?.exercises.find(e => e.exerciseId === exerciseId)?.sets;
+        if (!lastSessionSets) {setActiveSet({activeExerciseId: exerciseId, activeSetType: setType, activeSetIndex: undefined}); return;}
 
-    const toggleFullPastSetList = () => {setFullPastSetList(!fullPastSetList); console.log('Ran')}
+        //Get which index of the specific set type the clicked set in current workout is (ie 5th overall set but 3rd working set returns index: 2)
+        const currentSessionSetIndex = workoutForm.values.exercises.find(e => e.exerciseId === exerciseId)?.sets.filter(s => s.setType === setType).findIndex(st => st.setId === setId);
+        if (currentSessionSetIndex === undefined || currentSessionSetIndex === -1) {setActiveSet({activeExerciseId: exerciseId, activeSetType: setType, activeSetIndex: undefined}); return}
+ 
+        //Check if there was a matching index set from last trained.
+        //If user on 3rd working set this workout, but last session only logged 2 working sets, will return undefined
+        if (lastSessionSets.filter(s => s.setType === setType)[currentSessionSetIndex]) {
+            setActiveSet({
+                activeExerciseId: exerciseFromLastTrained.exerciseId, 
+                activeSetType: setType,
+                activeSetIndex: currentSessionSetIndex
+            });
+            return;
+        }
+
+        setActiveSet({activeExerciseId: exerciseId, activeSetType: setType, activeSetIndex: undefined});
+    }
+
+    //Used to toggle last session set display between single set and all sets of an exercise
+    const [fullPastSetList, setFullPastSetList] = useState<boolean>(false);
+    const toggleFullPastSetList = () => setFullPastSetList(!fullPastSetList)
 
     const initialFormState: LogWorkoutForm = {
         values : {
@@ -877,31 +905,34 @@ export default function LogWorkout (props: Props) {
 
     const [workoutForm, dispatch] = useReducer(logWorkoutReducer, initialFormState);
 
-    console.log(JSON.stringify(lastTrained));
-
     return (
         <ScrollView>
             <View>
                 <Text>Last {workoutTemplate?.workoutName} session notes: {lastTrained?.workoutNotes}</Text>
                 <View style={[layoutStyles.rowFlex]}>
                     <View>
-                        { lastTrained?.exercises[activeSet.activeExercise] && (
-                            fullPastSetList ? 
-                            lastTrained.exercises[activeSet.activeExercise].sets.map(s => {
-                                return (
-                                    <LastTrainedSet 
-                                        key={s.setIndex}
-                                        lastTrainedExercise={lastTrained.exercises[activeSet.activeExercise]} 
-                                        activeSetIndex={s.setIndex}
-                                    /> 
+                        {
+                            fullPastSetList ? (
+                                lastTrained?.exercises.filter(e => e.exerciseId === activeSet.activeExerciseId)[0].sets.map(s => {
+                                    return (
+                                        <LastTrainedSet 
+                                            key={s.setId}
+                                            lastTrainedSet={lastTrained.exercises.filter(e => e.exerciseId === activeSet.activeExerciseId)[0].sets[s.setIndex]}
+                                            activeSetIndex={s.setIndex}
+                                        />
+                                    )
+                                })
+                            ) : (
+                                activeSet.activeSetIndex !== undefined ? 
+                                    <LastTrainedSet
+                                        lastTrainedSet={lastTrained?.exercises.filter(e => e.exerciseId === activeSet.activeExerciseId)[0].sets.filter(s => s.setType === activeSet.activeSetType)[activeSet.activeSetIndex]}
+                                        activeSetIndex={activeSet.activeSetIndex}
+                                    />
+                                : (
+                                    <View><Text>No matching set from past workout </Text></View>
                                 )
-                            })
-                            :
-                            <LastTrainedSet 
-                                lastTrainedExercise={lastTrained.exercises[activeSet.activeExercise]} 
-                                activeSetIndex={activeSet.activeSet}
-                            /> 
-                        )}
+                            )
+                        }
                     </View>
                     <Pressable onPress={toggleFullPastSetList}>
                         <Text>Toggle</Text>
@@ -918,6 +949,7 @@ export default function LogWorkout (props: Props) {
                                     activeWorkout={props.activeWorkout} 
                                     exerciseCount={workoutForm.values.exercises.length}
                                     lastTrainedExercise={lastTrained?.exercises.find(exc => exc.exerciseId === e.exerciseId)}
+                                    updateActiveSet={updateActiveSet}
                                 ></LogExercise>)
                         })
                     }

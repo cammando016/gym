@@ -14,6 +14,7 @@ interface Props {
     activeWorkout: boolean,
     exerciseCount: number,
     lastTrainedExercise?: LoggedWorkoutExercise,
+    updateActiveSet: (exerciseId: string, setId: string, setType: string) => void,
 }
 
 export default function LogExercise ( props: Props ) {
@@ -235,7 +236,9 @@ export default function LogExercise ( props: Props ) {
                                     dispatch={props.dispatch}
                                     activeWorkout={props.activeWorkout}
                                     setData={s}
+                                    updateActiveSet={props.updateActiveSet}
                                     exerciseIndex={props.exerciseData.exerciseIndex}
+                                    exerciseId={props.exerciseData.exerciseId}
                                     unilateralExercise={props.exerciseData.subbedExercise?.subbedExerciseId ? props.exerciseData.subbedExercise.unilateralExercise : props.exerciseData.unilateralExercise}
                                     optionalSetModifiers={props.exerciseData.subbedExercise?.subbedExerciseId ? props.exerciseData.subbedExercise.optionalSetModifiers : props.exerciseData.optionalSetModifiers}
                                 />

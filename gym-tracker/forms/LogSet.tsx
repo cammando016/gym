@@ -8,7 +8,9 @@ interface Props {
     dispatch: Dispatch<LogWorkoutAction>,
     activeWorkout: boolean,
     setData: LoggedWorkoutSet,
+    updateActiveSet: (exerciseId: string, setId: string, setType: string) => void,
     exerciseIndex: number,
+    exerciseId: string,
     unilateralExercise: boolean,
     optionalSetModifiers: {
         unilateral: boolean,
@@ -56,7 +58,10 @@ export default function LogSet (props: Props) {
                                 <TextInput 
                                     placeholder='00'
                                     value={props.setData.weight.toString()}
-                                    onFocus={() => props.dispatch({ type: 'SET_DROPDOWN_FALSE' })}
+                                    onFocus={() => {
+                                        props.dispatch({ type: 'SET_DROPDOWN_FALSE' });
+                                        props.updateActiveSet(props.exerciseId, props.setData.setId, props.setData.setType);
+                                    }}
                                     onChangeText={(s: string) => {
                                         props.dispatch({ type: 'UPDATE_SET_WEIGHT', value: s, exerciseIndex: props.exerciseIndex, setIndex: props.setData.setIndex })
                                     }}

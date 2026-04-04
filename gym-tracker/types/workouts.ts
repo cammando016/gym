@@ -304,6 +304,12 @@ interface LogWorkoutForm {
     }
 }
 
+interface activeSetType {
+    activeExerciseId: string,
+    activeSetType: string,
+    activeSetIndex?: number
+}
+
 type LogWorkoutAction = 
 | { type: 'UPDATE_WORKOUT_NOTES'; value: string }
 | { type: 'UPDATE_EXERCISE_NOTES'; value: string; exerciseIndex: number }
@@ -335,4 +341,4 @@ type LogWorkoutAction =
 | { type: 'MOVE_EXERCISE_UP'; exerciseIndex: number }
 | { type: 'MOVE_EXERCISE_DOWN'; exerciseIndex: number }
 
-export { setTypes, SetType, muscleGroups, Muscle, WorkoutSet, Exercise, SetTracker, FormValues, FormStateWithValidation, privacyTypes, PrivacyType, ExerciseSearchResultType, CreatedExercise, WorkoutAction, ErrorShape, FormPayload, WorkoutTemplateType, SplitDay, SplitFormPayload, Split, UserSplits, LoggedWorkout, LoggedWorkoutExercise, LoggedWorkoutSet, LogWorkoutForm, LogWorkoutAction };
+export { setTypes, SetType, muscleGroups, Muscle, WorkoutSet, Exercise, SetTracker, FormValues, FormStateWithValidation, privacyTypes, PrivacyType, ExerciseSearchResultType, CreatedExercise, WorkoutAction, ErrorShape, FormPayload, WorkoutTemplateType, SplitDay, SplitFormPayload, Split, UserSplits, LoggedWorkout, LoggedWorkoutExercise, LoggedWorkoutSet, LogWorkoutForm, LogWorkoutAction, activeSetType };
