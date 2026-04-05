@@ -919,6 +919,7 @@ export default function LogWorkout (props: Props) {
                                             key={s.setId}
                                             lastTrainedSet={lastTrained.exercises.filter(e => e.exerciseId === activeSet.activeExerciseId)[0].sets[s.setIndex]}
                                             activeSetIndex={s.setIndex}
+                                            allSets={fullPastSetList}
                                         />
                                     )
                                 })
@@ -927,6 +928,7 @@ export default function LogWorkout (props: Props) {
                                     <LastTrainedSet
                                         lastTrainedSet={lastTrained?.exercises.filter(e => e.exerciseId === activeSet.activeExerciseId)[0].sets.filter(s => s.setType === activeSet.activeSetType)[activeSet.activeSetIndex]}
                                         activeSetIndex={activeSet.activeSetIndex}
+                                        allSets={fullPastSetList}
                                     />
                                 : (
                                     <View><Text>No matching set from past workout </Text></View>

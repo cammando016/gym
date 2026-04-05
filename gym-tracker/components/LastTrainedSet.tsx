@@ -7,6 +7,7 @@ import layoutStyles from '../styles/layoutStyles'
 interface Props {
     lastTrainedSet?: LoggedWorkoutSet,
     activeSetIndex: number,
+    allSets: boolean,
 }
 
 export default function LastTrainedSet(props: Props) {
@@ -20,8 +21,18 @@ export default function LastTrainedSet(props: Props) {
                     <View>
                         <View>
                             <View style={[layoutStyles.rowFlex]}>
-                                <Text>Last {props.lastTrainedSet.setType} Set {props.activeSetIndex + 1} </Text>
-                                <Text>{props.lastTrainedSet.weight} KG/LB</Text>
+                                {
+                                    props.allSets ? 
+                                    <Text>Set {props.activeSetIndex + 1} Type: {props.lastTrainedSet.setType} </Text>
+                                    :
+                                    <Text>Last {props.lastTrainedSet.setType} Set {props.activeSetIndex + 1} </Text>
+                                }
+                                {
+                                    user?.weightUnit === 'kg' ?
+                                    <Text>{props.lastTrainedSet.weight} KGs</Text>
+                                    :
+                                    <Text>{Math.round(props.lastTrainedSet.weight / 0.45359237)} LBs</Text>
+                                }
                             </View>
                             {props.lastTrainedSet.isUnilateral ? (
                                 <View>

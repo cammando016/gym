@@ -85,6 +85,7 @@ router.post('/login', async (req, res) => {
             user: {
                 username: user.username,
                 name: user.name,
+                weightUnit: user.weight_unit,
             }
         })
     } catch(error) {

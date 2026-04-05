@@ -34,6 +34,7 @@ interface LogonFormValues {
 interface User {
     username: string;
     name: string;
+    weightUnit: WeightUnit;
 }
 
 interface AuthContextType {

@@ -30,7 +30,11 @@ export default function LogSet (props: Props) {
                             <View style={[layoutStyles.rowFlex, {flexGrow: 1}]}>
                                 <Text>Set {props.setData.setIndex + 1} Type</Text>
                                 <View>
-                                    <Pressable onPress={() => props.dispatch({ type: 'TOGGLE_SET_TYPE_DROPDOWN', exerciseIndex: props.exerciseIndex, setIndex: props.setData.setIndex })} >
+                                    <Pressable 
+                                        onPress={() => {
+                                            props.dispatch({ type: 'TOGGLE_SET_TYPE_DROPDOWN', exerciseIndex: props.exerciseIndex, setIndex: props.setData.setIndex }) 
+                                        }} 
+                                    >
                                         <Text>{props.setData.setType}</Text>
                                     </Pressable>
                                     {
@@ -87,7 +91,10 @@ export default function LogSet (props: Props) {
                                             <TextInput 
                                                 placeholder='00' 
                                                 value={props.setData.reps.left.fullReps.toString()}
-                                                onFocus={() => props.dispatch({ type: 'SET_DROPDOWN_FALSE' })}
+                                                onFocus={() => {
+                                                    props.dispatch({ type: 'SET_DROPDOWN_FALSE' })
+                                                    props.updateActiveSet(props.exerciseId, props.setData.setId, props.setData.setType);
+                                                }}
                                                 onChangeText={(s: string) => {
                                                     props.dispatch({ type: 'UPDATE_SET_LEFT_FULL_REPS', value: s, exerciseIndex: props.exerciseIndex, setIndex: props.setData.setIndex })
                                                 }}
@@ -96,7 +103,10 @@ export default function LogSet (props: Props) {
                                             <TextInput 
                                                 placeholder='00' 
                                                 value={props.setData.reps.left.partialReps.toString()}
-                                                onFocus={() => props.dispatch({ type: 'SET_DROPDOWN_FALSE' })}
+                                                onFocus={() => {
+                                                    props.dispatch({ type: 'SET_DROPDOWN_FALSE' })
+                                                    props.updateActiveSet(props.exerciseId, props.setData.setId, props.setData.setType);
+                                                }}
                                                 onChangeText={(s: string) => {
                                                     props.dispatch({ type: 'UPDATE_SET_LEFT_PRTL_REPS', value: s, exerciseIndex: props.exerciseIndex, setIndex: props.setData.setIndex })
                                                 }}
@@ -105,7 +115,10 @@ export default function LogSet (props: Props) {
                                             <TextInput 
                                                 placeholder='00' 
                                                 value={props.setData.reps.left.assistedReps.toString()}
-                                                onFocus={() => props.dispatch({ type: 'SET_DROPDOWN_FALSE' })}
+                                                onFocus={() => {
+                                                    props.dispatch({ type: 'SET_DROPDOWN_FALSE' })
+                                                    props.updateActiveSet(props.exerciseId, props.setData.setId, props.setData.setType);
+                                                }}
                                                 onChangeText={(s: string) => {
                                                     props.dispatch({ type: 'UPDATE_SET_LEFT_ASTD_REPS', value: s, exerciseIndex: props.exerciseIndex, setIndex: props.setData.setIndex })
                                                 }}
@@ -117,7 +130,10 @@ export default function LogSet (props: Props) {
                                             <TextInput 
                                                 placeholder='00' 
                                                 value={props.setData.reps.right.fullReps.toString()}
-                                                onFocus={() => props.dispatch({ type: 'SET_DROPDOWN_FALSE' })}
+                                                onFocus={() => {
+                                                    props.dispatch({ type: 'SET_DROPDOWN_FALSE' })
+                                                    props.updateActiveSet(props.exerciseId, props.setData.setId, props.setData.setType);
+                                                }}
                                                 onChangeText={(s: string) => {
                                                     props.dispatch({ type: 'UPDATE_SET_RIGHT_FULL_REPS', value: s, exerciseIndex: props.exerciseIndex, setIndex: props.setData.setIndex })
                                                 }}
@@ -126,7 +142,10 @@ export default function LogSet (props: Props) {
                                             <TextInput 
                                                 placeholder='00' 
                                                 value={props.setData.reps.right.partialReps.toString()}
-                                                onFocus={() => props.dispatch({ type: 'SET_DROPDOWN_FALSE' })}
+                                                onFocus={() => {
+                                                    props.dispatch({ type: 'SET_DROPDOWN_FALSE' })
+                                                    props.updateActiveSet(props.exerciseId, props.setData.setId, props.setData.setType);
+                                                }}
                                                 onChangeText={(s: string) => {
                                                     props.dispatch({ type: 'UPDATE_SET_RIGHT_PRTL_REPS', value: s, exerciseIndex: props.exerciseIndex, setIndex: props.setData.setIndex })
                                                 }}
@@ -135,7 +154,10 @@ export default function LogSet (props: Props) {
                                             <TextInput 
                                                 placeholder='00' 
                                                 value={props.setData.reps.right.assistedReps.toString()}
-                                                onFocus={() => props.dispatch({ type: 'SET_DROPDOWN_FALSE' })}
+                                                onFocus={() => {
+                                                    props.dispatch({ type: 'SET_DROPDOWN_FALSE' })
+                                                    props.updateActiveSet(props.exerciseId, props.setData.setId, props.setData.setType);
+                                                }}
                                                 onChangeText={(s: string) => {
                                                     props.dispatch({ type: 'UPDATE_SET_RIGHT_ASTD_REPS', value: s, exerciseIndex: props.exerciseIndex, setIndex: props.setData.setIndex })
                                                 }}
@@ -149,7 +171,10 @@ export default function LogSet (props: Props) {
                                         <TextInput 
                                             placeholder='00' 
                                             value={props.setData.reps.fullReps.toString()}
-                                            onFocus={() => props.dispatch({ type: 'SET_DROPDOWN_FALSE' })}
+                                            onFocus={() => {
+                                                props.dispatch({ type: 'SET_DROPDOWN_FALSE' })
+                                                props.updateActiveSet(props.exerciseId, props.setData.setId, props.setData.setType);
+                                            }}
                                             onChangeText={(s: string) => {
                                                 props.dispatch({ type: 'UPDATE_SET_FULL_REPS', value: s, exerciseIndex: props.exerciseIndex, setIndex: props.setData.setIndex })
                                             }}
@@ -158,7 +183,10 @@ export default function LogSet (props: Props) {
                                         <TextInput 
                                             placeholder='00' 
                                             value={props.setData.reps.partialReps.toString()}
-                                            onFocus={() => props.dispatch({ type: 'SET_DROPDOWN_FALSE' })}
+                                            onFocus={() => {
+                                                props.dispatch({ type: 'SET_DROPDOWN_FALSE' })
+                                                props.updateActiveSet(props.exerciseId, props.setData.setId, props.setData.setType);
+                                            }}
                                             onChangeText={(s: string) => {
                                                 props.dispatch({ type: 'UPDATE_SET_PRTL_REPS', value: s, exerciseIndex: props.exerciseIndex, setIndex: props.setData.setIndex })
                                             }}
@@ -167,7 +195,10 @@ export default function LogSet (props: Props) {
                                         <TextInput 
                                             placeholder='00' 
                                             value={props.setData.reps.assistedReps.toString()}
-                                            onFocus={() => props.dispatch({ type: 'SET_DROPDOWN_FALSE' })}
+                                            onFocus={() => {
+                                                props.dispatch({ type: 'SET_DROPDOWN_FALSE' })
+                                                props.updateActiveSet(props.exerciseId, props.setData.setId, props.setData.setType);
+                                            }}
                                             onChangeText={(s: string) => {
                                                 props.dispatch({ type: 'UPDATE_SET_ASTD_REPS', value: s, exerciseIndex: props.exerciseIndex, setIndex: props.setData.setIndex })
                                             }}
@@ -181,7 +212,10 @@ export default function LogSet (props: Props) {
                             <TextInput 
                                 placeholder='Enter set notes here'
                                 value={props.setData.setNotes}
-                                onFocus={() => props.dispatch({ type: 'SET_DROPDOWN_FALSE' })}
+                                onFocus={() => {
+                                    props.dispatch({ type: 'SET_DROPDOWN_FALSE' })
+                                    props.updateActiveSet(props.exerciseId, props.setData.setId, props.setData.setType);
+                                }}
                                 onChangeText={(s: string) => {
                                     props.dispatch({ type: 'UPDATE_SET_NOTES', value: s, exerciseIndex: props.exerciseIndex, setIndex: props.setData.setIndex })
                                 }}
@@ -196,8 +230,9 @@ export default function LogSet (props: Props) {
                                 {props.optionalSetModifiers.belt && (
                                     <Pressable
                                         onPress={() => {
-                                            props.dispatch({ type: 'TOGGLE_SET_USE_BELT', exerciseIndex: props.exerciseIndex, setIndex: props.setData.setIndex })
-                                            props.dispatch({ type: 'SET_DROPDOWN_FALSE' })
+                                            props.dispatch({ type: 'TOGGLE_SET_USE_BELT', exerciseIndex: props.exerciseIndex, setIndex: props.setData.setIndex });
+                                            props.dispatch({ type: 'SET_DROPDOWN_FALSE' });
+                                            props.updateActiveSet(props.exerciseId, props.setData.setId, props.setData.setType);
                                         }}
                                     >
                                     {
@@ -220,7 +255,8 @@ export default function LogSet (props: Props) {
                                     <Pressable
                                         onPress={() => {
                                             props.dispatch({ type: 'TOGGLE_SET_USE_STRAPS', exerciseIndex: props.exerciseIndex, setIndex: props.setData.setIndex })
-                                            props.dispatch({ type: 'SET_DROPDOWN_FALSE' })
+                                            props.dispatch({ type: 'SET_DROPDOWN_FALSE' });
+                                            props.updateActiveSet(props.exerciseId, props.setData.setId, props.setData.setType);
                                         }}
                                     >
                                     {
@@ -243,7 +279,8 @@ export default function LogSet (props: Props) {
                                     <Pressable
                                         onPress={() => {
                                             props.dispatch({ type: 'TOGGLE_SET_UNILATERAL', exerciseIndex: props.exerciseIndex, setIndex: props.setData.setIndex })
-                                            props.dispatch({ type: 'SET_DROPDOWN_FALSE' })
+                                            props.dispatch({ type: 'SET_DROPDOWN_FALSE' });
+                                            props.updateActiveSet(props.exerciseId, props.setData.setId, props.setData.setType);
                                         }}
                                     >
                                         {
