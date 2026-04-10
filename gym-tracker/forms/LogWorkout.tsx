@@ -282,48 +282,6 @@ export default function LogWorkout (props: Props) {
                     }
                 }
             }
-            case 'UPDATE_SET_BELT': {
-                return {
-                    ...state,
-                    values: {
-                        ...state.values,
-                        exercises: state.values.exercises.map(e => {
-                            if (e.exerciseIndex !== action.exerciseIndex) return e 
-                            return {
-                                ...e,
-                                sets: e.sets.map(s => {
-                                    if (s.setIndex !== action.setIndex) return s
-                                    return {
-                                        ...s,
-                                        usedBelt: action.value
-                                    }
-                                })
-                            }
-                        })
-                    }
-                }
-            }
-            case 'UPDATE_SET_STRAPS': {
-                return {
-                    ...state,
-                    values: {
-                        ...state.values,
-                        exercises: state.values.exercises.map(e => {
-                            if (e.exerciseIndex !== action.exerciseIndex) return e
-                            return {
-                                ...e,
-                                sets: e.sets.map(s => {
-                                    if (s.setIndex !== action.setIndex) return s 
-                                    return {
-                                        ...s,
-                                        usedStraps: action.value
-                                    }
-                                })
-                            }
-                        })
-                    }
-                }
-            }
             case 'UPDATE_SET_FULL_REPS': {
                 return {
                     ...state,

@@ -349,8 +349,6 @@ type LogWorkoutAction =
 | { type: 'UPDATE_SET_TYPE'; value: SetType; exerciseIndex: number; setIndex: number }
 | { type: 'UPDATE_SET_WEIGHT'; value: string; exerciseIndex: number; setIndex: number }
 | { type: 'UPDATE_SET_NOTES'; value: string; exerciseIndex: number; setIndex: number }
-| { type: 'UPDATE_SET_BELT'; value: boolean; exerciseIndex: number; setIndex: number }
-| { type: 'UPDATE_SET_STRAPS'; value: boolean; exerciseIndex: number; setIndex: number }
 | { type: 'UPDATE_SET_FULL_REPS'; value: string; exerciseIndex: number; setIndex: number }
 | { type: 'UPDATE_SET_ASTD_REPS'; value: string; exerciseIndex: number; setIndex: number }
 | { type: 'UPDATE_SET_PRTL_REPS'; value: string; exerciseIndex: number; setIndex: number }
