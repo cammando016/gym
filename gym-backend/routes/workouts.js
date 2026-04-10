@@ -121,6 +121,39 @@ router.get('/templates', authenticateToken, async (req, res) => {
     }
 });
 
+router.get('/active', authenticateToken, async (req, res) => {
+    const userId = req.user.id;
+
+    try {
+        const activeWorkoutQuery = await pool.query(
+            `
+            SELECT
+                w.id,
+                w.date_started AS "dateStarted",
+                wt.workout_name AS "workoutName"
+            FROM workouts w
+            JOIN users u ON w.user_id = u.id
+            JOIN workout_templates wt ON w.workout_template_id = wt.id
+            WHERE u.id = $1
+            AND w.status = $2`, 
+            [userId, 'active']
+        );
+
+        const activeWorkout = activeWorkoutQuery.rows[0];
+
+        if (!activeWorkout) return res.status(404).json({message: 'No active workouts'});
+
+        return res.status(200).json({
+            workout: activeWorkout
+        })
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({
+            error: error.message
+        })
+    }
+})
+
 router.get('/:workoutId/last', authenticateToken, async (req, res) => {
     const userId = req.user.id;
     const templateId = req.params.workoutId;

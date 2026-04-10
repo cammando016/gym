@@ -20,6 +20,16 @@ export const createWorkout = async (details: FormPayload) => {
     }
 };
 
+export const checkForActiveWorkout = async () => {
+    const token = await AsyncStorage.getItem('token');
+    const res = await fetch(`http://localhost:3000/api/workouts/active`, {
+        headers: { authorization: `Bearer ${token}`}
+    });
+    console.log(res);
+    if (res.status === 200) { return await res.json(); }
+    return null;
+}
+
 export const fetchWorkouts = async () => {
     const token = await AsyncStorage.getItem('token');
     const res = await fetch(`http://localhost:3000/api/workouts/templates`, {
