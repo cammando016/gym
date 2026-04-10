@@ -24,7 +24,10 @@ const workoutStyles = StyleSheet.create({
     },
     headerTextBold: {
         fontWeight: 'bold'
-    }
+    },
+    errorText: {
+        color: 'red',
+    },
 })
 
 export default workoutStyles

@@ -1,4 +1,4 @@
-import { LoggedWorkoutSet, LogWorkoutAction, WorkoutTemplateType, setTypes } from '@/types/workouts';
+import { LoggedWorkoutSet, LogWorkoutAction, WorkoutTemplateType, setTypes, LoggedSetError } from '@/types/workouts';
 import { Dispatch } from 'react';
 import { View, Text, TextInput, Pressable, Image } from 'react-native';
 import layoutStyles from '../styles/layoutStyles.js';
@@ -17,6 +17,7 @@ interface Props {
         belt: boolean,
         straps: boolean,
     },
+    setErrors: LoggedSetError,
 }
 
 export default function LogSet (props: Props) {
@@ -69,6 +70,7 @@ export default function LogSet (props: Props) {
                                     onChangeText={(s: string) => {
                                         props.dispatch({ type: 'UPDATE_SET_WEIGHT', value: s, exerciseIndex: props.exerciseIndex, setIndex: props.setData.setIndex })
                                     }}
+                                    onEndEditing={(event) => props.dispatch({ type: 'VALIDATE_SET_WEIGHT', value: event.nativeEvent.text, exerciseIndex: props.exerciseIndex, setIndex: props.setData.setIndex })}
                                 ></TextInput>
                                 
                                 <View style={[layoutStyles.rowFlex]}>
@@ -81,6 +83,7 @@ export default function LogSet (props: Props) {
                                 </View>
                             </View>
                         </View>
+                        { props.setErrors.weight && <Text style={[workoutStyles.errorText]}>{props.setErrors.weight}</Text> }
                         <View style={[layoutStyles.rowFlex,]}>
                             {
                                 props.setData.isUnilateral ? (
@@ -98,6 +101,7 @@ export default function LogSet (props: Props) {
                                                 onChangeText={(s: string) => {
                                                     props.dispatch({ type: 'UPDATE_SET_LEFT_FULL_REPS', value: s, exerciseIndex: props.exerciseIndex, setIndex: props.setData.setIndex })
                                                 }}
+                                                onEndEditing={(event) => props.dispatch({ type: 'VALIDATE_LEFT_FULL_REPS', value: event.nativeEvent.text, exerciseIndex: props.exerciseIndex, setIndex: props.setData.setIndex })}
                                             />
                                             <Text>Partial:</Text>
                                             <TextInput 
@@ -110,6 +114,7 @@ export default function LogSet (props: Props) {
                                                 onChangeText={(s: string) => {
                                                     props.dispatch({ type: 'UPDATE_SET_LEFT_PRTL_REPS', value: s, exerciseIndex: props.exerciseIndex, setIndex: props.setData.setIndex })
                                                 }}
+                                                onEndEditing={(event) => props.dispatch({ type: 'VALIDATE_LEFT_PRTL_REPS', value: event.nativeEvent.text, exerciseIndex: props.exerciseIndex, setIndex: props.setData.setIndex })}
                                             />
                                             <Text>Assisted:</Text>
                                             <TextInput 
@@ -122,8 +127,12 @@ export default function LogSet (props: Props) {
                                                 onChangeText={(s: string) => {
                                                     props.dispatch({ type: 'UPDATE_SET_LEFT_ASTD_REPS', value: s, exerciseIndex: props.exerciseIndex, setIndex: props.setData.setIndex })
                                                 }}
+                                                onEndEditing={(event) => props.dispatch({ type: 'VALIDATE_LEFT_ASTD_REPS', value: event.nativeEvent.text, exerciseIndex: props.exerciseIndex, setIndex: props.setData.setIndex })}
                                             />
                                         </View>
+                                        { (props.setErrors.unilateralSet && props.setErrors.left.fullReps) && <Text style={[workoutStyles.errorText]}>{props.setErrors.left.fullReps}</Text>}
+                                        { (props.setErrors.unilateralSet && props.setErrors.left.partialReps) && <Text style={[workoutStyles.errorText]}>{props.setErrors.left.partialReps}</Text>}
+                                        { (props.setErrors.unilateralSet && props.setErrors.left.assistedReps) && <Text style={[workoutStyles.errorText]}>{props.setErrors.left.assistedReps}</Text>}
                                         <View style={[layoutStyles.rowFlex,]}>
                                             <Text>Right Reps</Text>
                                             <Text>Full:</Text>
@@ -137,6 +146,7 @@ export default function LogSet (props: Props) {
                                                 onChangeText={(s: string) => {
                                                     props.dispatch({ type: 'UPDATE_SET_RIGHT_FULL_REPS', value: s, exerciseIndex: props.exerciseIndex, setIndex: props.setData.setIndex })
                                                 }}
+                                                onEndEditing={(event) => props.dispatch({ type: 'VALIDATE_RIGHT_FULL_REPS', value: event.nativeEvent.text, exerciseIndex: props.exerciseIndex, setIndex: props.setData.setIndex })}
                                             />
                                             <Text>Partial:</Text>
                                             <TextInput 
@@ -149,6 +159,7 @@ export default function LogSet (props: Props) {
                                                 onChangeText={(s: string) => {
                                                     props.dispatch({ type: 'UPDATE_SET_RIGHT_PRTL_REPS', value: s, exerciseIndex: props.exerciseIndex, setIndex: props.setData.setIndex })
                                                 }}
+                                                onEndEditing={(event) => props.dispatch({ type: 'VALIDATE_RIGHT_PRTL_REPS', value: event.nativeEvent.text, exerciseIndex: props.exerciseIndex, setIndex: props.setData.setIndex })}
                                             />
                                             <Text>Assisted:</Text>
                                             <TextInput 
@@ -161,48 +172,60 @@ export default function LogSet (props: Props) {
                                                 onChangeText={(s: string) => {
                                                     props.dispatch({ type: 'UPDATE_SET_RIGHT_ASTD_REPS', value: s, exerciseIndex: props.exerciseIndex, setIndex: props.setData.setIndex })
                                                 }}
+                                                onEndEditing={(event) => props.dispatch({ type: 'VALIDATE_RIGHT_ASTD_REPS', value: event.nativeEvent.text, exerciseIndex: props.exerciseIndex, setIndex: props.setData.setIndex })}
                                             />
                                         </View>
+                                        { (props.setErrors.unilateralSet && props.setErrors.right.fullReps) && <Text style={[workoutStyles.errorText]}>{props.setErrors.right.fullReps}</Text>}
+                                        { (props.setErrors.unilateralSet && props.setErrors.right.partialReps) && <Text style={[workoutStyles.errorText]}>{props.setErrors.right.partialReps}</Text>}
+                                        { (props.setErrors.unilateralSet && props.setErrors.right.assistedReps) && <Text style={[workoutStyles.errorText]}>{props.setErrors.right.assistedReps}</Text>}
                                     </View>
                                 ) : (
-                                    <View style={[layoutStyles.rowFlex,]}>
-                                        <Text>Reps</Text>
-                                        <Text>Full:</Text>
-                                        <TextInput 
-                                            placeholder='00' 
-                                            value={props.setData.reps.fullReps.toString()}
-                                            onFocus={() => {
-                                                props.dispatch({ type: 'SET_DROPDOWN_FALSE' })
-                                                props.updateActiveSet(props.exerciseId, props.setData.setId, props.setData.setType);
-                                            }}
-                                            onChangeText={(s: string) => {
-                                                props.dispatch({ type: 'UPDATE_SET_FULL_REPS', value: s, exerciseIndex: props.exerciseIndex, setIndex: props.setData.setIndex })
-                                            }}
-                                        />
-                                        <Text>Partial:</Text>
-                                        <TextInput 
-                                            placeholder='00' 
-                                            value={props.setData.reps.partialReps.toString()}
-                                            onFocus={() => {
-                                                props.dispatch({ type: 'SET_DROPDOWN_FALSE' })
-                                                props.updateActiveSet(props.exerciseId, props.setData.setId, props.setData.setType);
-                                            }}
-                                            onChangeText={(s: string) => {
-                                                props.dispatch({ type: 'UPDATE_SET_PRTL_REPS', value: s, exerciseIndex: props.exerciseIndex, setIndex: props.setData.setIndex })
-                                            }}
-                                        />
-                                        <Text>Assisted:</Text>
-                                        <TextInput 
-                                            placeholder='00' 
-                                            value={props.setData.reps.assistedReps.toString()}
-                                            onFocus={() => {
-                                                props.dispatch({ type: 'SET_DROPDOWN_FALSE' })
-                                                props.updateActiveSet(props.exerciseId, props.setData.setId, props.setData.setType);
-                                            }}
-                                            onChangeText={(s: string) => {
-                                                props.dispatch({ type: 'UPDATE_SET_ASTD_REPS', value: s, exerciseIndex: props.exerciseIndex, setIndex: props.setData.setIndex })
-                                            }}
-                                        />
+                                    <View>
+                                        <View style={[layoutStyles.rowFlex,]}>
+                                            <Text>Reps</Text>
+                                            <Text>Full:</Text>
+                                            <TextInput 
+                                                placeholder='00' 
+                                                value={props.setData.reps.fullReps.toString()}
+                                                onFocus={() => {
+                                                    props.dispatch({ type: 'SET_DROPDOWN_FALSE' })
+                                                    props.updateActiveSet(props.exerciseId, props.setData.setId, props.setData.setType);
+                                                }}
+                                                onChangeText={(s: string) => {
+                                                    props.dispatch({ type: 'UPDATE_SET_FULL_REPS', value: s, exerciseIndex: props.exerciseIndex, setIndex: props.setData.setIndex })
+                                                }}
+                                                onEndEditing={(event) => props.dispatch({ type: 'VALIDATE_FULL_REPS', value: event.nativeEvent.text, exerciseIndex: props.exerciseIndex, setIndex: props.setData.setIndex })}
+                                            />
+                                            <Text>Partial:</Text>
+                                            <TextInput 
+                                                placeholder='00' 
+                                                value={props.setData.reps.partialReps.toString()}
+                                                onFocus={() => {
+                                                    props.dispatch({ type: 'SET_DROPDOWN_FALSE' })
+                                                    props.updateActiveSet(props.exerciseId, props.setData.setId, props.setData.setType);
+                                                }}
+                                                onChangeText={(s: string) => {
+                                                    props.dispatch({ type: 'UPDATE_SET_PRTL_REPS', value: s, exerciseIndex: props.exerciseIndex, setIndex: props.setData.setIndex })
+                                                }}
+                                                onEndEditing={(event) => props.dispatch({ type: 'VALIDATE_PRTL_REPS', value: event.nativeEvent.text, exerciseIndex: props.exerciseIndex, setIndex: props.setData.setIndex })}
+                                            />
+                                            <Text>Assisted:</Text>
+                                            <TextInput 
+                                                placeholder='00' 
+                                                value={props.setData.reps.assistedReps.toString()}
+                                                onFocus={() => {
+                                                    props.dispatch({ type: 'SET_DROPDOWN_FALSE' })
+                                                    props.updateActiveSet(props.exerciseId, props.setData.setId, props.setData.setType);
+                                                }}
+                                                onChangeText={(s: string) => {
+                                                    props.dispatch({ type: 'UPDATE_SET_ASTD_REPS', value: s, exerciseIndex: props.exerciseIndex, setIndex: props.setData.setIndex })
+                                                }}
+                                                onEndEditing={(event) => props.dispatch({ type: 'VALIDATE_ASTD_REPS', value: event.nativeEvent.text, exerciseIndex: props.exerciseIndex, setIndex: props.setData.setIndex })}
+                                            />
+                                        </View>
+                                        { (!props.setErrors.unilateralSet && props.setErrors.fullReps) && <Text style={[workoutStyles.errorText]}>{props.setErrors.fullReps}</Text> }
+                                        { (!props.setErrors.unilateralSet && props.setErrors.partialReps) && <Text style={[workoutStyles.errorText]}>{props.setErrors.partialReps}</Text> }
+                                        { (!props.setErrors.unilateralSet && props.setErrors.assistedReps) && <Text style={[workoutStyles.errorText]}>{props.setErrors.assistedReps}</Text> }
                                     </View>
                                 )
                             }
@@ -219,8 +242,10 @@ export default function LogSet (props: Props) {
                                 onChangeText={(s: string) => {
                                     props.dispatch({ type: 'UPDATE_SET_NOTES', value: s, exerciseIndex: props.exerciseIndex, setIndex: props.setData.setIndex })
                                 }}
+                                onEndEditing={(event) => props.dispatch({ type: 'VALIDATE_SET_NOTES', value: event.nativeEvent.text, exerciseIndex: props.exerciseIndex, setIndex: props.setData.setIndex })}
                             />
                         </View>
+                        { props.setErrors.setNotes && <Text style={[workoutStyles.errorText]}>{props.setErrors.setNotes}</Text> }
                     </View>
                     {
                         (props.optionalSetModifiers.belt ||

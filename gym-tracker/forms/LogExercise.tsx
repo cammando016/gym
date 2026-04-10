@@ -1,4 +1,4 @@
-import { ExerciseSearchResultType, LoggedWorkoutExercise, LogWorkoutAction } from '@/types/workouts';
+import { ExerciseSearchResultType, LoggedExerciseError, LoggedWorkoutExercise, LogWorkoutAction } from '@/types/workouts';
 import { View, Text, TextInput, Pressable, Modal } from 'react-native';
 import workoutStyles from '@/styles/workouts';
 import { Dispatch, useEffect, useState } from 'react';
@@ -15,6 +15,7 @@ interface Props {
     exerciseCount: number,
     lastTrainedExercise?: LoggedWorkoutExercise,
     updateActiveSet: (exerciseId: string, setId: string, setType: string) => void,
+    exerciseErrors: LoggedExerciseError,
 }
 
 export default function LogExercise ( props: Props ) {
@@ -229,7 +230,7 @@ export default function LogExercise ( props: Props ) {
                 showSets && (
                     <View>
                         {
-                            props.exerciseData.sets.map(s => {
+                            props.exerciseData.sets.map((s, i) => {
                             return (
                                 <LogSet 
                                     key={s.setId} 
@@ -241,18 +242,23 @@ export default function LogExercise ( props: Props ) {
                                     exerciseId={props.exerciseData.exerciseId}
                                     unilateralExercise={props.exerciseData.subbedExercise?.subbedExerciseId ? props.exerciseData.subbedExercise.unilateralExercise : props.exerciseData.unilateralExercise}
                                     optionalSetModifiers={props.exerciseData.subbedExercise?.subbedExerciseId ? props.exerciseData.subbedExercise.optionalSetModifiers : props.exerciseData.optionalSetModifiers}
+                                    setErrors={props.exerciseErrors.sets[i]}
                                 />
                             )})
                         }
 
-                        <View style={[layoutStyles.rowFlex]}>
-                            <Text>Exercise Notes: </Text>
-                            <TextInput 
-                                placeholder='Leave any notes for next session here'
-                                value={props.exerciseData.exerciseNotes}
-                                onFocus={() => props.dispatch({ type: 'SET_DROPDOWN_FALSE' })}
-                                onChangeText={(s: string) => props.dispatch({ type: 'UPDATE_EXERCISE_NOTES', value: s, exerciseIndex: props.exerciseData.exerciseIndex })}
-                            />
+                        <View>
+                            <View style={[layoutStyles.rowFlex]}>
+                                <Text>Exercise Notes: </Text>
+                                <TextInput 
+                                    placeholder='Leave any notes for next session here'
+                                    value={props.exerciseData.exerciseNotes}
+                                    onFocus={() => props.dispatch({ type: 'SET_DROPDOWN_FALSE' })}
+                                    onChangeText={(s: string) => props.dispatch({ type: 'UPDATE_EXERCISE_NOTES', value: s, exerciseIndex: props.exerciseData.exerciseIndex })}
+                                    onEndEditing={(event) => props.dispatch({ type: 'VALIDATE_EXERCISE_NOTES', value: event.nativeEvent.text, exerciseIndex: props.exerciseData.exerciseIndex })}
+                                />
+                            </View>
+                            { props.exerciseErrors.exerciseNotes && <Text style={[workoutStyles.errorText]}>{props.exerciseErrors.exerciseNotes}</Text> }
                         </View>
                     </View>
                 )

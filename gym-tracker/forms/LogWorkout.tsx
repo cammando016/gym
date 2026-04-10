@@ -7,6 +7,8 @@ import { useWorkoutHistory } from '@/hooks/useWorkoutHistory';
 import { randomUUID } from 'expo-crypto'
 import LastTrainedSet from '@/components/LastTrainedSet';
 import layoutStyles from '@/styles/layoutStyles';
+import { validateOptionalAlphanumericSymbolsField, validateOptionalNumericField, validateRequiredNumericField } from '@/utils/formValiditors';
+import workoutStyles from '@/styles/workouts';
 
 interface Props {
     activeWorkout: boolean, //True for when logging working, false when viewing past workout
@@ -119,6 +121,39 @@ export default function LogWorkout (props: Props) {
                     })
                 }
             }),
+        },
+        errors: {
+            workoutNotes: undefined,
+            exercises: workoutTemplate.exercises.map(e => {
+                return {
+                    exerciseNotes: undefined,
+                    sets: e.sets.map(s => {
+                        if (s.isUnilateralSet || e.unilateralExercise) return {
+                            weight: undefined,
+                            setNotes: undefined,
+                            unilateralSet: true,
+                            left: {
+                                fullReps: undefined,
+                                assistedReps: undefined,
+                                partialReps: undefined,
+                            },
+                            right: {
+                                fullReps: undefined,
+                                assistedReps: undefined,
+                                partialReps: undefined,
+                            }
+                        }
+                        else return {
+                            weight: undefined,
+                            setNotes: undefined,
+                            unilateralSet: false,
+                            fullReps: undefined,
+                            assistedReps: undefined,
+                            partialReps: undefined
+                        }
+                    })
+                }
+            })
         }
     }
 
@@ -899,6 +934,285 @@ export default function LogWorkout (props: Props) {
                     }
                 }
             }
+            case 'VALIDATE_WORKOUT_NOTES': {
+                return {
+                    ...state,
+                    errors: {
+                        ...state.errors,
+                        workoutNotes: validateOptionalAlphanumericSymbolsField(action.value, 'Workout Notes')
+                    }
+                }
+            }
+            case 'VALIDATE_EXERCISE_NOTES': {
+                return {
+                    ...state,
+                    errors: {
+                        ...state.errors,
+                        exercises: state.errors.exercises.map((e, i) => {
+                            if (action.exerciseIndex !== i) return e
+                            return {
+                                ...e,
+                                exerciseNotes: validateOptionalAlphanumericSymbolsField(action.value, 'Exercise Notes')
+                            }
+                        })
+                    }
+                }
+            }
+            case 'VALIDATE_SET_NOTES': {
+                return {
+                    ...state,
+                    errors: {
+                        ...state.errors, 
+                        exercises: state.errors.exercises.map((e, i) => {
+                            if (action.exerciseIndex !== i) return e
+                            return {
+                                ...e,
+                                sets: e.sets.map((s, j) => {
+                                    if (action.setIndex !== j) return s
+                                    return {
+                                        ...s,
+                                        setNotes: validateOptionalAlphanumericSymbolsField(action.value, 'Set Notes')
+                                    }
+                                })
+                            }
+                        })
+                    }
+                }
+            }
+            case 'VALIDATE_SET_WEIGHT': {
+                return {
+                    ...state,
+                    errors: {
+                        ...state.errors,
+                        exercises: state.errors.exercises.map((e, i) => {
+                            if (action.exerciseIndex !== i) return e
+                            return {
+                                ...e,
+                                sets: e.sets.map((s, j) => {
+                                    if (action.setIndex !== j) return s
+                                    return {
+                                        ...s,
+                                        weight: validateRequiredNumericField(action.value, 'Set Weight')
+                                    }
+                                })
+                            }
+                        })
+                    }
+                }
+            }
+            case 'VALIDATE_FULL_REPS': {
+                return {
+                    ...state,
+                    errors: {
+                        ...state.errors,
+                        exercises: state.errors.exercises.map((e, i) => {
+                            if (action.exerciseIndex !== i) return e
+                            return {
+                                ...e,
+                                sets: e.sets.map((s, j) => {
+                                    if (action.setIndex !== j) return s
+                                    return {
+                                        ...s,
+                                        fullReps: validateOptionalNumericField(action.value, 'Full Reps')
+                                    }
+                                })
+                            }
+                        })
+                    }
+                }
+            }
+            case 'VALIDATE_ASTD_REPS': {
+                return {
+                    ...state,
+                    errors: {
+                        ...state.errors,
+                        exercises: state.errors.exercises.map((e, i) => {
+                            if (action.exerciseIndex !== i) return e
+                            return {
+                                ...e,
+                                sets: e.sets.map((s, j) => {
+                                    if (action.setIndex !== j) return s
+                                    return {
+                                        ...s,
+                                        assistedReps: validateOptionalNumericField(action.value, 'Assisted Reps')
+                                    }
+                                })
+                            }
+                        })
+                    }
+                }
+            }
+            case 'VALIDATE_PRTL_REPS': {
+                return {
+                    ...state,
+                    errors: {
+                        ...state.errors,
+                        exercises: state.errors.exercises.map((e, i) => {
+                            if (action.exerciseIndex !== i) return e
+                            return {
+                                ...e,
+                                sets: e.sets.map((s, j) => {
+                                    if (action.setIndex !== j) return s
+                                    return {
+                                        ...s,
+                                        partialReps: validateOptionalNumericField(action.value, 'Partial Reps')
+                                    }
+                                })
+                            }
+                        })
+                    }
+                }
+            }
+            case 'VALIDATE_LEFT_FULL_REPS': {
+                return {
+                    ...state,
+                    errors: {
+                        ...state.errors,
+                        exercises: state.errors.exercises.map((e, i) => {
+                            if (action.exerciseIndex !== i) return e
+                            return {
+                                ...e,
+                                sets: e.sets.map((s, j) => {
+                                    if (action.setIndex !== j) return s
+                                    if (!s.unilateralSet) return s
+                                    return {
+                                        ...s,
+                                        left: {
+                                            ...s.left,
+                                            fullReps: validateOptionalNumericField(action.value, 'Left Full Reps')
+                                        }
+                                    }
+                                })
+                            }
+                        })
+                    }
+                }
+            }
+            case 'VALIDATE_LEFT_ASTD_REPS': {
+                return {
+                    ...state,
+                    errors: {
+                        ...state.errors,
+                        exercises: state.errors.exercises.map((e, i) => {
+                            if (action.exerciseIndex !== i) return e
+                            return {
+                                ...e,
+                                sets: e.sets.map((s, j) => {
+                                    if (action.setIndex !== j) return s
+                                    if (!s.unilateralSet) return s
+                                    return {
+                                        ...s,
+                                        left: {
+                                            ...s.left,
+                                            assistedReps: validateOptionalNumericField(action.value, 'Left Assisted Reps')
+                                        }
+                                    }
+                                })
+                            }
+                        })
+                    }
+                }
+            }
+            case 'VALIDATE_LEFT_PRTL_REPS': {
+                return {
+                    ...state,
+                    errors: {
+                        ...state.errors,
+                        exercises: state.errors.exercises.map((e, i) => {
+                            if (action.exerciseIndex !== i) return e
+                            return {
+                                ...e,
+                                sets: e.sets.map((s, j) => {
+                                    if (action.setIndex !== j) return s
+                                    if (!s.unilateralSet) return s
+                                    return {
+                                        ...s,
+                                        left: {
+                                            ...s.left,
+                                            partialReps: validateOptionalNumericField(action.value, 'Left Partial Reps')
+                                        }
+                                    }
+                                })
+                            }
+                        })
+                    }
+                }
+            }
+            case 'VALIDATE_RIGHT_FULL_REPS': {
+                return {
+                    ...state,
+                    errors: {
+                        ...state.errors,
+                        exercises: state.errors.exercises.map((e, i) => {
+                            if (action.exerciseIndex !== i) return e
+                            return {
+                                ...e,
+                                sets: e.sets.map((s, j) => {
+                                    if (action.setIndex !== j) return s
+                                    if (!s.unilateralSet) return s
+                                    return {
+                                        ...s,
+                                        right: {
+                                            ...s.right,
+                                            fullReps: validateOptionalNumericField(action.value, 'Right Full Reps')
+                                        }
+                                    }
+                                })
+                            }
+                        })
+                    }
+                }
+            }
+            case 'VALIDATE_RIGHT_ASTD_REPS': {
+                return {
+                    ...state,
+                    errors: {
+                        ...state.errors,
+                        exercises: state.errors.exercises.map((e, i) => {
+                            if (action.exerciseIndex !== i) return e
+                            return {
+                                ...e,
+                                sets: e.sets.map((s, j) => {
+                                    if (action.setIndex !== j) return s
+                                    if (!s.unilateralSet) return s
+                                    return {
+                                        ...s,
+                                        right: {
+                                            ...s.right,
+                                            assistedReps: validateOptionalNumericField(action.value, 'Right Assisted Reps')
+                                        }
+                                    }
+                                })
+                            }
+                        })
+                    }
+                }
+            }
+            case 'VALIDATE_RIGHT_PRTL_REPS': {
+                return {
+                    ...state,
+                    errors: {
+                        ...state.errors,
+                        exercises: state.errors.exercises.map((e, i) => {
+                            if (action.exerciseIndex !== i) return e
+                            return {
+                                ...e,
+                                sets: e.sets.map((s, j) => {
+                                    if (action.setIndex !== j) return s
+                                    if (!s.unilateralSet) return s
+                                    return {
+                                        ...s,
+                                        right: {
+                                            ...s.right,
+                                            partialReps: validateOptionalNumericField(action.value, 'Right Partial Reps')
+                                        }
+                                    }
+                                })
+                            }
+                        })
+                    }
+                }
+            }
             default: return state;
         }
     }
@@ -942,7 +1256,7 @@ export default function LogWorkout (props: Props) {
                 </View>
                 <View>
                     {
-                        workoutForm.values.exercises.slice().sort((a, b) => a.exerciseIndex - b.exerciseIndex).map(e => {
+                        workoutForm.values.exercises.slice().sort((a, b) => a.exerciseIndex - b.exerciseIndex).map((e, i) => {
                             return (
                                 <LogExercise 
                                     key={e.exerciseId} 
@@ -952,6 +1266,7 @@ export default function LogWorkout (props: Props) {
                                     exerciseCount={workoutForm.values.exercises.length}
                                     lastTrainedExercise={lastTrained?.exercises.find(exc => exc.exerciseId === e.exerciseId)}
                                     updateActiveSet={updateActiveSet}
+                                    exerciseErrors={workoutForm.errors.exercises[i]}
                                 ></LogExercise>)
                         })
                     }
@@ -962,7 +1277,9 @@ export default function LogWorkout (props: Props) {
                         placeholder='Leave any notes from this workout for the next session here'
                         value={workoutForm.values.workoutNotes}
                         onChangeText={(s: string) => dispatch({ type: 'UPDATE_WORKOUT_NOTES', value: s })}
+                        onEndEditing={(event) => { console.log(event.nativeEvent.text); dispatch({ type: 'VALIDATE_WORKOUT_NOTES', value: event.nativeEvent.text }) } }
                     />
+                    {workoutForm.errors.workoutNotes && <Text style={[workoutStyles.errorText]}>{workoutForm.errors.workoutNotes}</Text>}
                 </View>
             </View>
         </ScrollView>

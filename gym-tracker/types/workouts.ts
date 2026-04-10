@@ -297,10 +297,42 @@ interface LoggedWorkout {
     exercises: LoggedWorkoutExercise [],
 }
 
+type LoggedSetError = {
+    weight?: string,
+    setNotes?: string,
+    unilateralSet: false,
+    fullReps?: string,
+    assistedReps?: string,
+    partialReps?: string,
+} | {
+    weight?: string, 
+    setNotes?: string,
+    unilateralSet: true,
+    left: {
+        fullReps?: string,
+        assistedReps?: string,
+        partialReps?: string,
+    },
+    right: {
+        fullReps?: string,
+        assistedReps?: string,
+        partialReps?: string,
+    }
+}
+
+interface LoggedExerciseError {
+    exerciseNotes?: string,
+    sets: LoggedSetError[]
+}
+
 interface LogWorkoutForm {
     values: {
         workoutNotes: string,
         exercises: LoggedWorkoutExercise [],
+    },
+    errors: {
+        workoutNotes?: string,
+        exercises: LoggedExerciseError[],
     }
 }
 
@@ -340,5 +372,18 @@ type LogWorkoutAction =
 | { type: 'CLEAR_SUB'; exerciseIndex: number }
 | { type: 'MOVE_EXERCISE_UP'; exerciseIndex: number }
 | { type: 'MOVE_EXERCISE_DOWN'; exerciseIndex: number }
+| { type: 'VALIDATE_WORKOUT_NOTES'; value: string }
+| { type: 'VALIDATE_EXERCISE_NOTES'; value: string; exerciseIndex: number }
+| { type: 'VALIDATE_SET_WEIGHT'; value: string; exerciseIndex: number; setIndex: number }
+| { type: 'VALIDATE_SET_NOTES'; value: string; exerciseIndex: number; setIndex: number }
+| { type: 'VALIDATE_FULL_REPS'; value: string; exerciseIndex: number; setIndex: number }
+| { type: 'VALIDATE_ASTD_REPS'; value: string; exerciseIndex: number; setIndex: number }
+| { type: 'VALIDATE_PRTL_REPS'; value: string; exerciseIndex: number; setIndex: number }
+| { type: 'VALIDATE_LEFT_FULL_REPS'; value: string; exerciseIndex: number; setIndex: number }
+| { type: 'VALIDATE_LEFT_ASTD_REPS'; value: string; exerciseIndex: number; setIndex: number }
+| { type: 'VALIDATE_LEFT_PRTL_REPS'; value: string; exerciseIndex: number; setIndex: number }
+| { type: 'VALIDATE_RIGHT_FULL_REPS'; value: string; exerciseIndex: number; setIndex: number }
+| { type: 'VALIDATE_RIGHT_ASTD_REPS'; value: string; exerciseIndex: number; setIndex: number }
+| { type: 'VALIDATE_RIGHT_PRTL_REPS'; value: string; exerciseIndex: number; setIndex: number }
 
-export { setTypes, SetType, muscleGroups, Muscle, WorkoutSet, Exercise, SetTracker, FormValues, FormStateWithValidation, privacyTypes, PrivacyType, ExerciseSearchResultType, CreatedExercise, WorkoutAction, ErrorShape, FormPayload, WorkoutTemplateType, SplitDay, SplitFormPayload, Split, UserSplits, LoggedWorkout, LoggedWorkoutExercise, LoggedWorkoutSet, LogWorkoutForm, LogWorkoutAction, activeSetType };
+export { setTypes, SetType, muscleGroups, Muscle, WorkoutSet, Exercise, SetTracker, FormValues, FormStateWithValidation, privacyTypes, PrivacyType, ExerciseSearchResultType, CreatedExercise, WorkoutAction, ErrorShape, FormPayload, WorkoutTemplateType, SplitDay, SplitFormPayload, Split, UserSplits, LoggedWorkout, LoggedWorkoutExercise, LoggedWorkoutSet, LoggedExerciseError, LoggedSetError, LogWorkoutForm, LogWorkoutAction, activeSetType };

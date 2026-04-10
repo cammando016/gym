@@ -9,7 +9,7 @@ export const validateRequiredAlphabeticalSpacesField = (value: string, fieldName
 }
 
 export const validateRequiredAlphanumericSymbolsField = (value: string, fieldName: string) : string | undefined => {
-    if (value === '' || !/^[a-zA-Z0-9,_/&\s]*$/.test(value)) return `${fieldName} is required containing only alphanumeric and "_ / , &" special characters`
+    if (value === '' || !/^[a-zA-Z0-9,._/&\s]*$/.test(value)) return `${fieldName} is required containing only alphanumeric or _ / & . , special characters`
     return undefined
 }
 
@@ -18,12 +18,21 @@ export const validateRequiredAlphanumericField = (value: string, fieldName: stri
     return undefined
 }
 
+export const validateOptionalAlphanumericSymbolsField = (value: string, fieldName: string) : string | undefined => {
+    if (!/^[a-zA-Z0-9,:._/&\s]*$/.test(value)) return `${fieldName} must only contain alphanumeric or _ / : & . , special characters`
+}
+
 export const validateOptionalNumericField = (value: string, fieldName: string) : string | undefined => {
     //Field is allowed to be empty, don't test isNaN if empty
     if (value === '') return undefined;
     
     if (Number.isNaN(Number(value))) return `${fieldName} must be a number`
     return undefined
+}
+
+export const validateRequiredNumericField = (value: string, fieldName: string) : string | undefined => {
+    if (Number.isNaN(Number(value))) return `${fieldName} must be a number`;
+    return undefined;
 }
 
 export const validateOptionalIntegerField = (value: string, fieldName: string) : string | undefined => {
