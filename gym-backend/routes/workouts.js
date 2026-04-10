@@ -2,11 +2,12 @@ import express from 'express';
 import dotenv from 'dotenv';
 import pool from '../db/pool.js';
 import { authenticateToken } from '../middleware/authenticateToken.js';
+import { deactivateActiveWorkouts } from '../middleware/deactivateActiveWorkouts.js';
 
 dotenv.config();
 const router = express.Router();
 
-router.post('/sessions', authenticateToken, async (req, res) => {
+router.post('/sessions', authenticateToken, deactivateActiveWorkouts, async (req, res) => {
     
     console.log(req.body);
     const { templateId } = req.body;
