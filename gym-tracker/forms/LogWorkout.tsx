@@ -127,10 +127,12 @@ export default function LogWorkout (props: Props) {
             exercises: workoutTemplate.exercises.map(e => {
                 return {
                     exerciseNotes: undefined,
+                    exerciseIndex: e.exerciseIndex,
                     sets: e.sets.map(s => {
                         if (s.isUnilateralSet || e.unilateralExercise) return {
                             weight: undefined,
                             setNotes: undefined,
+                            setIndex: s.setIndex,
                             unilateralSet: true,
                             left: {
                                 fullReps: undefined,
@@ -146,6 +148,7 @@ export default function LogWorkout (props: Props) {
                         else return {
                             weight: undefined,
                             setNotes: undefined,
+                            setIndex: s.setIndex,
                             unilateralSet: false,
                             fullReps: undefined,
                             assistedReps: undefined,
@@ -677,18 +680,25 @@ export default function LogWorkout (props: Props) {
                                     state.values.exercises[i].unilateralExercise ? {
                                         weight: undefined,
                                         setNotes: undefined,
+                                        setIndex: action.setIndexAddedAfter + 1,
                                         unilateralSet: true,
                                         left: { fullReps: undefined, assistedReps: undefined, partialReps: undefined },
                                         right: { fullReps: undefined, assistedReps: undefined, partialReps: undefined }
                                     } : {
                                         weight: undefined,
                                         setNotes: undefined,
+                                        setIndex: action.setIndexAddedAfter + 1,
                                         unilateralSet: false,
                                         fullReps: undefined,
                                         assistedReps: undefined,
                                         partialReps: undefined,
                                     },
-                                    ...e.sets.slice(action.setIndexAddedAfter + 1)
+                                    ...e.sets.slice(action.setIndexAddedAfter + 1).map(st => {
+                                        return {
+                                            ...st,
+                                            setIndex: st.setIndex + 1
+                                        }
+                                    })
                                 ]
                             }
                         })
@@ -720,7 +730,13 @@ export default function LogWorkout (props: Props) {
                             if (action.exerciseIndex !== i) return e
                             return {
                                 ...e,
-                                sets: e.sets.filter((_, j) => action.setIndex !== j)
+                                sets: e.sets.filter((_, j) => action.setIndex !== j).map(st => {
+                                    if (st.setIndex < action.setIndex) return st
+                                    return {
+                                        ...st,
+                                        setIndex: st.setIndex - 1
+                                    }
+                                })
                             }
                         })
                     }
@@ -801,14 +817,17 @@ export default function LogWorkout (props: Props) {
                             ...state.errors.exercises.slice(0, action.exerciseIndexAddedAfter + 1),
                             {
                                 exerciseNotes: undefined,
+                                exerciseIndex: action.exerciseIndexAddedAfter + 1,
                                 sets: action.unilateralExercise ? [{
                                     setNotes: undefined,
+                                    setIndex: 0,
                                     weight: undefined,
                                     unilateralSet: true,
                                     left: { fullReps: undefined, assistedReps: undefined, partialReps: undefined },
                                     right: { fullReps: undefined, assistedReps: undefined, partialReps: undefined }
                                 }] : [{
                                     setNotes: undefined,
+                                    setIndex: 0,
                                     weight: undefined,
                                     unilateralSet: false,
                                     fullReps: undefined,
@@ -816,7 +835,12 @@ export default function LogWorkout (props: Props) {
                                     partialReps: undefined
                                 }]
                             },
-                            ...state.errors.exercises.slice(action.exerciseIndexAddedAfter + 1)
+                            ...state.errors.exercises.slice(action.exerciseIndexAddedAfter + 1).map(e => {
+                                return {
+                                    ...e,
+                                    exerciseIndex: e.exerciseIndex + 1
+                                }
+                            })
                         ]
                     }
                 }
@@ -836,7 +860,13 @@ export default function LogWorkout (props: Props) {
                     },
                     errors: {
                         ...state.errors,
-                        exercises: state.errors.exercises.filter((_, i) => action.exerciseIndex !== i)
+                        exercises: state.errors.exercises.filter((_, i) => action.exerciseIndex !== i).map(ex => {
+                            if (ex.exerciseIndex < action.exerciseIndex) return ex
+                            return {
+                                ...ex,
+                                exerciseIndex: ex.exerciseIndex - 1
+                            }
+                        })
                     }
                 }
             }
@@ -882,9 +912,11 @@ export default function LogWorkout (props: Props) {
                         exercises: state.errors.exercises.map((e, i) => {
                             if (action.exerciseIndex !== i) return e
                             return {
+                                ...e,
                                 exerciseNotes: undefined,
-                                sets: e.sets.map(() => {
+                                sets: e.sets.map((s) => {
                                     if (action.unilateralExercise) return {
+                                        ...s,
                                         weight: undefined,
                                         setNotes: undefined,
                                         unilateralSet: true,
@@ -892,6 +924,7 @@ export default function LogWorkout (props: Props) {
                                         right: { fullReps: undefined, assistedReps: undefined, partialReps: undefined }
                                     }
                                     return {
+                                        ...s,
                                         weight: undefined,
                                         setNotes: undefined,
                                         unilateralSet: false,
@@ -938,9 +971,11 @@ export default function LogWorkout (props: Props) {
                         exercises: state.errors.exercises.map((e, i) => {
                             if (action.exerciseIndex !== i) return e
                             return {
+                                ...e,
                                 exerciseNotes: undefined,
-                                sets: e.sets.map(() => {
+                                sets: e.sets.map((s) => {
                                     if (state.values.exercises[i].unilateralExercise) return {
+                                        ...s,
                                         weight: undefined,
                                         setNotes: undefined,
                                         unilateralSet: true,
@@ -948,6 +983,7 @@ export default function LogWorkout (props: Props) {
                                         right: { fullReps: undefined, assistedReps: undefined, partialReps: undefined }
                                     }
                                     return {
+                                        ...s,
                                         weight: undefined,
                                         setNotes: undefined,
                                         unilateralSet: false,
@@ -985,6 +1021,20 @@ export default function LogWorkout (props: Props) {
                             }
                             return e
                         })
+                    },
+                    errors: {
+                        ...state.errors,
+                        exercises: state.errors.exercises.map(e => {
+                            if (e.exerciseIndex === action.exerciseIndex) return {
+                                ...e,
+                                exerciseIndex: action.exerciseIndex - 1
+                            }
+                            if (e.exerciseIndex === action.exerciseIndex - 1) return {
+                                ...e,
+                                exerciseIndex: action.exerciseIndex
+                            }
+                            return e
+                        })
                     }
                 }
             }
@@ -1009,6 +1059,20 @@ export default function LogWorkout (props: Props) {
                                     ...e.changedExerciseIndex,
                                     updatedExerciseIndex: action.exerciseIndex
                                 }
+                            }
+                            return e
+                        })
+                    },
+                    errors: {
+                        ...state.errors,
+                        exercises: state.errors.exercises.map(e => {
+                            if (e.exerciseIndex === action.exerciseIndex) return {
+                                ...e,
+                                exerciseIndex: action.exerciseIndex + 1
+                            }
+                            if (e.exerciseIndex === action.exerciseIndex + 1) return {
+                                ...e,
+                                exerciseIndex: action.exerciseIndex
                             }
                             return e
                         })

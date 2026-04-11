@@ -300,6 +300,7 @@ interface LoggedWorkout {
 type LoggedSetError = {
     weight?: string,
     setNotes?: string,
+    setIndex: number,
     unilateralSet: false,
     fullReps?: string,
     assistedReps?: string,
@@ -307,6 +308,7 @@ type LoggedSetError = {
 } | {
     weight?: string, 
     setNotes?: string,
+    setIndex: number,
     unilateralSet: true,
     left: {
         fullReps?: string,
@@ -322,6 +324,7 @@ type LoggedSetError = {
 
 interface LoggedExerciseError {
     exerciseNotes?: string,
+    exerciseIndex: number,
     sets: LoggedSetError[]
 }
 
