@@ -1401,7 +1401,8 @@ export default function LogWorkout (props: Props) {
                 </View>
                 <View>
                     {
-                        workoutForm.values.exercises.slice().sort((a, b) => a.exerciseIndex - b.exerciseIndex).map((e, i) => {
+                        workoutForm.values.exercises.slice().sort((a, b) => a.exerciseIndex - b.exerciseIndex).map(e => {
+                            const exerciseErrors = workoutForm.errors.exercises.find(er => er.exerciseIndex === e.exerciseIndex)!
                             return (
                                 <LogExercise 
                                     key={e.exerciseId} 
@@ -1411,7 +1412,7 @@ export default function LogWorkout (props: Props) {
                                     exerciseCount={workoutForm.values.exercises.length}
                                     lastTrainedExercise={lastTrained?.exercises.find(exc => exc.exerciseId === e.exerciseId)}
                                     updateActiveSet={updateActiveSet}
-                                    exerciseErrors={workoutForm.errors.exercises[i]}
+                                    exerciseErrors={exerciseErrors}
                                 ></LogExercise>)
                         })
                     }
