@@ -1452,13 +1452,47 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
         const formPayload : LogWorkoutPayload = {
             workoutId: props.sessionId,
             workoutNotes: workoutForm.values.workoutNotes,
-            exercises: workoutForm.values.exercises.map(e => {
+            exercises: workoutForm.values.exercises.filter(exc => 
+                exc.sets.some(s => {
+                    if (s.isUnilateral) {
+                        return (
+                            s.weight !== '0' ||
+                            s.reps.left.fullReps !== '0' ||
+                            s.reps.left.assistedReps !== '0' ||
+                            s.reps.left.partialReps !== '0' ||
+                            s.reps.right.fullReps !== '0' ||
+                            s.reps.right.assistedReps !== '0' ||
+                            s.reps.right.partialReps !== '0'
+                    )}
+                    return (
+                        s.weight !== '0' ||
+                        s.reps.fullReps !== '0' ||
+                        s.reps.assistedReps !== '0' ||
+                        s.reps.partialReps !== '0'
+                    )
+                })
+            ).map(e => {
                 return {
                     exerciseIndex: e.exerciseIndex,
                     exerciseId: e.subbedExercise?.subbedExerciseId ? e.subbedExercise.subbedExerciseId : e.exerciseId,
                     exerciseNotes: e.exerciseNotes,
                     exerciseSubbed: e.subbedExercise === undefined ? false : true,
-                    sets: e.sets.map(s => {
+                    sets: e.sets.filter(st => 
+                        st.isUnilateral ? (
+                            st.weight !== '0' ||
+                            st.reps.left.fullReps !== '0' ||
+                            st.reps.left.assistedReps !== '0' ||
+                            st.reps.left.partialReps !== '0' ||
+                            st.reps.right.fullReps !== '0' ||
+                            st.reps.right.assistedReps !== '0' ||
+                            st.reps.right.partialReps !== '0'
+                        ) : (
+                            st.weight !== '0' ||
+                            st.reps.fullReps !== '0' ||
+                            st.reps.assistedReps !== '0' ||
+                            st.reps.partialReps !== '0'
+                        )
+                    ).map(s => {
                         if (s.isUnilateral) {
                             return {
                                 setIndex: s.setIndex,
