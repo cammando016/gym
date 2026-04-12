@@ -222,7 +222,7 @@ interface BaseLoggedSet {
     setIndex: number,
     setId: string,
     weight: string,
-    setNotes?: string,
+    setNotes: string,
     setType: string,
     showSetTypeDropdown: boolean,
     usedBelt: boolean,
@@ -261,7 +261,7 @@ type LoggedWorkoutSet = BilateralSet | UnilateralSet
 interface LoggedWorkoutExercise {
     exerciseId: string,
     exerciseIndex: number,
-    exerciseNotes?: string,
+    exerciseNotes: string,
     setupNotes: string,
     exerciseName: string,
     exerciseRepsLower: number,
@@ -339,6 +339,51 @@ interface LogWorkoutForm {
     }
 }
 
+type LogSetPayload = {
+    setIndex: number,
+    setWeight: number,
+    setNotes: string,
+    setType: string,
+    setUsedStraps: boolean,
+    setUsedBelt: boolean,
+    setUnilateral: true,
+    left: {
+        fullReps: number,
+        partialReps: number,
+        assistedReps: number
+    },
+    right: {
+        fullReps: number,
+        partialReps: number,
+        assistedReps: number
+    }
+} | {
+    setIndex: number,
+    setWeight: number,
+    setNotes: string,
+    setType: string,
+    setUsedStraps: boolean,
+    setUsedBelt: boolean,
+    setUnilateral: false,
+    fullReps: number,
+    partialReps: number,
+    assistedReps: number
+}
+
+interface LogExercisePayload {
+    exerciseIndex: number,
+    exerciseId: string,
+    exerciseNotes: string,
+    exerciseSubbed: boolean,
+    sets: LogSetPayload[],
+}
+
+interface LogWorkoutPayload {
+    workoutId: string,
+    workoutNotes: string,
+    exercises: LogExercisePayload[]
+}
+
 interface activeSetType {
     activeExerciseId: string,
     activeSetType: string,
@@ -386,5 +431,37 @@ type LogWorkoutAction =
 | { type: 'VALIDATE_RIGHT_FULL_REPS'; value: string; exerciseIndex: number; setIndex: number }
 | { type: 'VALIDATE_RIGHT_ASTD_REPS'; value: string; exerciseIndex: number; setIndex: number }
 | { type: 'VALIDATE_RIGHT_PRTL_REPS'; value: string; exerciseIndex: number; setIndex: number }
+| { type: 'VALIDATE_ALL' }
 
-export { setTypes, SetType, muscleGroups, Muscle, WorkoutSet, Exercise, SetTracker, FormValues, FormStateWithValidation, privacyTypes, PrivacyType, ExerciseSearchResultType, CreatedExercise, WorkoutAction, ErrorShape, FormPayload, WorkoutTemplateType, SplitDay, SplitFormPayload, Split, UserSplits, LoggedWorkout, LoggedWorkoutExercise, LoggedWorkoutSet, LoggedExerciseError, LoggedSetError, LogWorkoutForm, LogWorkoutAction, activeSetType };
+export { 
+    setTypes, 
+    SetType, 
+    muscleGroups, 
+    Muscle, 
+    WorkoutSet, 
+    Exercise, 
+    SetTracker, 
+    FormValues, 
+    FormStateWithValidation, 
+    privacyTypes, 
+    PrivacyType, 
+    ExerciseSearchResultType, 
+    CreatedExercise, 
+    WorkoutAction, 
+    ErrorShape, 
+    FormPayload, 
+    WorkoutTemplateType, 
+    SplitDay, 
+    SplitFormPayload, 
+    Split, 
+    UserSplits, 
+    LoggedWorkout, 
+    LoggedWorkoutExercise, 
+    LoggedWorkoutSet, 
+    LoggedExerciseError, 
+    LoggedSetError, 
+    LogWorkoutForm, 
+    LogWorkoutAction, 
+    activeSetType, 
+    LogWorkoutPayload,
+};

@@ -1,4 +1,4 @@
-import { FormPayload, SplitFormPayload } from "@/types/workouts";
+import { FormPayload, LogWorkoutPayload, SplitFormPayload } from "@/types/workouts";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const dbExerciseSearch = async (search: string) => {
@@ -72,4 +72,22 @@ export const startWorkout = async ( templateId : string ) => {
     })
     if(!res.ok) throw new Error('Failed to start workout');
     return res.json();
+}
+
+export const completeWorkout = async ( details: LogWorkoutPayload ) => {
+    const token = await AsyncStorage.getItem('token');
+    const res = await fetch(`http://localhost:3000/api/workouts/complete`, {
+        method: 'POST',
+        headers: {
+            'Content=Type': 'application/json',
+            Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(details)
+    })
+
+    const response = await res.json();
+    return {
+        status: res.status,
+        ...response
+    }
 }

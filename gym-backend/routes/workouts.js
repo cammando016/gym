@@ -41,6 +41,12 @@ router.post('/sessions', authenticateToken, deactivateActiveWorkouts, async (req
     }
 });
 
+router.post('/complete', authenticateToken, async(req, res) => {
+    console.log('Received request to submit workout');
+
+    return res.status(200).json({ message: 'Workout Logged' });
+})
+
 router.get('/templates', authenticateToken, async (req, res) => {
 
     const userId = req.user.id;

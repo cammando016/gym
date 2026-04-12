@@ -1,6 +1,6 @@
 import { Text, View, TextInput, ScrollView, Pressable } from 'react-native';
 import { useReducer, useState } from 'react';
-import { activeSetType, LogWorkoutAction, LogWorkoutForm, WorkoutTemplateType } from '@/types/workouts';
+import { activeSetType, LogWorkoutAction, LogWorkoutForm, LogWorkoutPayload, WorkoutTemplateType } from '@/types/workouts';
 import { useWorkoutTemplates } from '@/hooks/useWorkoutTemplates';
 import LogExercise from './LogExercise';
 import { useWorkoutHistory } from '@/hooks/useWorkoutHistory';
@@ -9,6 +9,7 @@ import LastTrainedSet from '@/components/LastTrainedSet';
 import layoutStyles from '@/styles/layoutStyles';
 import { validateOptionalAlphanumericSymbolsField, validateOptionalNumericField, validateRequiredNumericField } from '@/utils/formValiditors';
 import workoutStyles from '@/styles/workouts';
+import { completeWorkout } from '@/utils/workouts';
 
 interface Props {
     activeWorkout: boolean, //True for when logging working, false when viewing past workout
@@ -753,6 +754,7 @@ export default function LogWorkout (props: Props) {
                                 exerciseId: action.exericseId,
                                 exerciseName: action.exerciseName,
                                 exerciseIndex: action.exerciseIndexAddedAfter + 1,
+                                exerciseNotes: '',
                                 setupNotes: '',
                                 exerciseRepsLower: Number(action.repsLower),
                                 exerciseRepsUpper: Number(action.repsUpper),
@@ -1354,11 +1356,141 @@ export default function LogWorkout (props: Props) {
                     }
                 }
             }
+            case 'VALIDATE_ALL': {
+                return {
+                    ...state,
+                    errors: {
+                        workoutNotes: validateOptionalAlphanumericSymbolsField(state.values.workoutNotes, 'Workout Notes'),
+                        exercises: state.errors.exercises.map(e => {
+                            const exerciseValues = state.values.exercises.find(ev => ev.exerciseIndex === e.exerciseIndex)!;
+                            return {
+                                ...e,
+                                exerciseNotes: validateOptionalAlphanumericSymbolsField(exerciseValues.exerciseNotes, 'Exercise Notes'),
+                                sets: e.sets.map((s, i) => {
+                                    const setValues = exerciseValues.sets[i];
+                                    if (setValues.isUnilateral) {
+                                        return {
+                                            ...s,
+                                            weight: validateRequiredNumericField(setValues.weight, 'Set Weight'),
+                                            setNotes: validateOptionalAlphanumericSymbolsField(setValues.setNotes, 'Set Notes'),
+                                            left: {
+                                                fullReps: validateOptionalNumericField(setValues.reps.left.fullReps, 'Left Full Reps'),
+                                                assistedReps: validateOptionalNumericField(setValues.reps.left.assistedReps, 'Left Assisted Reps'),
+                                                partialReps: validateOptionalNumericField(setValues.reps.left.partialReps, 'Left Partial Reps')
+                                            },
+                                            right: {
+                                                fullReps: validateOptionalNumericField(setValues.reps.right.fullReps, 'Right Full Reps'),
+                                                assistedReps: validateOptionalNumericField(setValues.reps.right.assistedReps, 'Right Assisted Reps'),
+                                                partialReps: validateOptionalNumericField(setValues.reps.right.partialReps, 'Right Partial Reps')
+                                            }
+                                        }
+                                    }
+                                    return {
+                                        ...s,
+                                        weight: validateRequiredNumericField(setValues.weight, 'Set Weight'),
+                                        setNotes: validateOptionalAlphanumericSymbolsField(setValues.setNotes, 'Set Notes'),
+                                        fullReps: validateOptionalNumericField(setValues.reps.fullReps, 'Full Reps'),
+                                        assistedReps: validateOptionalNumericField(setValues.reps.assistedReps, 'Assisted Reps'),
+                                        partialReps: validateOptionalNumericField(setValues.reps.partialReps, 'Partial Reps')
+                                    }
+                                })
+                            }
+                        })
+                    }
+                }
+            }
             default: return state;
         }
     }
 
     const [workoutForm, dispatch] = useReducer(logWorkoutReducer, initialFormState);
+
+    const errorCheck = () => {
+        if (workoutForm.errors.workoutNotes) return true;
+
+        workoutForm.errors.exercises.some(e => {
+            if (e.exerciseNotes) return true;
+
+            e.sets.some(s => {
+                if (s.setNotes || s.weight) return true;
+                if (s.unilateralSet) {
+                    if (   s.left.fullReps
+                        || s.left.assistedReps 
+                        || s.left.partialReps
+                        || s.right.fullReps
+                        || s.right.assistedReps
+                        || s.right.partialReps
+                    ) return true
+                }
+                else {
+                    if ( s.fullReps || s.assistedReps || s.partialReps ) return true
+                }
+            })
+        })
+
+        return false;
+    }
+
+    const handleSubmit = async () => {
+        //Check for any form errors before continuing with form submission
+        dispatch({ type: 'VALIDATE_ALL' });
+        const hasErrors = errorCheck();
+        if (hasErrors) {
+            alert('Please fix input errors to submit workout')
+            return
+        }
+        
+        //Get required data for DB submission from form values
+        const formPayload : LogWorkoutPayload = {
+            workoutId: props.sessionId,
+            workoutNotes: workoutForm.values.workoutNotes,
+            exercises: workoutForm.values.exercises.map(e => {
+                return {
+                    exerciseIndex: e.exerciseIndex,
+                    exerciseId: e.subbedExercise?.subbedExerciseId ? e.subbedExercise.subbedExerciseId : e.exerciseId,
+                    exerciseNotes: e.exerciseNotes,
+                    exerciseSubbed: e.subbedExercise === undefined ? false : true,
+                    sets: e.sets.map(s => {
+                        if (s.isUnilateral) {
+                            return {
+                                setIndex: s.setIndex,
+                                setWeight: Number(s.weight),
+                                setNotes: s.setNotes,
+                                setType: s.setType,
+                                setUsedStraps: s.usedStraps,
+                                setUsedBelt: s.usedBelt,
+                                setUnilateral: true,
+                                left: {
+                                    fullReps: Number(s.reps.left.fullReps),
+                                    partialReps: Number(s.reps.left.partialReps),
+                                    assistedReps: Number(s.reps.left.assistedReps)
+                                },
+                                right: {
+                                    fullReps: Number(s.reps.right.fullReps),
+                                    partialReps: Number(s.reps.right.partialReps),
+                                    assistedReps: Number(s.reps.right.assistedReps)
+                                }
+                            }
+                        }
+                        return {
+                            setIndex: s.setIndex,
+                            setWeight: Number(s.weight),
+                            setNotes: s.setNotes,
+                            setType: s.setType,
+                            setUsedStraps: s.usedStraps,
+                            setUsedBelt: s.usedBelt,
+                            setUnilateral: false,
+                            fullReps: Number(s.reps.fullReps),
+                            partialReps: Number(s.reps.partialReps),
+                            assistedReps: Number(s.reps.assistedReps)
+                        }
+                    })
+                }
+            })
+        }
+
+        await completeWorkout(formPayload);
+    }
 
     return (
         <ScrollView>
