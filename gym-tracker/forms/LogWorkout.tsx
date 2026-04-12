@@ -1,5 +1,5 @@
 import { Text, View, TextInput, ScrollView, Pressable } from 'react-native';
-import { useReducer, useState } from 'react';
+import { useReducer, useState, forwardRef, useImperativeHandle } from 'react';
 import { activeSetType, LogWorkoutAction, LogWorkoutForm, LogWorkoutPayload, WorkoutTemplateType } from '@/types/workouts';
 import { useWorkoutTemplates } from '@/hooks/useWorkoutTemplates';
 import LogExercise from './LogExercise';
@@ -17,7 +17,15 @@ interface Props {
     templateId: string
 }
 
-export default function LogWorkout (props: Props) {
+//Used to pass handle submit function back up to parent index page for header button submit
+export interface LogWorkoutRef {
+    handleSubmit: () => void
+}
+
+const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
+    useImperativeHandle(ref, () => ({
+        handleSubmit
+    }));
     const { data: workouts } = useWorkoutTemplates();
 
     const workoutTemplate : WorkoutTemplateType | undefined = workouts?.find(w => w.workoutId === props.templateId);
@@ -1558,4 +1566,6 @@ export default function LogWorkout (props: Props) {
             </View>
         </ScrollView>
     )
-}
+})
+
+export default LogWorkout;

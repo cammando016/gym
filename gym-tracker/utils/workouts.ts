@@ -79,7 +79,7 @@ export const completeWorkout = async ( details: LogWorkoutPayload ) => {
     const res = await fetch(`http://localhost:3000/api/workouts/complete`, {
         method: 'POST',
         headers: {
-            'Content=Type': 'application/json',
+            'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`
         },
         body: JSON.stringify(details)
