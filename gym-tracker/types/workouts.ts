@@ -221,7 +221,7 @@ interface UserSplits {
 interface BaseLoggedSet {
     setIndex: number,
     setId: string,
-    weight: number,
+    weight: string,
     setNotes?: string,
     setType: string,
     showSetTypeDropdown: boolean,
@@ -230,15 +230,15 @@ interface BaseLoggedSet {
 }
 
 interface BilateralReps {
-    fullReps: number,
-    assistedReps: number,
-    partialReps: number
+    fullReps: string,
+    assistedReps: string,
+    partialReps: string
 }   
 
 interface UnilateralSide {
-    fullReps: number,
-    assistedReps: number,
-    partialReps: number
+    fullReps: string,
+    assistedReps: string,
+    partialReps: string
 }
 
 interface UnilateralReps {

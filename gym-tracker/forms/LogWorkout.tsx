@@ -85,20 +85,20 @@ export default function LogWorkout (props: Props) {
                             setId: randomUUID(),
                             setType: s.setType,
                             showSetTypeDropdown: false,
-                            weight: 0,
+                            weight: '0',
                             setNotes: '',
                             usedBelt: false,
                             usedStraps: false,
                             reps: {
                                 left: {
-                                    fullReps: 0,
-                                    assistedReps: 0,
-                                    partialReps: 0
+                                    fullReps: '0',
+                                    assistedReps: '0',
+                                    partialReps: '0'
                                 },
                                 right: {
-                                    fullReps: 0,
-                                    assistedReps: 0,
-                                    partialReps: 0
+                                    fullReps: '0',
+                                    assistedReps: '0',
+                                    partialReps: '0'
                                 }
                             }
                         }
@@ -108,14 +108,14 @@ export default function LogWorkout (props: Props) {
                             setId: randomUUID(),
                             setType: s.setType,
                             showSetTypeDropdown: false,
-                            weight: 0,
+                            weight: '0',
                             setNotes: '',
                             usedBelt: false,
                             usedStraps: false,
                             reps: {
-                                fullReps: 0,
-                                assistedReps: 0,
-                                partialReps: 0
+                                fullReps: '0',
+                                assistedReps: '0',
+                                partialReps: '0'
                             }
                         }
                     })
@@ -194,14 +194,14 @@ export default function LogWorkout (props: Props) {
                                     else if (s.isUnilateral) return {
                                         ...s,
                                         isUnilateral: false,
-                                        reps: { fullReps: 0, assistedReps: 0, partialReps: 0 }
+                                        reps: { fullReps: '0', assistedReps: '0', partialReps: '0' }
                                     }
                                     return {
                                         ...s,
                                         isUnilateral: true,
                                         reps: {
-                                            left: { fullReps: 0, assistedReps: 0, partialReps: 0 },
-                                            right: { fullReps: 0, assistedReps: 0, partialReps: 0 }
+                                            left: { fullReps: '0', assistedReps: '0', partialReps: '0' },
+                                            right: { fullReps: '0', assistedReps: '0', partialReps: '0' }
                                         }
                                     }
                                 })
@@ -269,7 +269,7 @@ export default function LogWorkout (props: Props) {
                                     if (s.setIndex !== action.setIndex) return s
                                     return {
                                         ...s,
-                                        weight: Number(action.value)
+                                        weight: action.value
                                     }
                                 })
                             }
@@ -313,7 +313,7 @@ export default function LogWorkout (props: Props) {
                                         ...s,
                                         reps: {
                                             ...s.reps,
-                                            fullReps: Number(action.value)
+                                            fullReps: action.value
                                         }
                                     }
                                 })
@@ -337,7 +337,7 @@ export default function LogWorkout (props: Props) {
                                         ...s,
                                         reps: {
                                             ...s.reps,
-                                            assistedReps: Number(action.value)
+                                            assistedReps: action.value
                                         }
                                     }
                                 })
@@ -361,7 +361,7 @@ export default function LogWorkout (props: Props) {
                                         ...s,
                                         reps: {
                                             ...s.reps,
-                                            partialReps: Number(action.value)
+                                            partialReps: action.value
                                         }
                                     }
                                 })
@@ -387,7 +387,7 @@ export default function LogWorkout (props: Props) {
                                             ...s.reps,
                                             left: {
                                                 ...s.reps.left,
-                                                fullReps: Number(action.value)
+                                                fullReps: action.value
                                             }
                                         }
                                     }
@@ -414,7 +414,7 @@ export default function LogWorkout (props: Props) {
                                             ...s.reps,
                                             left: {
                                                 ...s.reps.left,
-                                                assistedReps: Number(action.value)
+                                                assistedReps: action.value
                                             }
                                         }
                                     }
@@ -441,7 +441,7 @@ export default function LogWorkout (props: Props) {
                                             ...s.reps,
                                             left: {
                                                 ...s.reps.left,
-                                                partialReps: Number(action.value)
+                                                partialReps: action.value
                                             }
                                         }
                                     }
@@ -468,7 +468,7 @@ export default function LogWorkout (props: Props) {
                                             ...s.reps,
                                             right: {
                                                 ...s.reps.right,
-                                                fullReps: Number(action.value)
+                                                fullReps: action.value
                                             }
                                         }
                                     }
@@ -495,7 +495,7 @@ export default function LogWorkout (props: Props) {
                                             ...s.reps,
                                             right: {
                                                 ...s.reps.right,
-                                                assistedReps: Number(action.value)
+                                                assistedReps: action.value
                                             }
                                         }
                                     }
@@ -522,7 +522,7 @@ export default function LogWorkout (props: Props) {
                                             ...s.reps,
                                             right: {
                                                 ...s.reps.right,
-                                                partialReps: Number(action.value)
+                                                partialReps: action.value
                                             }
                                         }
                                     }
@@ -638,13 +638,13 @@ export default function LogWorkout (props: Props) {
                                         setId: randomUUID(),
                                         setType: 'working',
                                         showSetTypeDropdown: false,
-                                        weight: 0,
+                                        weight: '0',
                                         setNotes: '',
                                         usedBelt: false,
                                         usedStraps: false,
                                         reps: {
-                                            left: { fullReps: 0, assistedReps: 0, partialReps: 0 },
-                                            right: { fullReps: 0, assistedReps: 0, partialReps: 0 }
+                                            left: { fullReps: '0', assistedReps: '0', partialReps: '0' },
+                                            right: { fullReps: '0', assistedReps: '0', partialReps: '0' }
                                         }
                                     } :
                                     {
@@ -653,11 +653,11 @@ export default function LogWorkout (props: Props) {
                                         setId: randomUUID(),
                                         setType: 'working',
                                         showSetTypeDropdown: false,
-                                        weight: 0,
+                                        weight: '0',
                                         setNotes: '',
                                         usedBelt: false,
                                         usedStraps: false,
-                                        reps: { fullReps: 0, assistedReps: 0, partialReps: 0 }
+                                        reps: { fullReps: '0', assistedReps: '0', partialReps: '0' }
                                     },
                                     ...e.sets.slice(action.setIndexAddedAfter + 1).map(st => {
                                         return {
@@ -772,13 +772,13 @@ export default function LogWorkout (props: Props) {
                                         setId: randomUUID(),
                                         setType: 'working',
                                         showSetTypeDropdown: false,
-                                        weight: 0,
+                                        weight: '0',
                                         setNotes: '',
                                         usedBelt: false,
                                         usedStraps: false,
                                         reps: {
-                                            left: { fullReps: 0, assistedReps: 0, partialReps: 0 },
-                                            right: { fullReps: 0, assistedReps: 0, partialReps: 0 }
+                                            left: { fullReps: '0', assistedReps: '0', partialReps: '0' },
+                                            right: { fullReps: '0', assistedReps: '0', partialReps: '0' }
                                         }
                                     }] 
                                     :
@@ -788,15 +788,11 @@ export default function LogWorkout (props: Props) {
                                         setId: randomUUID(),
                                         setType: 'working',
                                         showSetTypeDropdown: false,
-                                        weight: 0,
+                                        weight: '0',
                                         setNotes: '',
                                         usedBelt: false,
                                         usedStraps: false,
-                                        reps: {
-                                            fullReps: 0,
-                                            assistedReps: 0,
-                                            partialReps: 0
-                                        }
+                                        reps: { fullReps: '0', assistedReps: '0', partialReps: '0' }
                                     }]
                             },
                             ...state.values.exercises.slice(action.exerciseIndexAddedAfter + 1).map(e => {
@@ -894,14 +890,14 @@ export default function LogWorkout (props: Props) {
                                         ...s,
                                         isUnilateral: true,
                                         reps: {
-                                            left: { fullReps: 0, assistedReps: 0, partialReps: 0 },
-                                            right: { fullReps: 0, assistedReps: 0, partialReps: 0 }
+                                            left: { fullReps: '0', assistedReps: '0', partialReps: '0' },
+                                            right: { fullReps: '0', assistedReps: '0', partialReps: '0' }
                                         }
                                     }
                                     return {
                                         ...s,
                                         isUnilateral: false,
-                                        reps: { fullReps: 0, assistedReps: 0, partialReps: 0 }
+                                        reps: { fullReps: '0', assistedReps: '0', partialReps: '0' }
                                     }
                                 })
                             }
@@ -953,14 +949,14 @@ export default function LogWorkout (props: Props) {
                                         ...s,
                                         isUnilateral: true,
                                         reps: {
-                                            left: { fullReps: 0, assistedReps: 0, partialReps: 0 },
-                                            right: { fullReps: 0, assistedReps: 0, partialReps: 0 }
+                                            left: { fullReps: '0', assistedReps: '0', partialReps: '0' },
+                                            right: { fullReps: '0', assistedReps: '0', partialReps: '0' }
                                         }
                                     }
                                     return {
                                         ...s,
                                         isUnilateral: false,
-                                        reps: { fullReps: 0, assistedReps: 0, partialReps: 0 }
+                                        reps: { fullReps: '0', assistedReps: '0', partialReps: '0' }
                                     }
                                 })
                             }

@@ -31,7 +31,7 @@ export default function LastTrainedSet(props: Props) {
                                     user?.weightUnit === 'kg' ?
                                     <Text>{props.lastTrainedSet.weight} KGs</Text>
                                     :
-                                    <Text>{Math.round(props.lastTrainedSet.weight / 0.45359237)} LBs</Text>
+                                    <Text>{Math.round(Number(props.lastTrainedSet.weight) / 0.45359237)} LBs</Text>
                                 }
                             </View>
                             {props.lastTrainedSet.isUnilateral ? (
