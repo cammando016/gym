@@ -41,10 +41,137 @@ router.post('/sessions', authenticateToken, deactivateActiveWorkouts, async (req
     }
 });
 
+//Submit logged workout data
 router.post('/complete', authenticateToken, async(req, res) => {
     console.log('Received request to submit workout');
 
-    return res.status(200).json({ message: 'Workout Logged' });
+    const userId = req.user.id;
+    const { workoutId, workoutNotes, exercises } = req.body;
+    const dateEnded = new Date();
+
+    //Check the user submitting the workout is the same user who started workout
+    try {
+        const workoutQuery = await pool.query(`SELECT user_id, id FROM workouts WHERE id = $1 AND user_id = $2`, [workoutId, userId]);
+        
+        if (workoutQuery.rows.length === 0) {
+            return res.status(403).json({
+                error: 'Unauthorized'
+            })
+        }
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            error: error.message
+        })
+    }
+
+    const client = await pool.connect();
+    try {
+        await client.query('BEGIN');
+
+        //Update workout details for date ended, notes and set status to complete
+        await client.query(
+            `UPDATE workouts 
+            SET date_ended = $1, workout_notes = $2, status = $3
+            WHERE id = $4`, 
+            [dateEnded, workoutNotes, 'complete', workoutId]
+        );
+
+        //Insert completed exercises
+        const insertExercisesQuery = await pool.query(`
+            INSERT INTO workout_exercises
+            (workout_id, exercise_index, exercise_id, exercise_notes, subbed_exercise)
+            SELECT * FROM unnest( $1::uuid[], $2::int2[], $3::uuid[], $4::text[], $5::bool[] )
+            RETURNING id, exercise_index
+        `, 
+        [
+            exercises.map(_ => workoutId),
+            exercises.map(e => e.exerciseIndex),
+            exercises.map(e => e.exerciseId),
+            exercises.map(e => e.exerciseNotes),
+            exercises.map(e => e.exerciseSubbed)
+        ]);
+
+        //Build map of matching exercise index and created ID for exercise in workout_exercises table
+        const exerciseIdMap = new Map(
+            insertExercisesQuery.rows.map(row => [row.exercise_index, row.id])
+        )
+
+        //Add the created ID for the matching exercise to each set object ready for DB insert
+        const setList = exercises.flatMap(e => 
+            e.sets.map(s => ({
+                ...s,
+                workoutExerciseId: exerciseIdMap.get(e.exerciseIndex)
+            }))    
+        );
+
+        const bilateralSets = setList.filter(s => !s.setUnilateral);
+        const unilateralSets = setList.filter(s => s.setUnilateral);
+
+        //Get set types
+        const setTypesQuery = await client.query('SELECT id, name FROM set_types');
+        const setTypesMap = new Map(setTypesQuery.rows.map(row => [row.name, row.id]));
+
+        //Insert bilateral sets
+        await pool.query(`
+            INSERT INTO workout_sets
+            (set_index, workout_id, weight, full_reps, partial_reps, assisted_reps, set_notes, is_unilateral, set_type, workout_exercise_id, used_straps, used_belt)
+            SELECT * FROM
+                unnest( $1::int2[], $2::uuid[], $3::float4[], $4::int2[], $5::int2[], $6::int2[], $7::text[], $8::bool[], $9::uuid[], $10::uuid[], $11::bool[], $12::bool[] )
+        `,
+        [
+            bilateralSets.map(s => s.setIndex),
+            bilateralSets.map(_ => workoutId),
+            bilateralSets.map(s => s.setWeight),
+            bilateralSets.map(s => s.fullReps),
+            bilateralSets.map(s => s.partialReps),
+            bilateralSets.map(s => s.assistedReps),
+            bilateralSets.map(s => s.setNotes),
+            bilateralSets.map(_ => false),
+            bilateralSets.map(s => setTypesMap.get(s.setType)),
+            bilateralSets.map(s => s.workoutExerciseId),
+            bilateralSets.map(s => s.setUsedStraps),
+            bilateralSets.map(s => s.setUsedBelt),
+        ]);
+
+        //Insert unilateral sets
+        await pool.query(`
+            INSERT INTO workout_sets
+            (set_index, workout_id, weight, ull_full_reps, ull_partial_reps, ull_assisted_reps, ulr_full_reps, ulr_partial_reps, ulr_assisted_reps, set_notes, is_unilateral, set_type, workout_exercise_id, used_straps, used_belt)
+            SELECT * FROM
+                unnest( $1::int2[], $2::uuid[], $3::float4[], $4::int2[], $5::int2[], $6::int2[], $7::int2[], $8::int2[], $9::int2[], $10::text[], $11::bool[], $12::uuid[], $13::uuid[], $14::bool[], $15::bool[] )
+        `,
+        [
+            unilateralSets.map(s => s.setIndex),
+            unilateralSets.map(_ => workoutId),
+            unilateralSets.map(s => s.setWeight),
+            unilateralSets.map(s => s.left.fullReps),
+            unilateralSets.map(s => s.left.partialReps),
+            unilateralSets.map(s => s.left.assistedReps),
+            unilateralSets.map(s => s.right.fullReps),
+            unilateralSets.map(s => s.right.partialReps),
+            unilateralSets.map(s => s.right.assistedReps),
+            unilateralSets.map(s => s.setNotes),
+            unilateralSets.map(_ => true),
+            unilateralSets.map(s => setTypesMap.get(s.setType)),
+            unilateralSets.map(s => s.workoutExerciseId),
+            unilateralSets.map(s => s.setUsedStraps),
+            unilateralSets.map(s => s.setUsedBelt),
+        ]);
+
+        await client.query('COMMIT');
+        return res.status(201).json({ message: 'Workout Logged'});
+
+    } catch(error) {
+        await client.query('ROLLBACK');
+        console.error(error);
+        return res.status(500).json({
+            error: error.message
+        })
+    } finally {
+        client.release();
+    }
 })
 
 router.get('/templates', authenticateToken, async (req, res) => {

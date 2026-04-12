@@ -28,7 +28,14 @@ export default function StartWorkout () {
             <Stack.Screen options={{
                 title: `Logging Workout`,
                 headerLeft: () => (<Pressable onPress={() => router.replace('/(protected)/(tabs)')}><Text>Cancel</Text></Pressable>),
-                headerRight: () => (<Pressable onPress={() => {logWorkoutRef.current?.handleSubmit(); /*router.replace('/(protected)/(tabs)')*/ }}><Text>Complete</Text></Pressable>)
+                headerRight: () => (
+                    <Pressable onPress={() => {
+                        logWorkoutRef.current?.handleSubmit(); 
+                        router.replace('/(protected)/(tabs)') 
+                    }}>
+                        <Text>Complete</Text>
+                    </Pressable>
+                )
             }} />
             <LogWorkout ref={logWorkoutRef} sessionId={sessionId} activeWorkout={true} templateId={templateId} />
             <View style={{padding: 10, backgroundColor: '#619888', display: 'flex', flexDirection: 'row', justifyContent: 'space-around'}}>
