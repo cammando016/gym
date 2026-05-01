@@ -9,9 +9,10 @@ import LastTrainedSet from '@/components/LastTrainedSet';
 import layoutStyles from '@/styles/layoutStyles';
 import { validateOptionalAlphanumericSymbolsField, validateOptionalNumericField, validateRequiredNumericField } from '@/utils/formValiditors';
 import workoutStyles from '@/styles/workouts';
-import { completeWorkout } from '@/utils/workouts';
+import { checkForActiveWorkout, completeWorkout } from '@/utils/workouts';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQueryClient } from '@tanstack/react-query';
+import { useRouter } from 'expo-router';
 
 interface Props {
     activeWorkout: boolean, //True for when logging working, false when viewing past workout
@@ -29,6 +30,8 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
         handleSubmit
     }));
     const { data: workouts } = useWorkoutTemplates();
+
+    const router = useRouter();
 
     const workoutTemplate : WorkoutTemplateType | undefined = workouts?.find(w => w.workoutId === props.templateId);
     if (!workoutTemplate) return <View><Text>Loading Workout Template</Text></View>
@@ -1537,7 +1540,11 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
             })
         }
 
-        await completeWorkout(formPayload, queryClient, user?.username!);
+        const result = await completeWorkout(formPayload, queryClient, user?.username!);
+        console.log(result);
+        if (result.status === 201) {
+            router.replace('/(protected)/(tabs)');
+        }
     }
 
     return (

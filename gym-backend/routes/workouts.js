@@ -79,7 +79,7 @@ router.post('/complete', authenticateToken, async(req, res) => {
         );
 
         //Insert completed exercises
-        const insertExercisesQuery = await pool.query(`
+        const insertExercisesQuery = await client.query(`
             INSERT INTO workout_exercises
             (workout_id, exercise_index, exercise_id, exercise_notes, subbed_exercise)
             SELECT * FROM unnest( $1::uuid[], $2::int2[], $3::uuid[], $4::text[], $5::bool[] )
@@ -114,7 +114,7 @@ router.post('/complete', authenticateToken, async(req, res) => {
         const setTypesMap = new Map(setTypesQuery.rows.map(row => [row.name, row.id]));
 
         //Insert bilateral sets
-        await pool.query(`
+        await client.query(`
             INSERT INTO workout_sets
             (set_index, workout_id, weight, full_reps, partial_reps, assisted_reps, set_notes, is_unilateral, set_type, workout_exercise_id, used_straps, used_belt)
             SELECT * FROM
@@ -136,7 +136,7 @@ router.post('/complete', authenticateToken, async(req, res) => {
         ]);
 
         //Insert unilateral sets
-        await pool.query(`
+        await client.query(`
             INSERT INTO workout_sets
             (set_index, workout_id, weight, ull_full_reps, ull_partial_reps, ull_assisted_reps, ulr_full_reps, ulr_partial_reps, ulr_assisted_reps, set_notes, is_unilateral, set_type, workout_exercise_id, used_straps, used_belt)
             SELECT * FROM

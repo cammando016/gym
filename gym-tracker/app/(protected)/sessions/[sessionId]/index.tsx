@@ -29,10 +29,7 @@ export default function StartWorkout () {
                 title: `Logging Workout`,
                 headerLeft: () => (<Pressable onPress={() => router.replace('/(protected)/(tabs)')}><Text>Cancel</Text></Pressable>),
                 headerRight: () => (
-                    <Pressable onPress={() => {
-                        logWorkoutRef.current?.handleSubmit(); 
-                        router.replace('/(protected)/(tabs)') 
-                    }}>
+                    <Pressable onPress={ () => logWorkoutRef.current?.handleSubmit() }>
                         <Text>Complete</Text>
                     </Pressable>
                 )

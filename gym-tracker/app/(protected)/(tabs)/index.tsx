@@ -3,10 +3,11 @@ import { useSplits, useDayOfSplit } from '@/hooks/useSplit';
 import { useWorkoutHistory } from '@/hooks/useWorkoutHistory';
 import { formatDateDifferenceHMS } from '@/utils/dates';
 import { checkForActiveWorkout, fetchLastTrained } from '@/utils/workouts';
-import React, { useMemo, useEffect, useState } from 'react';
+import React, { useMemo, useEffect, useState, useCallback } from 'react';
 import { Button, Pressable, StyleSheet, Text, View } from 'react-native';
 import dayjs from 'dayjs';
 import { useStartWorkout } from '@/hooks/useStartWorkout';
+import { useFocusEffect } from '@react-navigation/native';
 
 const styles = StyleSheet.create({
   colflex: {
@@ -53,15 +54,16 @@ export default async function App() {
 
   //Used to check once on page load if there is currently an active workout to show resume option if so
   const [workoutInProgress, setWorkoutInProgress] = useState<ActiveWorkout | null>(null);
-  useEffect(() => {
-    const checkActive = async () => {
-      const result = await checkForActiveWorkout();
-      setWorkoutInProgress(result);
-    }
-    checkActive();
-  }, []);
-
-  console.log(workoutInProgress);
+  useFocusEffect(
+    useCallback(() => {
+      setWorkoutInProgress(null);
+      const checkActive = async () => {
+        const result = await checkForActiveWorkout();
+        setWorkoutInProgress(result)
+      }
+      checkActive();
+    }, [])
+  );
 
   return (
     <View style={[styles.colflex, {flex: 1}]} >
