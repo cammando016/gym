@@ -1,5 +1,7 @@
+import { useAuth } from "@/contexts/AuthContext";
 import { FormPayload, LogWorkoutPayload, SplitFormPayload } from "@/types/workouts";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { QueryClient, useQueryClient } from "@tanstack/react-query";
 
 export const dbExerciseSearch = async (search: string) => {
     const res = await fetch(`http://localhost:3000/api/exercise?searchString=${encodeURIComponent(search)}`);
@@ -74,7 +76,7 @@ export const startWorkout = async ( templateId : string ) => {
     return res.json();
 }
 
-export const completeWorkout = async ( details: LogWorkoutPayload ) => {
+export const completeWorkout = async ( details: LogWorkoutPayload, queryClient: QueryClient, username: string ) => {
     const token = await AsyncStorage.getItem('token');
     const res = await fetch(`http://localhost:3000/api/workouts/complete`, {
         method: 'POST',
@@ -86,6 +88,10 @@ export const completeWorkout = async ( details: LogWorkoutPayload ) => {
     })
 
     const response = await res.json();
+
+    if (res.ok) {
+        await queryClient.refetchQueries({ queryKey: ['lastTrained', username, details.templateId] })
+    }
     return {
         status: res.status,
         ...response

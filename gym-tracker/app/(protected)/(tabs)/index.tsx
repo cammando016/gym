@@ -4,9 +4,8 @@ import { useWorkoutHistory } from '@/hooks/useWorkoutHistory';
 import { formatDateDifferenceHMS } from '@/utils/dates';
 import { checkForActiveWorkout, fetchLastTrained } from '@/utils/workouts';
 import React, { useMemo, useEffect, useState } from 'react';
-import { Button, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Button, Pressable, StyleSheet, Text, View } from 'react-native';
 import dayjs from 'dayjs';
-import { Link } from 'expo-router';
 import { useStartWorkout } from '@/hooks/useStartWorkout';
 
 const styles = StyleSheet.create({
@@ -25,6 +24,7 @@ interface ActiveWorkout {
 }
 
 export default async function App() {
+  const today = new Date();
   const { user } = useAuth();
   const { data: splitDay, isLoading: splitDayLoading } = useDayOfSplit();
   const { data: splitsData, isLoading: splitsDataLoading } = useSplits();
@@ -39,6 +39,10 @@ export default async function App() {
   }, [activeSplit, splitDay]);
 
   const { data: lastWorkout, isLoading: lastWorkoutLoading } = useWorkoutHistory(workoutTemplateId);
+
+  const trainedToday : boolean = useMemo(() => {
+    return lastWorkout?.dateStarted.toString().slice(0, 10) === today.toISOString().slice(0, 10);
+  }, [lastWorkout]) 
 
   const testFetch: any = async (workoutId: string) => {
     const lastTrained = await fetchLastTrained(workoutId);
@@ -74,7 +78,7 @@ export default async function App() {
               </View>
 
               <View style={styles.rowflex}>
-                { !(splitDay < 0) && 
+                { !(splitDay < 0) && !trainedToday &&
                   <Pressable
                     onPress={ () => startWorkout(`${workoutTemplateId}`) }
                     disabled={isPending}
@@ -92,13 +96,19 @@ export default async function App() {
               {
                 lastWorkout ? (
                   <View style={styles.colflex} >
-                    { !(splitDay < 0) && <Text>{`Last ${activeSplit?.workouts[splitDay].workoutName} Session`}</Text> }
+                    { !(splitDay < 0) && <Text>{`${trainedToday ? 'Today\'s' : 'Last'} ${activeSplit?.workouts[splitDay].workoutName} Session`}</Text> }
                     <View>
-                      <Text>{`Date Trained: ${lastWorkout.dateStarted.toString().slice(0, 10)}`}</Text>
+                      { !trainedToday && <Text>{`Date Trained: ${lastWorkout.dateStarted.toString().slice(0, 10)}`}</Text> }
                       <Text>{`DURATION: ${formatDateDifferenceHMS(dayjs(lastWorkout.dateEnded).diff(dayjs(lastWorkout.dateStarted)))}`}</Text>
                     </View>
-                    <Text>Last Session Notes</Text>
-                    <Text>{lastWorkout.workoutNotes}</Text>
+                    {
+                      lastWorkout.workoutNotes && (
+                        <View>
+                          <Text>Notes</Text>
+                          <Text>{lastWorkout.workoutNotes}</Text>
+                        </View>
+                      )
+                    }
                   </View>
                 ) : (
                   <Text>No previous workouts from this template.</Text>

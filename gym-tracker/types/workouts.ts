@@ -379,6 +379,7 @@ interface LogExercisePayload {
 }
 
 interface LogWorkoutPayload {
+    templateId: string,
     workoutId: string,
     workoutNotes: string,
     exercises: LogExercisePayload[]

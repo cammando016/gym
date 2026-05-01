@@ -10,6 +10,8 @@ import layoutStyles from '@/styles/layoutStyles';
 import { validateOptionalAlphanumericSymbolsField, validateOptionalNumericField, validateRequiredNumericField } from '@/utils/formValiditors';
 import workoutStyles from '@/styles/workouts';
 import { completeWorkout } from '@/utils/workouts';
+import { useAuth } from '@/contexts/AuthContext';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface Props {
     activeWorkout: boolean, //True for when logging working, false when viewing past workout
@@ -1439,6 +1441,9 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
         return false;
     }
 
+    const { user } = useAuth()
+    const queryClient = useQueryClient();
+
     const handleSubmit = async () => {
         //Check for any form errors before continuing with form submission
         dispatch({ type: 'VALIDATE_ALL' });
@@ -1450,6 +1455,7 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
         
         //Get required data for DB submission from form values
         const formPayload : LogWorkoutPayload = {
+            templateId: props.templateId,
             workoutId: props.sessionId,
             workoutNotes: workoutForm.values.workoutNotes,
             exercises: workoutForm.values.exercises.filter(exc => 
@@ -1531,7 +1537,7 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
             })
         }
 
-        await completeWorkout(formPayload);
+        await completeWorkout(formPayload, queryClient, user?.username!);
     }
 
     return (
