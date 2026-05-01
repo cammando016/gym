@@ -4,7 +4,7 @@ import { useWorkoutHistory } from '@/hooks/useWorkoutHistory';
 import { formatDateDifferenceHMS } from '@/utils/dates';
 import { checkForActiveWorkout, fetchLastTrained } from '@/utils/workouts';
 import React, { useMemo, useState, useCallback } from 'react';
-import { Button, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Button, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import dayjs from 'dayjs';
 import { useStartWorkout } from '@/hooks/useStartWorkout';
 import { useFocusEffect } from '@react-navigation/native';
@@ -67,6 +67,10 @@ export default function App() {
     }, [])
   );
 
+  //State values for selecting manual workout
+  const [showManualWorkoutSelect, setShowManualWorkoutSelect] = useState<boolean>(false);
+  const [manualWorkoutSelection, setManualWorkoutSelection] = useState<{workoutName: string, templateId: string}>({workoutName: '', templateId: ''})
+
   return (
     <View style={[styles.colflex, {flex: 1}]} >
       {
@@ -94,7 +98,7 @@ export default function App() {
                     </Text>
                   </Pressable>
                 }
-                <Pressable onPress={() => testFetch(workoutTemplateId)}><Text>MANUAL START</Text></Pressable>
+                <Pressable onPress={() => setShowManualWorkoutSelect(true)}><Text>MANUAL START</Text></Pressable>
               </View>
 
               {
@@ -169,6 +173,37 @@ export default function App() {
             )}
           </View>
       )}
+      {
+        showManualWorkoutSelect && (
+          <Modal>
+            <View style={{maxHeight: '80%', marginTop: '10%', padding: 20, paddingTop: 50}}>
+              <View><Text>Select Workout Template:</Text></View>
+              <View>
+                {
+                  workouts?.map(w => {
+                    return (
+                      <Pressable onPress={ () => setManualWorkoutSelection({workoutName: w.workoutName, templateId: w.workoutId}) }>
+                        <Text>{w.workoutName}</Text>
+                      </Pressable>
+                    )
+                  })
+                }
+              </View>
+              <View style={styles.rowflex}>
+                <Pressable onPress={() => setShowManualWorkoutSelect(false)}>
+                  <Text>Cancel</Text>
+                </Pressable>
+                <Pressable 
+                  onPress={() => startWorkout(manualWorkoutSelection.templateId)}
+                  disabled={isPending}
+                >
+                  { manualWorkoutSelection.workoutName !== '' && <Text>{isPending ? 'Starting Workout...' : `Start ${manualWorkoutSelection.workoutName} Workout`}</Text> }
+                </Pressable>
+              </View>
+            </View>
+          </Modal>
+        )
+      }
     </View>
   )
 }
