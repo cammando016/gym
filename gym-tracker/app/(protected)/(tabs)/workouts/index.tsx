@@ -8,9 +8,6 @@ export default function WorkoutsPage() {
     const { data: workoutTemplateList, isLoading, error } = useWorkoutTemplates();
     const { data } = useSplits();
     const activeSplit = data?.activeSplit
-    console.log(activeSplit);
-
-    console.log(workoutTemplateList);
 
     return (
         <View>

@@ -3,11 +3,12 @@ import { useSplits, useDayOfSplit } from '@/hooks/useSplit';
 import { useWorkoutHistory } from '@/hooks/useWorkoutHistory';
 import { formatDateDifferenceHMS } from '@/utils/dates';
 import { checkForActiveWorkout, fetchLastTrained } from '@/utils/workouts';
-import React, { useMemo, useEffect, useState, useCallback } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import { Button, Pressable, StyleSheet, Text, View } from 'react-native';
 import dayjs from 'dayjs';
 import { useStartWorkout } from '@/hooks/useStartWorkout';
 import { useFocusEffect } from '@react-navigation/native';
+import { useWorkoutTemplates } from '@/hooks/useWorkoutTemplates';
 
 const styles = StyleSheet.create({
   colflex: {
@@ -24,12 +25,13 @@ interface ActiveWorkout {
   workout: { id: string, dateStarted: string, workoutName: string }
 }
 
-export default async function App() {
+export default function App() {
   const today = new Date();
   const { user } = useAuth();
   const { data: splitDay, isLoading: splitDayLoading } = useDayOfSplit();
   const { data: splitsData, isLoading: splitsDataLoading } = useSplits();
   const { mutate: startWorkout, isPending } = useStartWorkout();
+  const { data: workouts } = useWorkoutTemplates();
   const activeSplit = splitsData?.activeSplit;
 
   const workoutTemplateId = useMemo(() => {

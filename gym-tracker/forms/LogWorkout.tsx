@@ -9,7 +9,7 @@ import LastTrainedSet from '@/components/LastTrainedSet';
 import layoutStyles from '@/styles/layoutStyles';
 import { validateOptionalAlphanumericSymbolsField, validateOptionalNumericField, validateRequiredNumericField } from '@/utils/formValiditors';
 import workoutStyles from '@/styles/workouts';
-import { checkForActiveWorkout, completeWorkout } from '@/utils/workouts';
+import { completeWorkout } from '@/utils/workouts';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
@@ -1541,7 +1541,6 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
         }
 
         const result = await completeWorkout(formPayload, queryClient, user?.username!);
-        console.log(result);
         if (result.status === 201) {
             router.replace('/(protected)/(tabs)');
         }
