@@ -264,7 +264,8 @@ router.get('/active', authenticateToken, async (req, res) => {
             SELECT
                 w.id,
                 w.date_started AS "dateStarted",
-                wt.workout_name AS "workoutName"
+                wt.workout_name AS "workoutName",
+                w.workout_template_id AS "templateId"
             FROM workouts w
             JOIN users u ON w.user_id = u.id
             JOIN workout_templates wt ON w.workout_template_id = wt.id

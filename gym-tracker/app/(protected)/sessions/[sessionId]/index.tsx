@@ -6,10 +6,12 @@ import dayjs from "dayjs";
 import { formatDateDifferenceHMS } from "@/utils/dates";
 
 export default function StartWorkout () {
-    const { sessionId, templateId, workoutName, dateStarted } = useLocalSearchParams<{ sessionId: string, templateId: string, workoutName: string, dateStarted: string }>();
+    const { sessionId, templateId, workoutName, dateStarted, resumed } = useLocalSearchParams<{ sessionId: string, templateId: string, workoutName: string, dateStarted: string, resumed: string }>();
     
     const [workoutDuration, setWorkoutDuration] = useState<string>('');
     const router = useRouter();
+
+    const resumedAsBool = resumed === 'true';
 
     const logWorkoutRef = useRef<LogWorkoutRef>(null);
 
@@ -34,7 +36,7 @@ export default function StartWorkout () {
                     </Pressable>
                 )
             }} />
-            <LogWorkout ref={logWorkoutRef} sessionId={sessionId} activeWorkout={true} templateId={templateId} />
+            <LogWorkout ref={logWorkoutRef} sessionId={sessionId} activeWorkout={true} templateId={templateId} resumingWorkout={resumedAsBool} />
             <View style={{padding: 10, backgroundColor: '#619888', display: 'flex', flexDirection: 'row', justifyContent: 'space-around'}}>
                 <Text style={{color: 'white', textAlign: 'center'}}>{workoutName} Day</Text>
                 <Text style={{color: 'white', textAlign: 'center'}}>{workoutDuration}</Text>

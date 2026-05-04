@@ -10,7 +10,7 @@ export function useStartWorkout() {
             console.log('SUCCESS:', data);
             router.replace({
                 pathname: `/sessions/${data.sessionId}`,
-                params: { templateId: data.templateId, workoutName: data.workoutName, dateStarted: data.dateStarted }
+                params: { templateId: data.templateId, workoutName: data.workoutName, dateStarted: data.dateStarted, resumed: 'false' }
             });
         },
         onError: (err) => {

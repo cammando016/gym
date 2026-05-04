@@ -1,5 +1,5 @@
-import { Text, View, TextInput, ScrollView, Pressable } from 'react-native';
-import { useReducer, useState, forwardRef, useImperativeHandle } from 'react';
+import { Text, View, TextInput, ScrollView, Pressable, AppState } from 'react-native';
+import { useReducer, useState, forwardRef, useImperativeHandle, useRef, useEffect } from 'react';
 import { activeSetType, LogWorkoutAction, LogWorkoutForm, LogWorkoutPayload, WorkoutTemplateType } from '@/types/workouts';
 import { useWorkoutTemplates } from '@/hooks/useWorkoutTemplates';
 import LogExercise from './LogExercise';
@@ -13,11 +13,13 @@ import { completeWorkout } from '@/utils/workouts';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface Props {
     activeWorkout: boolean, //True for when logging working, false when viewing past workout
     sessionId: string,
-    templateId: string
+    templateId: string,
+    resumingWorkout: boolean
 }
 
 //Used to pass handle submit function back up to parent index page for header button submit
@@ -29,49 +31,42 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
     useImperativeHandle(ref, () => ({
         handleSubmit
     }));
-    const { data: workouts } = useWorkoutTemplates();
-
     const router = useRouter();
+    //Passed in to the completeWorkout function in handleSubmit to invalidate lastTrained data on home page, once new workout is logged
+    const { user } = useAuth()
+    const queryClient = useQueryClient();
 
+    const [formReady, setFormReady] = useState<boolean>(false);
+    const [cachedForm, setCachedForm] = useState<LogWorkoutForm | null>(null);
+
+    //Check if workout is being resumed, and get data from cache if so
+    useEffect(() => {
+        if (!props.resumingWorkout) {
+            setFormReady(true);
+            return;
+        }
+        const loadCache = async () => {
+            const cachedData = await AsyncStorage.getItem(`workout_draft_${user?.username}`);
+            if (cachedData) setCachedForm(JSON.parse(cachedData));
+            setFormReady(true);
+        }
+        loadCache();
+    }, []);
+
+    console.log('CACHE:', JSON.stringify(cachedForm));
+
+    const { data: workouts } = useWorkoutTemplates();
     const workoutTemplate : WorkoutTemplateType | undefined = workouts?.find(w => w.workoutId === props.templateId);
-    if (!workoutTemplate) return <View><Text>Loading Workout Template</Text></View>
     
     const { data: lastTrained } = useWorkoutHistory(props.templateId);
 
-    //Track the current focused set for showing the matching set from last session
-    const [activeSet, setActiveSet] = useState<activeSetType>({activeExerciseId: workoutTemplate.exercises[0].exerciseId, activeSetType: 'working', activeSetIndex: 0})
-    const updateActiveSet = (exerciseId: string, setId: string, setType: string) => {
-        //Check exercise is in previous session at all
-        const exerciseFromLastTrained = lastTrained?.exercises.find(e => e.exerciseId === exerciseId);
-        if (!exerciseFromLastTrained) {setActiveSet({activeExerciseId: exerciseId, activeSetType: setType, activeSetIndex: undefined}); return;}
- 
-        //If exercise found, check for any logged sets (should never be null, no exercise should be logged without sets but fallback for possible error in previous log)
-        const lastSessionSets = lastTrained?.exercises.find(e => e.exerciseId === exerciseId)?.sets;
-        if (!lastSessionSets) {setActiveSet({activeExerciseId: exerciseId, activeSetType: setType, activeSetIndex: undefined}); return;}
-
-        //Get which index of the specific set type the clicked set in current workout is (ie 5th overall set but 3rd working set returns index: 2)
-        const currentSessionSetIndex = workoutForm.values.exercises.find(e => e.exerciseId === exerciseId)?.sets.filter(s => s.setType === setType).findIndex(st => st.setId === setId);
-        if (currentSessionSetIndex === undefined || currentSessionSetIndex === -1) {setActiveSet({activeExerciseId: exerciseId, activeSetType: setType, activeSetIndex: undefined}); return}
- 
-        //Check if there was a matching index set from last trained.
-        //If user on 3rd working set this workout, but last session only logged 2 working sets, will return undefined
-        if (lastSessionSets.filter(s => s.setType === setType)[currentSessionSetIndex]) {
-            setActiveSet({
-                activeExerciseId: exerciseFromLastTrained.exerciseId, 
-                activeSetType: setType,
-                activeSetIndex: currentSessionSetIndex
-            });
-            return;
-        }
-
-        setActiveSet({activeExerciseId: exerciseId, activeSetType: setType, activeSetIndex: undefined});
-    }
+    const saveWorkoutToAsyncStorage = async (formState: LogWorkoutForm) => await AsyncStorage.setItem(`workout_draft_${user?.username}`, JSON.stringify(formState));
 
     //Used to toggle last session set display between single set and all sets of an exercise
     const [fullPastSetList, setFullPastSetList] = useState<boolean>(false);
     const toggleFullPastSetList = () => setFullPastSetList(!fullPastSetList)
 
-    const initialFormState: LogWorkoutForm = {
+    const initialFormState: LogWorkoutForm = props.resumingWorkout && cachedForm ? cachedForm : {
         values : {
             workoutNotes: '',
             exercises: workoutTemplate.exercises.map(e => {
@@ -172,6 +167,38 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
                 }
             })
         }
+    }
+
+    console.log('INITIAL:', JSON.stringify(initialFormState));
+
+    //Track the current focused set for showing the matching set from last session
+    const [activeSet, setActiveSet] = useState<activeSetType>({activeExerciseId: initialFormState.values.exercises[0].exerciseId, activeSetType: 'working', activeSetIndex: 0})
+    const updateActiveSet = async (exerciseId: string, setId: string, setType: string) => {
+        await saveWorkoutToAsyncStorage(workoutForm);
+        //Check exercise is in previous session at all
+        const exerciseFromLastTrained = lastTrained?.exercises.find(e => e.exerciseId === exerciseId);
+        if (!exerciseFromLastTrained) {setActiveSet({activeExerciseId: exerciseId, activeSetType: setType, activeSetIndex: undefined}); return;}
+ 
+        //If exercise found, check for any logged sets (should never be null, no exercise should be logged without sets but fallback for possible error in previous log)
+        const lastSessionSets = lastTrained?.exercises.find(e => e.exerciseId === exerciseId)?.sets;
+        if (!lastSessionSets) {setActiveSet({activeExerciseId: exerciseId, activeSetType: setType, activeSetIndex: undefined}); return;}
+
+        //Get which index of the specific set type the clicked set in current workout is (ie 5th overall set but 3rd working set returns index: 2)
+        const currentSessionSetIndex = workoutForm.values.exercises.find(e => e.exerciseId === exerciseId)?.sets.filter(s => s.setType === setType).findIndex(st => st.setId === setId);
+        if (currentSessionSetIndex === undefined || currentSessionSetIndex === -1) {setActiveSet({activeExerciseId: exerciseId, activeSetType: setType, activeSetIndex: undefined}); return}
+ 
+        //Check if there was a matching index set from last trained.
+        //If user on 3rd working set this workout, but last session only logged 2 working sets, will return undefined
+        if (lastSessionSets.filter(s => s.setType === setType)[currentSessionSetIndex]) {
+            setActiveSet({
+                activeExerciseId: exerciseFromLastTrained.exerciseId, 
+                activeSetType: setType,
+                activeSetIndex: currentSessionSetIndex
+            });
+            return;
+        }
+
+        setActiveSet({activeExerciseId: exerciseId, activeSetType: setType, activeSetIndex: undefined});
     }
 
     const logWorkoutReducer = (state: LogWorkoutForm, action: LogWorkoutAction) : LogWorkoutForm => {
@@ -1444,9 +1471,6 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
         return false;
     }
 
-    const { user } = useAuth()
-    const queryClient = useQueryClient();
-
     const handleSubmit = async () => {
         //Check for any form errors before continuing with form submission
         dispatch({ type: 'VALIDATE_ALL' });
@@ -1542,9 +1566,24 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
 
         const result = await completeWorkout(formPayload, queryClient, user?.username!);
         if (result.status === 201) {
+            await AsyncStorage.removeItem(`workout_draft_${user?.username}`);
             router.replace('/(protected)/(tabs)');
         }
     }
+
+    //Save form state to async storage if app state changes before workout is completed, ie closed mid workout
+    const workoutFormRef = useRef(workoutForm);
+    useEffect(() => {
+        workoutFormRef.current = workoutForm;
+    }, [workoutForm]);
+    useEffect(() => {
+        const subscription = AppState.addEventListener('change', state => {
+            if (state === 'background' || state === 'inactive') saveWorkoutToAsyncStorage(workoutFormRef.current)
+        });
+        return () => subscription.remove();
+    }, []);
+
+    if (!formReady || !workoutTemplate) return <View><Text>Loading Workout Template</Text></View>
 
     return (
         <ScrollView>
@@ -1583,15 +1622,15 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
                 </View>
                 <View>
                     {
-                        workoutForm.values.exercises.slice().sort((a, b) => a.exerciseIndex - b.exerciseIndex).map(e => {
-                            const exerciseErrors = workoutForm.errors.exercises.find(er => er.exerciseIndex === e.exerciseIndex)!
+                        initialFormState.values.exercises.slice().sort((a, b) => a.exerciseIndex - b.exerciseIndex).map(e => {
+                            const exerciseErrors = initialFormState.errors.exercises.find(er => er.exerciseIndex === e.exerciseIndex)!
                             return (
                                 <LogExercise 
                                     key={e.exerciseId} 
                                     dispatch={dispatch} 
                                     exerciseData={e}
                                     activeWorkout={props.activeWorkout} 
-                                    exerciseCount={workoutForm.values.exercises.length}
+                                    exerciseCount={initialFormState.values.exercises.length}
                                     lastTrainedExercise={lastTrained?.exercises.find(exc => exc.exerciseId === e.exerciseId)}
                                     updateActiveSet={updateActiveSet}
                                     exerciseErrors={exerciseErrors}

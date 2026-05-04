@@ -3,12 +3,14 @@ import { useSplits, useDayOfSplit } from '@/hooks/useSplit';
 import { useWorkoutHistory } from '@/hooks/useWorkoutHistory';
 import { formatDateDifferenceHMS } from '@/utils/dates';
 import { checkForActiveWorkout, fetchLastTrained } from '@/utils/workouts';
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import { Button, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import dayjs from 'dayjs';
 import { useStartWorkout } from '@/hooks/useStartWorkout';
 import { useFocusEffect } from '@react-navigation/native';
 import { useWorkoutTemplates } from '@/hooks/useWorkoutTemplates';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useRouter } from 'expo-router';
 
 const styles = StyleSheet.create({
   colflex: {
@@ -22,11 +24,21 @@ const styles = StyleSheet.create({
 })
 
 interface ActiveWorkout {
-  workout: { id: string, dateStarted: string, workoutName: string }
+  workout: { id: string, dateStarted: string, workoutName: string, templateId: string }
 }
 
 export default function App() {
+  useEffect(() => {
+    const checkStorage = async () => {
+        const keys = await AsyncStorage.getAllKeys();
+        const items = await AsyncStorage.multiGet(keys);
+        console.log('AsyncStorage contents:', items);
+    }
+    checkStorage();
+}, []);
+
   const today = new Date();
+  const router = useRouter();
   const { user } = useAuth();
   const { data: splitDay, isLoading: splitDayLoading } = useDayOfSplit();
   const { data: splitsData, isLoading: splitsDataLoading } = useSplits();
@@ -45,14 +57,7 @@ export default function App() {
 
   const trainedToday : boolean = useMemo(() => {
     return lastWorkout?.dateStarted.toString().slice(0, 10) === today.toISOString().slice(0, 10);
-  }, [lastWorkout]) 
-
-  const testFetch: any = async (workoutId: string) => {
-    const lastTrained = await fetchLastTrained(workoutId);
-    console.log(lastTrained.workout.exercises);
-    lastTrained.workout.exercises.map((e: any) => e.sets.map((s: any) => console.log(s)))
-    return lastTrained;
-  }
+  }, [lastWorkout])
 
   //Used to check once on page load if there is currently an active workout to show resume option if so
   const [workoutInProgress, setWorkoutInProgress] = useState<ActiveWorkout | null>(null);
@@ -66,6 +71,13 @@ export default function App() {
       checkActive();
     }, [])
   );
+
+  const resumeWorkout = (workout: ActiveWorkout) => {
+    router.replace({
+      pathname: `/sessions/${workout.workout.id}`,
+      params: { templateId: workout.workout.templateId, workoutName: workout.workout.workoutName, dateStarted: workout.workout.dateStarted, resumed: 'true' }
+    })
+  }
 
   //State values for selecting manual workout
   const [showManualWorkoutSelect, setShowManualWorkoutSelect] = useState<boolean>(false);
@@ -166,7 +178,7 @@ export default function App() {
 
             { workoutInProgress && (
               <View style={{backgroundColor: '#619888', padding: 5}}>
-                <Pressable onPress={() => alert('RESUME WORKOUT')}>
+                <Pressable onPress={() => resumeWorkout(workoutInProgress)}>
                   <Text style={{textAlign: 'center'}}>Resume {workoutInProgress.workout.workoutName} workout started on {workoutInProgress.workout.dateStarted.slice(0, 10)} ?</Text>
                 </Pressable>
               </View>
