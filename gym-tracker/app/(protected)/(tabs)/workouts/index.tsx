@@ -1,4 +1,4 @@
-import { Link } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 import { Text, View } from 'react-native';
 import { useWorkoutTemplates } from "@/hooks/useWorkoutTemplates";
 import { useSplits } from '@/hooks/useSplit';
@@ -7,7 +7,6 @@ import SkeletonSmall from '@/components/SkeletonSmall';
 export default function WorkoutsPage() {
     const { data: workoutTemplateList, isLoading, error } = useWorkoutTemplates();
     const { data } = useSplits();
-    const activeSplit = data?.activeSplit
 
     return (
         <View>
@@ -35,18 +34,32 @@ export default function WorkoutsPage() {
         
             <View style={{padding: 20}}>
                 <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
-                    <Text style={{fontWeight: 'bold'}}>Split</Text>
-                    <Link href='/workouts/EditSplit' >Create New Split</Link>
+                    <Text style={{fontWeight: 'bold'}}>Splits</Text>
+                    <Link href='/workouts/EditSplit' >Create New</Link>
                 </View>
                 <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
-                    <View>
-                        <Text>{activeSplit?.splitName}</Text>
-                        <Text>{activeSplit?.workouts?.length} Day Split</Text>
-                    </View>
-                    <View>
-                        {activeSplit?.splitId && (<Link href={`/workouts/${activeSplit.splitId}`}>View Split</Link>)}
-                        {/* <Link href={{pathname: 'workouts/[splitId]', params: {splitId: activeSplit?.splitId}}} withAnchor>Edit Split</Link> */}
-                    </View>
+                    {
+                        data?.splits.filter(sp => sp.isActive).map(s => {
+                            return (
+                                <View key={s.splitId}>
+                                    <Link href={`/workouts/${s.splitId}`}>
+                                        <Text>{s.workouts.length} Day Split: {s.splitName}</Text>
+                                    </Link>
+                                </View>
+                            )
+                        })
+                    }
+                    {
+                        data?.splits.filter(sp => !sp.isActive).map(s => {
+                            return (
+                                <View key={s.splitId}>
+                                    <Link href={`/workouts/${s.splitId}`}>
+                                        <Text>{s.workouts.length} Day Split: {s.splitName}</Text>
+                                    </Link>
+                                </View>
+                            )
+                        })
+                    }
                 </View>
             </View>
 

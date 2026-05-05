@@ -2,14 +2,13 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useSplits, useDayOfSplit } from '@/hooks/useSplit';
 import { useWorkoutHistory } from '@/hooks/useWorkoutHistory';
 import { formatDateDifferenceHMS } from '@/utils/dates';
-import { checkForActiveWorkout, fetchLastTrained } from '@/utils/workouts';
-import React, { useMemo, useState, useCallback, useEffect } from 'react';
+import { checkForActiveWorkout } from '@/utils/workouts';
+import React, { useMemo, useState, useCallback } from 'react';
 import { Button, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import dayjs from 'dayjs';
 import { useStartWorkout } from '@/hooks/useStartWorkout';
 import { useFocusEffect } from '@react-navigation/native';
 import { useWorkoutTemplates } from '@/hooks/useWorkoutTemplates';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 
 const styles = StyleSheet.create({
@@ -28,15 +27,6 @@ interface ActiveWorkout {
 }
 
 export default function App() {
-  useEffect(() => {
-    const checkStorage = async () => {
-        const keys = await AsyncStorage.getAllKeys();
-        const items = await AsyncStorage.multiGet(keys);
-        console.log('AsyncStorage contents:', items);
-    }
-    checkStorage();
-}, []);
-
   const today = new Date();
   const router = useRouter();
   const { user } = useAuth();

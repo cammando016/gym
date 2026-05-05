@@ -37,9 +37,9 @@ export function useDayOfSplit() {
     const now = new Date();
     const msUntilTomorrow = (
         (24 * 60 * 60 * 1000) - 
-        now.getHours() * 3600000 + 
-        now.getMinutes() * 60000 +
-        now.getSeconds() * 1000 +
+        (now.getHours() * 3600000) + 
+        (now.getMinutes() * 60000) +
+        (now.getSeconds() * 1000) +
         now.getMilliseconds()
     )
     return useQuery<number>({

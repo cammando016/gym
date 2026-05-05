@@ -1,10 +1,9 @@
 import { View, Text, TextInput, Pressable } from 'react-native';
 import { useState } from 'react';
-import { SplitDay, SplitFormPayload } from '@/types/workouts';
+import { Split, SplitDay, SplitFormPayload } from '@/types/workouts';
 import { Checkbox } from 'expo-checkbox';
 import { useWorkoutTemplates } from '@/hooks/useWorkoutTemplates';
 import { useRouter } from 'expo-router';
-import { useAuth } from '@/contexts/AuthContext';
 import { createSplit } from '@/utils/workouts';
 
 // <--------- TO DO -------------->
@@ -14,29 +13,45 @@ Advanced Search:
 Filters for muscle groups trained in workout, name, privacy, more than limited number of options returned on basic search
 */
 
-export default function SplitForm() {
+interface Props {
+    existingSplit?: Split,
+}
+
+export default function SplitForm( props: Props ) {
     const { data: workouts } = useWorkoutTemplates();
     const router = useRouter();
-    const { user } = useAuth();
+    
+    const [form, setForm] = useState<SplitDay[]>( props.existingSplit ? 
+        props.existingSplit.workouts.map((w, i) => {
+            return {
+                dayIndex: i,
+                workoutTemplateId: w.workoutId,
+                workoutName: w.workoutName,
+                restDay: w.restDay
+            }
+        })
+        : 
+        [{
+            dayIndex: 0,
+            workoutTemplateId: '',
+            workoutName: '',
+            restDay: false,
+        }]
+    );
 
-    const [newDayIndex, setNewDayIndex] = useState<number>(1);
+    const [editMode, setEditMode] = useState<boolean>(props.existingSplit ? false : true);
+    const toggleEditMode = () => {
+        setEditMode(!editMode);
+        setExerciseListOpen(false);
+    }
+
+    const [newDayIndex, setNewDayIndex] = useState<number>(props.existingSplit ? props.existingSplit.workouts.length : 1);
     const [activeDay, setActiveDay] = useState<number>(0);
-    const [splitName, setSplitName] = useState<string>('');
-    const [exerciseListOpen, setExerciseListOpen] = useState<boolean>(true);
-    const [form, setForm] = useState<SplitDay[]>([{
-        dayIndex: 0,
-        workoutTemplateId: '',
-        workoutName: '',
-        restDay: false,
-    }]);
+    const [splitName, setSplitName] = useState<string>(props.existingSplit ? props.existingSplit.splitName : '');
+    const [exerciseListOpen, setExerciseListOpen] = useState<boolean>(false);
 
     const handleSubmit = async () => {
-        if (!user) {
-            alert('You must be logged in to edit a split');
-            return;
-        }
         const formPayload : SplitFormPayload = {
-            username: user.username,
             splitName: splitName.toLowerCase().trim(),
             split: form.map((f, i) => {
                 return {
@@ -49,8 +64,8 @@ export default function SplitForm() {
 
         const res = await createSplit(formPayload);
         if (res.message) {
-            alert('Split successfully created');
             router.back();
+            alert(`${splitName} created`);
         } else alert (`Error creating split: ${res.error}. Please try again`);
     }
 
@@ -76,12 +91,24 @@ export default function SplitForm() {
 
     return (
         <View>
-            <View>
-                <TextInput 
-                    placeholder='Enter a name for your split'
-                    value={splitName}
-                    onChangeText={(value: string) => setSplitName(value)}
-                />
+            <View style={{display: 'flex', flexDirection: 'row'}}>
+                <View style={{display: 'flex', flexGrow: 1, flexDirection: 'row'}}>
+                    <Text>Name:</Text>
+                    <View style={{flexGrow: 1, borderWidth: 0.5, borderColor: 'black'}}>
+                        <TextInput
+                            autoFocus
+                            placeholder='Enter a name for your split'
+                            value={splitName}
+                            onChangeText={(value: string) => setSplitName(value)}
+                            editable={editMode}
+                        />
+                    </View>
+                </View>
+                { props.existingSplit &&
+                    <Pressable onPress={toggleEditMode}>
+                        <Text style={{color: editMode ? 'green' : 'red'}}>Edit Split</Text>
+                    </Pressable>
+                }
             </View>
             <View>
                 {
@@ -99,7 +126,7 @@ export default function SplitForm() {
                                                     prev.map(d => d.dayIndex === day.dayIndex ? {...d, workoutName: value} : d )    
                                                 );
                                             }}
-                                            editable={!day.restDay}
+                                            editable={editMode && !day.restDay}
                                             onFocus={() => {
                                                 setActiveDay(day.dayIndex);
                                                 setExerciseListOpen(true);
@@ -108,6 +135,7 @@ export default function SplitForm() {
                                     </View>
                                     <View style={{display: 'flex', flexDirection: 'row'}}>
                                         <Checkbox 
+                                            disabled={!editMode}
                                             value={day.restDay}
                                             onValueChange={(value: boolean) => setForm(prev =>
                                                 prev.map(d => d.dayIndex === day.dayIndex ? {...d, restDay: value} : d )
@@ -115,18 +143,18 @@ export default function SplitForm() {
                                         />
                                         <Text>Rest Day</Text>
                                     </View>
-                                    { form.length > 1 && <Pressable onPress={() => handleDeleteDay(day.dayIndex)} style={{borderWidth: 0.5, borderColor: 'black'}}><Text>X</Text></Pressable> }
+                                    { form.length > 1 && editMode && <Pressable onPress={() => handleDeleteDay(day.dayIndex)} style={{borderWidth: 0.5, borderColor: 'black'}}><Text>X</Text></Pressable> }
                                 </View>
 
                                 <View>
                                     { day.dayIndex === activeDay && exerciseListOpen && day.workoutName.length > 0 && (
-                                        workouts?.filter(workout => workout.workoutname.includes(form[i].workoutName.toLowerCase().trim())).map(w => {
+                                        workouts?.filter(workout => workout.workoutName.includes(form[i].workoutName.toLowerCase().trim())).map(w => {
                                             return (
                                                 <Pressable 
-                                                    onPress={() => handleSelectWorkout(w.workoutid, w.workoutname, day.dayIndex)} 
-                                                    key={w.workoutid}
+                                                    onPress={() => handleSelectWorkout(w.workoutId, w.workoutName, day.dayIndex)} 
+                                                    key={w.workoutId}
                                                 >
-                                                    <Text>{w.workoutname}</Text>
+                                                    <Text>{w.workoutName}</Text>
                                                 </Pressable>
                                             )
                                         })

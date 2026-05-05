@@ -48,9 +48,13 @@ export const fetchLastTrained = async (workoutId: string) => {
 }
 
 export const createSplit = async (details: SplitFormPayload) => {
+    const token = await AsyncStorage.getItem('token');
     const res = await fetch(`http://localhost:3000/api/workouts/split/create`, {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
+        headers: {
+            'Content-Type': 'application/json',
+            authorization: `Bearer ${token}`
+        },
         body: JSON.stringify(details),
     })
     const response = await res.json();
