@@ -481,6 +481,58 @@ router.post('/templates/create', async(req, res) => {
     }
 })
 
+router.patch('/split/:splitId/edit', authenticateToken, async(req, res) => {
+    const splitId = req.params.splitId;
+    const userId = req.user.id;
+
+    //Check split exists, and user is permitted to edit the split
+    if (!splitId) return res.status(404).json({ error: 'Submitted split ID not found'});
+    try {
+        const splitUserCheck = await pool.query(
+            `SELECT user_id FROM splits WHERE split_id = $1`, [splitId]
+        );
+        if (splitUserCheck.rows.length === 0) return res.status(404).json({ error: 'Submitted split ID not found'});
+        if (splitUserCheck.rows[0].user_id !== userId) return res.status(403).json({error: 'Unauthorized to edit this split'});
+    } catch (error) {
+        return res.status(500).json({error: error.message});
+    }
+
+    //Update split
+    const client = await pool.connect();
+    try {
+        await client.query('BEGIN');
+        const { splitName, split } = req.body;
+
+        console.log(splitName, split);
+
+        //Update split name if needed
+        if (splitName) {
+            await client.query(`
+                UPDATE splits
+                SET split_name = $1
+                WHERE split_id = $2
+                `,
+                [splitName, splitId]
+            );
+        }
+
+        if (split.length > 0) {
+            console.log('tbd')
+        }
+
+        await client.query('COMMIT');
+        return res.status(200).json({message: 'Split Updated'});
+
+    } catch (error) {
+        await client.query('ROLLBACK');
+        console.error(error);
+        return res.status(500).json({ error: error.message});
+    } finally {
+        client.release();
+    }
+
+})
+
 router.post('/split/create', async (req, res) => {
     const client = await pool.connect();
 
@@ -506,10 +558,10 @@ router.post('/split/create', async (req, res) => {
         console.log('Creating new split...');
         const createSplit = await client.query(
             `INSERT INTO splits
-            (user_id, split_name, current_split_day)
-            VALUES ($1, $2, $3)
+            (user_id, split_name)
+            VALUES ($1, $2)
             RETURNING split_id`,
-            [userId, splitName, -1]
+            [userId, splitName]
         );
         const splitId = createSplit.rows[0].split_id;
         console.log('Split Created');
@@ -517,9 +569,9 @@ router.post('/split/create', async (req, res) => {
         //Update user record with the current active split
         await client.query(
             `UPDATE users
-            SET active_split = $1
+            SET active_split = $1, current_split_day = $3
             WHERE id = $2`,
-            [splitId, userId]
+            [splitId, userId, -1]
         );
 
         //Add each day of the split with the tagged workout

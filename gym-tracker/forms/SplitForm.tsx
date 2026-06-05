@@ -5,9 +5,13 @@ import { Checkbox } from 'expo-checkbox';
 import { useWorkoutTemplates } from '@/hooks/useWorkoutTemplates';
 import { useRouter } from 'expo-router';
 import { createSplit, editSplit } from '@/utils/workouts';
+import { useAuth } from "@/contexts/AuthContext";
+import { useQueryClient } from "@tanstack/react-query";
+
 
 // <--------- TO DO -------------->
 /*
+Ensure users can't submit a day without either workout template or rest day selected
 Implement advanced search for workout templates, text input runs basic string match on user's own workouts, limited results
 Advanced Search:
 Filters for muscle groups trained in workout, name, privacy, more than limited number of options returned on basic search
@@ -20,7 +24,10 @@ interface Props {
 export default function SplitForm( props: Props ) {
     const { data: workouts } = useWorkoutTemplates();
     const router = useRouter();
-    
+
+    const { user } = useAuth();
+    const queryClient = useQueryClient();
+     
     const [form, setForm] = useState<SplitDay[]>( props.existingSplit ? 
         props.existingSplit.workouts.map((w, i) => {
             return {
@@ -113,7 +120,12 @@ export default function SplitForm( props: Props ) {
                     }
                 })
             }
-            // const res = await editSplit(formPayload, props.existingSplit?.splitId!!)
+            const res = await editSplit(formPayload, props.existingSplit?.splitId!!)
+            if (res.message) {
+                queryClient.refetchQueries({ queryKey: ['splits', user?.username]})
+                router.back();
+                alert(`${splitName} Updated`);
+            } else alert(`Error updating split: ${res.error}. Please try again`);
         }
     }
 
