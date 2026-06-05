@@ -1,5 +1,5 @@
 import { useAuth } from "@/contexts/AuthContext";
-import { FormPayload, LogWorkoutPayload, SplitFormPayload } from "@/types/workouts";
+import { EditSplitPayload, FormPayload, LogWorkoutPayload, SplitFormPayload } from "@/types/workouts";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { QueryClient, useQueryClient } from "@tanstack/react-query";
 
@@ -51,6 +51,24 @@ export const createSplit = async (details: SplitFormPayload) => {
     const token = await AsyncStorage.getItem('token');
     const res = await fetch(`http://localhost:3000/api/workouts/split/create`, {
         method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(details),
+    })
+    const response = await res.json();
+
+    return {
+        status: res.status,
+        ...response
+    }
+}
+
+export const editSplit = async (details: EditSplitPayload, splitId: string) => {
+    const token = await AsyncStorage.getItem('token');
+    const res = await fetch(`http://localhost:3000/api/workouts/split/${splitId}/edit`, {
+        method: 'PATCH',
         headers: {
             'Content-Type': 'application/json',
             authorization: `Bearer ${token}`

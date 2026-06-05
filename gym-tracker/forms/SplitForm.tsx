@@ -1,10 +1,10 @@
 import { View, Text, TextInput, Pressable } from 'react-native';
 import { useState } from 'react';
-import { Split, SplitDay, SplitFormPayload } from '@/types/workouts';
+import { EditSplitPayload, Split, SplitDay, SplitFormPayload } from '@/types/workouts';
 import { Checkbox } from 'expo-checkbox';
 import { useWorkoutTemplates } from '@/hooks/useWorkoutTemplates';
 import { useRouter } from 'expo-router';
-import { createSplit } from '@/utils/workouts';
+import { createSplit, editSplit } from '@/utils/workouts';
 
 // <--------- TO DO -------------->
 /*
@@ -89,6 +89,34 @@ export default function SplitForm( props: Props ) {
         setExerciseListOpen(false);
     }
 
+    const handleSubmitEditSplit = async () => {
+        //Check for changed days
+        const changedDays : SplitDay[] = form.filter((f, i) => (
+            !props.existingSplit?.workouts[i] ||
+            f.dayIndex !== props.existingSplit?.workouts[i].dayIndex ||
+            f.restDay !== props.existingSplit.workouts[i].restDay ||
+            f.workoutTemplateId !== props.existingSplit.workouts[i].workoutId
+        ));
+        const changedName : string | undefined = props.existingSplit?.splitName === splitName ? undefined : splitName;
+        
+        if (changedDays.length === 0 && changedName === undefined) {
+            alert(`No changes detected for ${splitName} split`);
+            router.back();
+        } else {
+            const formPayload : EditSplitPayload = {
+                splitName: changedName,
+                split: changedDays.map(d => {
+                    return {
+                        workoutTemplateId: d.restDay ? '' : d.workoutTemplateId,
+                        restDay: d.restDay,
+                        dayIndex: d.dayIndex
+                    }
+                })
+            }
+            // const res = await editSplit(formPayload, props.existingSplit?.splitId!!)
+        }
+    }
+
     return (
         <View>
             <View style={{display: 'flex', flexDirection: 'row'}}>
@@ -106,7 +134,7 @@ export default function SplitForm( props: Props ) {
                 </View>
                 { props.existingSplit &&
                     <Pressable onPress={toggleEditMode}>
-                        <Text style={{color: editMode ? 'green' : 'red'}}>Edit Split</Text>
+                        <Text style={{color: editMode ? 'green' : 'red'}}>{editMode ? 'Editing Split' : 'Edit Split'}</Text>
                     </Pressable>
                 }
             </View>
@@ -172,9 +200,19 @@ export default function SplitForm( props: Props ) {
                 <Pressable onPress={() => router.back()}>
                     <Text>Cancel</Text>
                 </Pressable>
-                <Pressable onPress={handleSubmit}>
-                    <Text>Submit</Text>
-                </Pressable>
+
+                {
+                    props.existingSplit ? (
+                        <Pressable onPress={handleSubmitEditSplit}>
+                            <Text>Edit Split</Text>
+                        </Pressable>
+                    ) : (
+                        <Pressable onPress={handleSubmit}>
+                            <Text>Create Split</Text>
+                        </Pressable>
+                    )
+                }
+                
             </View>
         </View>
     )

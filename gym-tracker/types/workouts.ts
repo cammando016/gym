@@ -201,6 +201,15 @@ interface SplitFormPayload {
     } []
 }
 
+interface EditSplitPayload {
+    splitName?: string,
+    split?: {
+        workoutTemplateId: string,
+        restDay: boolean,
+        dayIndex: number
+    } []
+}
+
 interface Split {
     isActive: boolean;
     splitId: string;
@@ -453,6 +462,7 @@ export {
     WorkoutTemplateType, 
     SplitDay, 
     SplitFormPayload, 
+    EditSplitPayload,
     Split, 
     UserSplits, 
     LoggedWorkout, 
