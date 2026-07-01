@@ -98,20 +98,32 @@ export default function SplitForm( props: Props ) {
 
     const handleSubmitEditSplit = async () => {
         //Check for changed days
-        const changedDays : SplitDay[] = form.filter((f, i) => (
+        const firstChangedDay = form.find((f, i) =>
             !props.existingSplit?.workouts[i] ||
             f.dayIndex !== props.existingSplit?.workouts[i].dayIndex ||
             f.restDay !== props.existingSplit.workouts[i].restDay ||
             f.workoutTemplateId !== props.existingSplit.workouts[i].workoutId
-        ));
+        );
         const changedName : string | undefined = props.existingSplit?.splitName === splitName ? undefined : splitName;
         
-        if (changedDays.length === 0 && changedName === undefined) {
+        //Check if any split data returned, don't send to backend if not
+        if (!firstChangedDay && changedName === undefined && form.length === props.existingSplit?.workouts.length) {
             alert(`No changes detected for ${splitName} split`);
             router.back();
         } else {
+            const changedDays : SplitDay[] = form.length === props.existingSplit?.workouts.length ? //If length is the same, no added or deleted days, only pass changed days
+                form.filter((f, i) => 
+                    !props.existingSplit?.workouts[i] ||
+                    f.dayIndex !== props.existingSplit?.workouts[i].dayIndex ||
+                    f.restDay !== props.existingSplit.workouts[i].restDay ||
+                    f.workoutTemplateId !== props.existingSplit.workouts[i].workoutId
+                ) : 
+                firstChangedDay ? //If length wasn't the same, check which day is first edited
+                form.filter(f => f.dayIndex >= firstChangedDay.dayIndex) 
+                : []; //Empty list of changes if only name of split was changed
             const formPayload : EditSplitPayload = {
                 splitName: changedName,
+                splitLength: form.length,
                 split: changedDays.map(d => {
                     return {
                         workoutTemplateId: d.restDay ? '' : d.workoutTemplateId,

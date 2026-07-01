@@ -203,6 +203,7 @@ interface SplitFormPayload {
 
 interface EditSplitPayload {
     splitName?: string,
+    splitLength: number,
     split?: {
         workoutTemplateId: string,
         restDay: boolean,
