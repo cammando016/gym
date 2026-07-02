@@ -1,5 +1,5 @@
 import { View, Text, TextInput, Pressable } from 'react-native';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { EditSplitPayload, Split, SplitDay, SplitFormPayload } from '@/types/workouts';
 import { Checkbox } from 'expo-checkbox';
 import { useWorkoutTemplates } from '@/hooks/useWorkoutTemplates';
@@ -12,6 +12,7 @@ import { useQueryClient } from "@tanstack/react-query";
 // <--------- TO DO -------------->
 /*
 Ensure users can't submit a day without either workout template or rest day selected
+Reorder workouts
 Implement advanced search for workout templates, text input runs basic string match on user's own workouts, limited results
 Advanced Search:
 Filters for muscle groups trained in workout, name, privacy, more than limited number of options returned on basic search
@@ -57,6 +58,23 @@ export default function SplitForm( props: Props ) {
     const [splitName, setSplitName] = useState<string>(props.existingSplit ? props.existingSplit.splitName : '');
     const [exerciseListOpen, setExerciseListOpen] = useState<boolean>(false);
 
+    //Error handling
+    const [errors, setErrors] = useState<{error: boolean, index: number}[]>(props.existingSplit ? 
+        props.existingSplit.workouts.map(w => {
+            return {
+                error: w.restDay === false && w.workoutId === '',
+                index: w.dayIndex
+            }
+        })
+        :
+        [{error: true, index: 0}]
+    );
+    const [nameError, setNameError] = useState<boolean> (splitName === '' ? true : false);
+
+    const submitDisabled = useMemo(() => {
+        return errors.some(e => e.error === true);
+    }, [errors])
+
     const handleSubmit = async () => {
         const formPayload : SplitFormPayload = {
             splitName: splitName.toLowerCase().trim(),
@@ -85,11 +103,15 @@ export default function SplitForm( props: Props ) {
                 workoutName: '',
                 restDay: false,
             }
-        ])
+        ]);
+        setErrors(prev => [...prev, {error: true, index: newDayIndex}]);
         setNewDayIndex(newDayIndex + 1);
     }
 
-    const handleDeleteDay = (dayIndex: number) => { setForm(form.filter(f => f.dayIndex !== dayIndex)) }
+    const handleDeleteDay = (dayIndex: number) => { 
+        setForm(form.filter(f => f.dayIndex !== dayIndex));
+        setErrors(errors.filter(e => e.index !== dayIndex)); 
+    }
 
     const handleSelectWorkout = (workoutId: string, workoutName: string, clickedIndex: number) => {
         setForm(prev => prev.map(p => p.dayIndex === clickedIndex ? {...p, workoutName: workoutName, workoutTemplateId: workoutId} : p));
@@ -151,7 +173,10 @@ export default function SplitForm( props: Props ) {
                             autoFocus
                             placeholder='Enter a name for your split'
                             value={splitName}
-                            onChangeText={(value: string) => setSplitName(value)}
+                            onChangeText={(value: string) => {
+                                setSplitName(value);
+                                setNameError(value === '' ? true : false);
+                            }}
                             editable={editMode}
                         />
                     </View>
@@ -189,9 +214,14 @@ export default function SplitForm( props: Props ) {
                                         <Checkbox 
                                             disabled={!editMode}
                                             value={day.restDay}
-                                            onValueChange={(value: boolean) => setForm(prev =>
-                                                prev.map(d => d.dayIndex === day.dayIndex ? {...d, restDay: value} : d )
-                                            )}
+                                            onValueChange={(value: boolean) => {
+                                                setForm(prev =>
+                                                    prev.map(d => d.dayIndex === day.dayIndex ? {...d, restDay: value, workoutTemplateId: '', workoutName: ''} : d )
+                                                );
+                                                setErrors(prev => 
+                                                    prev.map(e => e.index === day.dayIndex ? {...e, error: value === true ? false : true} : e )
+                                                );
+                                            }}
                                         />
                                         <Text>Rest Day</Text>
                                     </View>
@@ -203,7 +233,10 @@ export default function SplitForm( props: Props ) {
                                         workouts?.filter(workout => workout.workoutName.includes(form[i].workoutName.toLowerCase().trim())).map(w => {
                                             return (
                                                 <Pressable 
-                                                    onPress={() => handleSelectWorkout(w.workoutId, w.workoutName, day.dayIndex)} 
+                                                    onPress={() => {
+                                                        handleSelectWorkout(w.workoutId, w.workoutName, day.dayIndex);
+                                                        setErrors(prev => prev.map(e => e.index === day.dayIndex ? {...e, error: false} : e ))
+                                                    }} 
                                                     key={w.workoutId}
                                                 >
                                                     <Text>{w.workoutName}</Text>
@@ -227,12 +260,12 @@ export default function SplitForm( props: Props ) {
 
                 {
                     props.existingSplit ? (
-                        <Pressable onPress={handleSubmitEditSplit}>
-                            <Text>Edit Split</Text>
+                        <Pressable onPress={handleSubmitEditSplit} disabled={nameError || submitDisabled} >
+                            <Text style={{color: nameError || submitDisabled ? 'red' : 'green'}}>Edit Split</Text>
                         </Pressable>
                     ) : (
-                        <Pressable onPress={handleSubmit}>
-                            <Text>Create Split</Text>
+                        <Pressable onPress={handleSubmit} disabled={nameError || submitDisabled} >
+                            <Text style={{color: nameError || submitDisabled ? 'red' : 'green'}}>Create Split</Text>
                         </Pressable>
                     )
                 }
