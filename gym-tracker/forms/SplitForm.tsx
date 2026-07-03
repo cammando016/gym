@@ -11,7 +11,6 @@ import { useQueryClient } from "@tanstack/react-query";
 
 // <--------- TO DO -------------->
 /*
-Ensure users can't submit a day without either workout template or rest day selected
 Reorder workouts
 Implement advanced search for workout templates, text input runs basic string match on user's own workouts, limited results
 Advanced Search:
@@ -196,14 +195,14 @@ export default function SplitForm( props: Props ) {
                                     <Text>Day {i + 1}:</Text>
                                     <View style={{flexGrow: 1, borderWidth: 0.5, borderColor: 'black'}}>
                                         <TextInput
-                                            placeholder={day.restDay ? 'REST DAY SELECTED' : 'Search Workout Templates'}
+                                            placeholder={day.restDay ? 'REST DAY SELECTED' : 'Search Templates'}
                                             value={day.restDay ? '' : day.workoutName}
                                             onChangeText={(value: string) => {
                                                 setForm(prev =>
                                                     prev.map(d => d.dayIndex === day.dayIndex ? {...d, workoutName: value} : d )    
                                                 );
                                             }}
-                                            editable={editMode && !day.restDay}
+                                            editable={editMode && !day.restDay && day.workoutTemplateId === ''}
                                             onFocus={() => {
                                                 setActiveDay(day.dayIndex);
                                                 setExerciseListOpen(true);
@@ -224,6 +223,11 @@ export default function SplitForm( props: Props ) {
                                             }}
                                         />
                                         <Text>Rest Day</Text>
+                                    </View>
+                                    <View>
+                                        <Pressable onPress={() => setForm(prev => prev.map(d => d.dayIndex === day.dayIndex ? {...d, workoutTemplateId: '', workoutName: ''} : d ))} >
+                                            <Text>Clear Workout</Text>
+                                        </Pressable>
                                     </View>
                                     { form.length > 1 && editMode && <Pressable onPress={() => handleDeleteDay(day.dayIndex)} style={{borderWidth: 0.5, borderColor: 'black'}}><Text>X</Text></Pressable> }
                                 </View>

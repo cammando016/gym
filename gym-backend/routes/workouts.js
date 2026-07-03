@@ -556,6 +556,15 @@ router.patch('/split/:splitId/edit', authenticateToken, async(req, res) => {
             ))
         }
 
+        //After split is edited, user needs to set where they are up to in split
+        //Reset current_split_day to -1, to trigger user selecting split or starting following day
+        await client.query(`
+            UPDATE users
+            SET current_split_day = $1
+            WHERE active_split = $2
+            `,[-1, splitId]
+        );
+
         await client.query('COMMIT');
         console.log('Changes committed to split ID:', splitId);
         return res.status(200).json({message: 'Split Updated'});
