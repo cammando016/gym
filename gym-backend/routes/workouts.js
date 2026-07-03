@@ -3,11 +3,12 @@ import dotenv from 'dotenv';
 import pool from '../db/pool.js';
 import { authenticateToken } from '../middleware/authenticateToken.js';
 import { deactivateActiveWorkouts } from '../middleware/deactivateActiveWorkouts.js';
+import { setSplitDay } from '../middleware/setSplitDay.js';
 
 dotenv.config();
 const router = express.Router();
 
-router.post('/sessions', authenticateToken, deactivateActiveWorkouts, async (req, res) => {
+router.post('/sessions', authenticateToken, deactivateActiveWorkouts, setSplitDay, async (req, res) => {
     
     console.log(req.body);
     const { templateId } = req.body;

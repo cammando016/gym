@@ -182,9 +182,9 @@ export default function App() {
               <View><Text>Select Workout Template:</Text></View>
               <View>
                 {
-                  workouts?.map(w => {
+                  workouts?.map((w, i) => {
                     return (
-                      <Pressable onPress={ () => setManualWorkoutSelection({workoutName: w.workoutName, templateId: w.workoutId}) }>
+                      <Pressable onPress={ () => setManualWorkoutSelection({workoutName: w.workoutName, templateId: w.workoutId}) } key={i}>
                         <Text>{w.workoutName}</Text>
                       </Pressable>
                     )
