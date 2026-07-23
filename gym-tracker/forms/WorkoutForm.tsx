@@ -25,7 +25,7 @@ export default function WorkoutForm () {
 
     const router = useRouter();
 
-    //Starting empty form for use in reducer and resetting form
+    //Starting form (either empty or prefilled with template data when editing existing) for use in reducer and resetting form
     const initialFormState: FormStateWithValidation = activeWorkout ? {
         values: {
             name: activeWorkout.workoutName,
@@ -75,11 +75,7 @@ export default function WorkoutForm () {
                 setOptionalUnilateral: false,
                 setOptionalStraps: false,
                 setOptionalBelt: false,
-                sets: [{ 
-                    id: 0, 
-                    type: 'working', 
-                    isUnilateral: false 
-                }] 
+                sets: [] 
             }] 
         },
         errors: {
@@ -128,7 +124,7 @@ export default function WorkoutForm () {
                         setOptionalUnilateral: false,
                         setOptionalStraps: false,
                         setOptionalBelt: false,
-                        sets: [{id: 0, type: 'working', isUnilateral: false}]
+                        sets: []
                     }]},
                     errors: {...state.errors, exercises: [...state.errors.exercises, 
                         { name: undefined, repRangeLower: undefined, repRangeUpper: undefined }
@@ -480,8 +476,7 @@ export default function WorkoutForm () {
                 </View>
 
                 <View style={{display: 'flex', flexDirection: 'row'}}>
-                    <Button title='Cancel' />
-                    {/* Still need to make sure reset clears set and exercise id counters */}
+                    <Button title='Cancel' onPress={() => router.back()} />
                     <Button title='Reset Form' onPress={() => dispatch({ type: 'RESET_FORM' })} />
                     <Button title='Submit' onPress={handleSubmit} />
                 </View>

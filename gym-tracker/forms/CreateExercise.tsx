@@ -7,6 +7,7 @@ import { WorkoutAction } from '@/types/workouts';
 import MuscleSelector from '@/components/MuscleSelector';
 
 interface Props {
+    setExerciseChosenTrue: () => void,
     closeModal:  () => void,
     exercise: Exercise,
     updateForm: Dispatch<WorkoutAction>,
@@ -170,7 +171,10 @@ export default function CreateExercise(props: Props) {
                     <Text>Cancel</Text>
                 </Pressable>
                 {/* Needs validation added to below */}
-                <Pressable onPress={() => props.closeModal()}>
+                <Pressable onPress={() => {
+                    props.setExerciseChosenTrue();
+                    props.closeModal();
+                }}>
                     <Text>Add Exercise</Text>
                 </Pressable>
             </View>

@@ -28,6 +28,11 @@ interface Props {
 }
 
 export default function NewExercise(props: Props) {
+    //State of exercise selected or created to allow adding sets
+    const [exerciseChosen, setExerciseChosen] = useState<boolean>(false);
+    const setExerciseChosenTrue = () => setExerciseChosen(true);
+    const setExerciseChosenFalse = () => setExerciseChosen(false);
+
     //Array of exercises with matching name in form vs db
     const [searchResults, setSearchResults] = useState<ExerciseSearchResultType[]>([]);
     //Only update when user types in the exercise name text input field.
@@ -76,7 +81,7 @@ export default function NewExercise(props: Props) {
 
             {showCreateExercise && (
                 <Modal style={[styles.modalContainer]}>
-                    <CreateExercise closeModal={closeCreateExercise} nameError={props.exerciseErrors?.name} exercise={props.exercise} updateForm={props.updateForm} />
+                    <CreateExercise setExerciseChosenTrue={setExerciseChosenTrue} closeModal={closeCreateExercise} nameError={props.exerciseErrors?.name} exercise={props.exercise} updateForm={props.updateForm} />
                 </Modal>
             )}
 
@@ -119,6 +124,7 @@ export default function NewExercise(props: Props) {
                                                         isUnilateral: result.exercise_unilateral,
                                                         dbId: result.exercise_id
                                                     }})
+                                                    setExerciseChosenTrue();
                                                     setSearchResults([]);
                                                 }}
                                             />
@@ -172,7 +178,11 @@ export default function NewExercise(props: Props) {
             </View>
 
             <View>
-                <Button title='Add Set' onPress={() => props.updateForm({ type: 'ADD_SET', exerciseIndex: props.exercise.index, newSetIndex: props.exercise.sets.length }) } />
+                { exerciseChosen ?
+                    <Button title='Add Set' onPress={() => props.updateForm({ type: 'ADD_SET', exerciseIndex: props.exercise.index, newSetIndex: props.exercise.sets.length }) } />
+                    :
+                    <Text>Select or create new exercise to add sets.</Text>
+                }    
             </View>
         </View>
     )
