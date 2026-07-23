@@ -6,12 +6,19 @@ import NewExercise from './NewExercise';
 import { useAuth } from '@/contexts/AuthContext';
 import { validateRequiredAlphanumericSymbolsField, validateRequiredAlphabeticalSpacesField, validateOptionalIntegerField, validateUpperRepsTarget } from '../utils/formValiditors';
 import { createWorkout } from '@/utils/workouts';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQueryClient } from '@tanstack/react-query';
+import { useWorkoutTemplates } from '@/hooks/useWorkoutTemplates';
 
 export default function WorkoutForm () {
     const { user } = useAuth();
     const queryClient = useQueryClient();
+
+    //Check for templateId provided in url to fill existing workout data if editing
+    const { templateId } = useLocalSearchParams();
+    const { data: workoutTemplateList } = useWorkoutTemplates();
+    const activeWorkout = templateId ? workoutTemplateList?.find(w => w.workoutId === templateId)! : undefined;
+
     //State objects for tracking number of sets and exercises, and tracking current exercise/set being interacted with by user
     const exerciseIndex = useRef<number>(1);
     const [activeSet, setActiveSet] = useState<SetTracker>({exercise: 0, set: 0});
@@ -21,7 +28,42 @@ export default function WorkoutForm () {
     const router = useRouter();
 
     //Starting empty form for use in reducer and resetting form
-    const initialFormState: FormStateWithValidation = { 
+    const initialFormState: FormStateWithValidation = activeWorkout ? {
+        values: {
+            name: activeWorkout.workoutName,
+            privacy: activeWorkout.privacy,
+            exercises: activeWorkout.exercises.map(e => {
+                return {
+                    index: e.exerciseIndex,
+                    dbId: e.exerciseId,
+                    name: e.exerciseName,
+                    repRangeLower: e.repRangeLower.toString(),
+                    repRangeHigher: e.repRangeUpper.toString(),
+                    isUnilateral: e.unilateralExercise,
+                    setOptionalUnilateral: e.optionalSetModifiers.unilateral,
+                    setOptionalStraps: e.optionalSetModifiers.straps,
+                    setOptionalBelt: e.optionalSetModifiers.belt,
+                    sets: e.sets.map(s => {
+                        return {
+                            id: s.setIndex,
+                            type: s.setType,
+                            isUnilateral: s.isUnilateralSet
+                        }
+                    })
+                }
+            })
+        },
+        errors: {
+            name: undefined,
+            exercises: activeWorkout.exercises.map(e => {
+                return {
+                    name: undefined,
+                    repRangeLower: undefined,
+                    repRangeUpper: undefined
+                }
+            })
+        }
+    } : { 
         values: {
             name: '', 
             privacy: PrivacyType.Private, 

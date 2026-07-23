@@ -1,5 +1,6 @@
 import { WorkoutTemplateType } from "@/types/workouts";
 import { View, Text, Pressable } from 'react-native';
+import { Link } from 'expo-router';
 
 interface Props {
     workout: WorkoutTemplateType,
@@ -9,6 +10,7 @@ interface Props {
 
 export default function WorkoutTemplate (props: Props) {
     const isActiveWorkout = props.workout.workoutId === props.openDetails;
+    const editLink = `/workouts/AddWorkout?templateId=${props.workout.workoutId}`
     return (
         <View style={{paddingTop: '10'}}>
             <View>
@@ -19,7 +21,8 @@ export default function WorkoutTemplate (props: Props) {
                         <Text>{`${props.workout.exercises.length} Exercises:`}</Text>
                     </View>
                     <View>
-                        <Pressable onPress={() => props.updateActiveWorkout(props.workout.workoutId)}><Text>{isActiveWorkout ? 'Hide' : 'Show'} Details</Text></Pressable>
+                        <Link href={editLink}>Edit</Link>
+                        <Pressable onPress={() => props.updateActiveWorkout(props.workout.workoutId)}><Text>{isActiveWorkout ? 'Hide' : 'Show'} Details</Text></Pressable> 
                     </View>
                 </View>
                 {isActiveWorkout && (
