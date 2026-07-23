@@ -1,7 +1,7 @@
 import { Dispatch, useState } from 'react';
 import { Button, Pressable, StyleSheet, Text, View } from 'react-native';
-import { Checkbox } from 'expo-checkbox';
 import { Exercise, SetTracker, SetType, setTypes, WorkoutSet, WorkoutAction } from '@/types/workouts';
+import formStyles from '../styles/formStyles.js';
 
 interface Props {
     set: WorkoutSet,
@@ -34,12 +34,7 @@ export default function NewSet(props: Props) {
                     </View>
                 </Pressable>
 
-                <Checkbox 
-                    value={ props.exercise.isUnilateral ? true : props.set.isUnilateral } 
-                    disabled={props.exercise.isUnilateral} 
-                    onValueChange={(b: boolean) => props.updateForm({ type: 'SET_UNILATERAL_SET', exerciseIndex: props.exercise.index, setIndex: props.set.id, value: b })}
-                />
-                <Text>Unilateral Set</Text>
+                <Pressable onPress={() => props.updateForm({ type: 'SET_UNILATERAL_SET', exerciseIndex: props.exercise.index, setIndex: props.set.id })}><Text style={props.set.isUnilateral ? formStyles.setModifierOn : formStyles.setModifierOff}>UNILATERAL</Text></Pressable>
                 {
                     props.exercise.sets.length > 1 && <Button title='Remove Set' onPress={() => props.updateForm({ type: 'REMOVE_SET', exerciseIndex: props.exercise.index, setIndex: props.set.id }) }/>
                 }

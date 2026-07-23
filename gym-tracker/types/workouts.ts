@@ -60,7 +60,7 @@ type WorkoutAction =
 | { type: 'ADD_SET'; exerciseIndex: number; newSetIndex: number }
 | { type: 'REMOVE_SET'; exerciseIndex: number; setIndex: number }
 | { type: 'SET_SET_TYPE'; exerciseIndex: number; setIndex: number; value: SetType }
-| { type: 'SET_UNILATERAL_SET', exerciseIndex: number; setIndex: number; value: boolean }
+| { type: 'SET_UNILATERAL_SET', exerciseIndex: number; setIndex: number; }
 | { type: 'VALIDATE_FULL_FORM' }
 | { type: 'RESET_FORM' }
 

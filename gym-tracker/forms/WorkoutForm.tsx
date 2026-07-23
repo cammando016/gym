@@ -344,7 +344,7 @@ export default function WorkoutForm () {
                     ...state,
                     values: {...state.values, exercises: state.values.exercises.map(exc => {
                         if (exc.index === action.exerciseIndex) return { ...exc, sets: exc.sets.map(s => {
-                            if (s.id === action.setIndex) return {...s, isUnilateral: action.value };
+                            if (s.id === action.setIndex) return {...s, isUnilateral: !s.isUnilateral};
                             return s;
                         })}
                         return exc;
