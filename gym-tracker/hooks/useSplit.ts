@@ -35,14 +35,6 @@ export function useDayOfSplit() {
     //Check if rest day
     const { user } = useAuth();
 
-    const calculateMsUntilMidnight = () => {
-        const now = new Date();
-        const tomorrow = new Date(now);
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        tomorrow.setHours(0, 0, 30);
-        return Math.max(tomorrow.getTime() - now.getTime(), 1000);
-    }
-
     return useQuery<number>({
         queryKey: ['splitDay', user?.username],
         queryFn: async () => {
@@ -50,7 +42,9 @@ export function useDayOfSplit() {
             return res.splitDay;
         },
         enabled: !!user,
-        staleTime: calculateMsUntilMidnight(),
-        refetchInterval: calculateMsUntilMidnight(),
+        staleTime: 23.5 * 60 * 60 * 1000,
+        refetchInterval: 30 * 60 * 1000,
+        refetchOnWindowFocus: true,
+        refetchOnReconnect: true
     })
 }
