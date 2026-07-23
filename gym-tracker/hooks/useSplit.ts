@@ -34,14 +34,15 @@ export function useDayOfSplit() {
     //Check if date of last training is oen day ago
     //Check if rest day
     const { user } = useAuth();
-    const now = new Date();
-    const msUntilTomorrow = (
-        (24 * 60 * 60 * 1000) - 
-        (now.getHours() * 3600000) + 
-        (now.getMinutes() * 60000) +
-        (now.getSeconds() * 1000) +
-        now.getMilliseconds()
-    )
+
+    const calculateMsUntilMidnight = () => {
+        const now = new Date();
+        const tomorrow = new Date(now);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        tomorrow.setHours(0, 0, 30);
+        return Math.max(tomorrow.getTime() - now.getTime(), 1000);
+    }
+
     return useQuery<number>({
         queryKey: ['splitDay', user?.username],
         queryFn: async () => {
@@ -49,6 +50,7 @@ export function useDayOfSplit() {
             return res.splitDay;
         },
         enabled: !!user,
-        staleTime: msUntilTomorrow,
+        staleTime: calculateMsUntilMidnight(),
+        refetchInterval: calculateMsUntilMidnight(),
     })
 }
