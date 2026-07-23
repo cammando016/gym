@@ -1,5 +1,5 @@
 import { Exercise, WorkoutSet, SetTracker, PrivacyType, WorkoutAction, FormStateWithValidation, ErrorShape, FormPayload } from '@/types/workouts';
-import { useRef, useState, useReducer } from 'react';
+import { useState, useReducer } from 'react';
 import { Button, Text, TextInput, View, ScrollView, StyleSheet } from 'react-native';
 import { RadioButton } from 'react-native-paper';
 import NewExercise from './NewExercise';
@@ -19,11 +19,9 @@ export default function WorkoutForm () {
     const { data: workoutTemplateList } = useWorkoutTemplates();
     const activeWorkout = templateId ? workoutTemplateList?.find(w => w.workoutId === templateId)! : undefined;
 
-    //State objects for tracking number of sets and exercises, and tracking current exercise/set being interacted with by user
-    const exerciseIndex = useRef<number>(1);
+    //State objects for tracking current exercise/set being interacted with by user
     const [activeSet, setActiveSet] = useState<SetTracker>({exercise: 0, set: 0});
     const [activeExercise, setActiveExercise] = useState<number>(0);
-    const setCounters = useRef<Record<number, number>>({0: 1});
 
     const router = useRouter();
 
@@ -120,7 +118,18 @@ export default function WorkoutForm () {
             case 'ADD_EXERCISE': {
                 return {
                     ...state,
-                    values: {...state.values, exercises: [...state.values.exercises, action.value]},
+                    values: {...state.values, exercises: [...state.values.exercises, {
+                        index: action.exerciseIndex,
+                        dbId: '',
+                        name: '',
+                        repRangeLower: '0',
+                        repRangeHigher: '0',
+                        isUnilateral: false,
+                        setOptionalUnilateral: false,
+                        setOptionalStraps: false,
+                        setOptionalBelt: false,
+                        sets: [{id: 0, type: 'working', isUnilateral: false}]
+                    }]},
                     errors: {...state.errors, exercises: [...state.errors.exercises, 
                         { name: undefined, repRangeLower: undefined, repRangeUpper: undefined }
                     ]}
@@ -284,7 +293,11 @@ export default function WorkoutForm () {
                 return {
                     ...state,
                     values: {...state.values, exercises: state.values.exercises.map(exc => {
-                        if (exc.index === action.exerciseIndex) return { ...exc, sets: [...exc.sets, action.value]};
+                        if (exc.index === action.exerciseIndex) return { ...exc, sets: [...exc.sets, {
+                            id: action.newSetIndex,
+                            type: 'working',
+                            isUnilateral: exc.isUnilateral ? true : false
+                        }]};
                         return exc;
                     })}
                 };
@@ -355,43 +368,6 @@ export default function WorkoutForm () {
     const hasErrors = (errorObject: ErrorShape) : boolean => {
         if (errorObject.name) return true;
         return errorObject.exercises.some(exc => exc.name || exc.repRangeLower || exc.repRangeUpper);
-    }
-
-    //Add new exercise to workout
-    const handleAddExercise = () => {
-        const newId = exerciseIndex.current;
-        setCounters.current[newId] = 1;
-
-        const newExercise: Exercise = {
-            index: exerciseIndex.current,
-            dbId: '',
-            name: '',
-            repRangeLower: '0',
-            repRangeHigher: '0',
-            isUnilateral: false,
-            setOptionalUnilateral: false,
-            setOptionalStraps: false,
-            setOptionalBelt: false,
-            sets: [{id: 0, type: 'working', isUnilateral: false}]
-        };
-
-        exerciseIndex.current++;
-
-        dispatch({ type: 'ADD_EXERCISE', value: newExercise });
-    }
-    //Add new set to specific exercise in workout
-    const handleAddSet = (exerciseId: number) => {
-        const nextSetId = setCounters.current[exerciseId] ?? 0;
-        setCounters.current[exerciseId] = nextSetId + 1;
-
-        const newSet: WorkoutSet = {id: nextSetId, type: 'working', isUnilateral: false}
-
-        dispatch({ type: 'ADD_SET', value: newSet, exerciseIndex: exerciseId });
-    }
-    //Remove an exercise from workout
-    const handleRemoveExercise = (exerciseId: number) => {
-        delete setCounters.current[exerciseId];
-        dispatch({ type: 'REMOVE_EXERCISE', exerciseIndex: exerciseId });
     }
 
     // <-------- TO COMPLETE: FORM SUBMISSION FUNCTION --------->
@@ -493,13 +469,13 @@ export default function WorkoutForm () {
                     <View id='exercises'>
                         {
                             form.values.exercises.map((exercise, i) => {
-                                return <NewExercise key={exercise.index} exerciseErrors={form.errors.exercises[i]} updateForm={dispatch} exercise={exercise} exerciseCount={Object.keys(setCounters.current).length} removeExc={handleRemoveExercise} addSet={handleAddSet} activeSet={activeSet} activeExercise={activeExercise} updateActiveSet={updateActiveSet} updateActiveExercise={updateActiveExercise}></NewExercise>
+                                return <NewExercise key={exercise.index} exerciseErrors={form.errors.exercises[i]} updateForm={dispatch} exercise={exercise} exerciseCount={form.values.exercises.length} activeSet={activeSet} activeExercise={activeExercise} updateActiveSet={updateActiveSet} updateActiveExercise={updateActiveExercise}></NewExercise>
                             })
                         }
                     </View>
 
                     <View>
-                        <Button title='Add Exercise' onPress={handleAddExercise} />
+                        <Button title='Add Exercise' onPress={() => dispatch({ type: 'ADD_EXERCISE', exerciseIndex: form.values.exercises.length })} />
                     </View>
                 </View>
 

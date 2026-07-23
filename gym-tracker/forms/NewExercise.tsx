@@ -20,8 +20,6 @@ interface Props {
         repRangeUpper?: string,
     },
     exerciseCount: number,
-    removeExc: (id: number) => void,
-    addSet: (exerciseId: number) => void,
     activeSet: SetTracker,
     activeExercise: number,
     updateActiveSet: (exerciseId: number, setId: number) => void,
@@ -85,7 +83,7 @@ export default function NewExercise(props: Props) {
             <View style={{display: 'flex', flexDirection: 'row'}}>
                 <Text>Exercise Name</Text>
                 {
-                    props.exerciseCount > 1 && <Button title='Remove Excerise' onPress={() => props.removeExc(props.exercise.index)} />
+                    props.exerciseCount > 1 && <Button title='Remove Excerise' onPress={() => props.updateForm({ type: 'REMOVE_EXERCISE', exerciseIndex: props.exercise.index }) } />
                 }
             </View>
             <View>
@@ -174,7 +172,7 @@ export default function NewExercise(props: Props) {
             </View>
 
             <View>
-                <Button title='Add Set' onPress={() => props.addSet(props.exercise.index)} />
+                <Button title='Add Set' onPress={() => props.updateForm({ type: 'ADD_SET', exerciseIndex: props.exercise.index, newSetIndex: props.exercise.sets.length }) } />
             </View>
         </View>
     )

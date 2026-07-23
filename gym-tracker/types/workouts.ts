@@ -40,7 +40,7 @@ type WorkoutAction =
 | { type: 'SET_WORKOUT_NAME'; value: string }
 | { type: 'VALIDATE_WORKOUT_NAME'; value: string }
 | { type: 'SET_WORKOUT_PRIVACY'; value: string } 
-| { type: 'ADD_EXERCISE'; value: Exercise }
+| { type: 'ADD_EXERCISE'; exerciseIndex: number }
 | { type: 'REMOVE_EXERCISE'; exerciseIndex: number }
 | { type: 'SET_EXERCISE_NAME'; exerciseIndex: number; value: string }
 | { type: 'VALIDATE_EXERCISE_NAME'; exerciseIndex: number, value: string }
@@ -56,7 +56,7 @@ type WorkoutAction =
 | { type: 'SET_DB_SET_OPTIONAL_STRAPS'; exerciseIndex: number; value: boolean }
 | { type: 'SET_DB_SET_OPTIONAL_BELT'; exerciseIndex: number; value: boolean }
 | { type: 'CANCEL_CREATE_DB_EXERCISE'; exerciseIndex: number }
-| { type: 'ADD_SET'; exerciseIndex: number; value: WorkoutSet }
+| { type: 'ADD_SET'; exerciseIndex: number; newSetIndex: number }
 | { type: 'REMOVE_SET'; exerciseIndex: number; setIndex: number }
 | { type: 'SET_SET_TYPE'; exerciseIndex: number; setIndex: number; value: SetType }
 | { type: 'SET_UNILATERAL_SET', exerciseIndex: number; setIndex: number; value: boolean }
