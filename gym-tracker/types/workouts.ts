@@ -42,6 +42,7 @@ type WorkoutAction =
 | { type: 'SET_WORKOUT_PRIVACY'; value: string } 
 | { type: 'ADD_EXERCISE'; exerciseIndex: number }
 | { type: 'REMOVE_EXERCISE'; exerciseIndex: number }
+| { type: 'RESET_EXERCISE'; exerciseIndex: number }
 | { type: 'SET_EXERCISE_NAME'; exerciseIndex: number; value: string }
 | { type: 'VALIDATE_EXERCISE_NAME'; exerciseIndex: number, value: string }
 | { type: 'SELECT_EXERCISE'; exerciseIndex: number; newFieldValues: { name: string; isUnilateral: boolean; dbId: string } }

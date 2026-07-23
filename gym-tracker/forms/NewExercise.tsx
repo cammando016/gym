@@ -28,6 +28,8 @@ interface Props {
 }
 
 export default function NewExercise(props: Props) {
+    const [isNewExercise, setIsNewExercise] = useState<boolean>(false);
+    const setIsNewExerciseTrue = () => setIsNewExercise(true);
     //State of exercise selected or created to allow adding sets
     const [exerciseChosen, setExerciseChosen] = useState<boolean>(false);
     const setExerciseChosenTrue = () => setExerciseChosen(true);
@@ -81,7 +83,7 @@ export default function NewExercise(props: Props) {
 
             {showCreateExercise && (
                 <Modal style={[styles.modalContainer]}>
-                    <CreateExercise setExerciseChosenTrue={setExerciseChosenTrue} closeModal={closeCreateExercise} nameError={props.exerciseErrors?.name} exercise={props.exercise} updateForm={props.updateForm} />
+                    <CreateExercise setIsNewExerciseTrue={setIsNewExerciseTrue} setExerciseChosenTrue={setExerciseChosenTrue} closeModal={closeCreateExercise} nameError={props.exerciseErrors?.name} exercise={props.exercise} updateForm={props.updateForm} />
                 </Modal>
             )}
 
@@ -90,12 +92,23 @@ export default function NewExercise(props: Props) {
                 {
                     props.exerciseCount > 1 && <Button title='Remove Excerise' onPress={() => props.updateForm({ type: 'REMOVE_EXERCISE', exerciseIndex: props.exercise.index }) } />
                 }
+                { exerciseChosen &&
+                    <Pressable onPress={() => {
+                        setExerciseChosenFalse();
+                        setIsNewExercise(false);
+                        setInputValue('');
+                        props.updateForm({ type: 'RESET_EXERCISE', exerciseIndex: props.exercise.index }) 
+                    }}>
+                        <Text>Reset Exercise</Text>
+                    </Pressable>
+                }
             </View>
             <View>
                 <TextInput 
                     placeholder='Search exercises'
                     onFocus={() => props.updateActiveExercise(props.exercise.index)}
                     value={props.exercise.name}
+                    editable={!exerciseChosen}
                     onChangeText={(text: string) => { 
                         setInputValue(text);
                         props.updateForm({ type: 'SET_EXERCISE_NAME', value: text, exerciseIndex: props.exercise.index })
@@ -106,9 +119,12 @@ export default function NewExercise(props: Props) {
                 { props.activeExercise === props.exercise.index && (
                 // Render list of exercises from db that match user input into exercise name
                     <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-evenly'}}>
-                        <Pressable onPress={() => createExercise()}>
-                            <Text>Create New Exercise</Text>
-                        </Pressable>
+                        { !exerciseChosen &&
+                            <Pressable onPress={() => createExercise()}>
+                                <Text>Create New Exercise</Text>
+                            </Pressable>
+                        }
+                        { isNewExercise && <Text>This is a new exercise you are creating.</Text> }
                         { searchResults?.length > 0 && (
                             <ScrollView horizontal={true}>
                                 <View style={{display: 'flex', flexDirection: 'row'}}>

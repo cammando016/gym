@@ -142,6 +142,26 @@ export default function WorkoutForm () {
                     }
                 };
             }
+            case 'RESET_EXERCISE': {
+                return {
+                    ...state,
+                    values: {
+                        ...state.values, exercises: state.values.exercises.map(exc => {
+                            if (exc.index !== action.exerciseIndex) return exc;
+                            return {
+                                ...exc,
+                                dbId: '',
+                                name: '',
+                                isUnilateral: false,
+                                setOptionalUnilateral: false,
+                                setOptionalStraps: false,
+                                setOptionalBelt: false,
+                                sets: []
+                            }
+                        })
+                    }
+                }
+            }
             case 'SET_EXERCISE_NAME': {
                 return {
                     ...state,
