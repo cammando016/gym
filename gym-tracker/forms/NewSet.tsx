@@ -34,9 +34,9 @@ export default function NewSet(props: Props) {
                     </View>
                 </Pressable>
 
-                <Pressable onPress={() => props.updateForm({ type: 'SET_UNILATERAL_SET', exerciseIndex: props.exercise.index, setIndex: props.set.id })}><Text style={props.set.isUnilateral ? formStyles.setModifierOn : formStyles.setModifierOff}>UNILATERAL</Text></Pressable>
-                {
-                    props.exercise.sets.length > 1 && <Button title='Remove Set' onPress={() => props.updateForm({ type: 'REMOVE_SET', exerciseIndex: props.exercise.index, setIndex: props.set.id }) }/>
+                <Pressable disabled={props.exercise.isUnilateral} onPress={() => props.updateForm({ type: 'SET_UNILATERAL_SET', exerciseIndex: props.exercise.index, setIndex: props.set.id })}><Text style={props.set.isUnilateral ? formStyles.setModifierOn : formStyles.setModifierOff}>UNILATERAL</Text></Pressable>
+                { props.exercise.sets.length > 1 && 
+                    <Button title='Remove Set' onPress={() => props.updateForm({ type: 'REMOVE_SET', exerciseIndex: props.exercise.index, setIndex: props.set.id }) }/>
                 }
             </View>
 

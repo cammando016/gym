@@ -135,7 +135,10 @@ export default function WorkoutForm () {
                 const exerciseArrayIndex = state.values.exercises.findIndex(exc => exc.index === action.exerciseIndex);
                 return {
                     ...state,
-                    values: {...state.values, exercises: state.values.exercises.filter(exc => exc.index != action.exerciseIndex)},
+                    values: {...state.values, exercises: state.values.exercises.filter(exc => exc.index != action.exerciseIndex).map(e => {
+                        if (e.index > action.exerciseIndex) return {...e, index: e.index - 1}
+                        return e;
+                    }) },
                     errors: {
                         ...state.errors,
                         exercises: state.errors.exercises.filter((_, i) => i !== exerciseArrayIndex)
@@ -322,7 +325,10 @@ export default function WorkoutForm () {
                 return {
                     ...state,
                     values: {...state.values, exercises: state.values.exercises.map(exc => {
-                        if (exc.index === action.exerciseIndex) return { ...exc, sets: exc.sets.filter(set => set.id !== action.setIndex) };
+                        if (exc.index === action.exerciseIndex) return { ...exc, sets: exc.sets.filter(set => set.id !== action.setIndex).map(s => {
+                            if (s.id > action.setIndex) return {...s, id: s.id - 1}
+                            return s
+                        }) };
                         return exc;
                     })}
                 };
