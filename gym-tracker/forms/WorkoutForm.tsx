@@ -9,6 +9,7 @@ import { createWorkout } from '@/utils/workouts';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQueryClient } from '@tanstack/react-query';
 import { useWorkoutTemplates } from '@/hooks/useWorkoutTemplates';
+import * as Crypto from 'expo-crypto';
 
 export default function WorkoutForm () {
     const { user } = useAuth();
@@ -20,7 +21,7 @@ export default function WorkoutForm () {
     const activeWorkout = templateId ? workoutTemplateList?.find(w => w.workoutId === templateId)! : undefined;
 
     //State objects for tracking current exercise/set being interacted with by user
-    const [activeSet, setActiveSet] = useState<SetTracker>({exercise: 0, set: 0});
+    const [activeSet, setActiveSet] = useState<SetTracker>({exercise: -1, set: -1});
     const [activeExercise, setActiveExercise] = useState<number>(0);
 
     const router = useRouter();
@@ -43,6 +44,7 @@ export default function WorkoutForm () {
                     setOptionalBelt: e.optionalSetModifiers.belt,
                     sets: e.sets.map(s => {
                         return {
+                            key: Crypto.randomUUID(),
                             id: s.setIndex,
                             type: s.setType,
                             isUnilateral: s.isUnilateralSet
@@ -313,6 +315,7 @@ export default function WorkoutForm () {
                     ...state,
                     values: {...state.values, exercises: state.values.exercises.map(exc => {
                         if (exc.index === action.exerciseIndex) return { ...exc, sets: [...exc.sets, {
+                            key: Crypto.randomUUID(),
                             id: action.newSetIndex,
                             type: 'working',
                             isUnilateral: exc.isUnilateral ? true : false
@@ -332,6 +335,15 @@ export default function WorkoutForm () {
                         return exc;
                     })}
                 };
+            }
+            case 'REORDER_SETS': {
+                return {
+                    ...state,
+                    values: {...state.values, exercises: state.values.exercises.map((e, i) => {
+                        if (i === action.exerciseIndex) return {...e, sets: action.newSetOrder}
+                        return e
+                    }) }
+                }
             }
             case 'SET_SET_TYPE': {
                 return {

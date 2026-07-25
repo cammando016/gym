@@ -1,6 +1,7 @@
-import { SetTracker, ExerciseSearchResultType, WorkoutAction, Exercise } from '@/types/workouts';
+import { SetTracker, ExerciseSearchResultType, WorkoutAction, Exercise, WorkoutSet } from '@/types/workouts';
 import { Button, Text, TextInput, View, ScrollView, Pressable, Modal, StyleSheet } from 'react-native';
 import { useEffect, useState, Dispatch } from 'react';
+import DraggableFlatList, { RenderItemParams, ScaleDecorator } from 'react-native-draggable-flatlist';
 import NewSet from './NewSet';
 import useDebounce from '@/utils/search';
 import ExerciseSearchResult from '../components/ExerciseSearchResult';
@@ -70,6 +71,40 @@ export default function NewExercise(props: Props) {
     const closeCreateExercise = () => {
         setShowCreateExercise(false);
     }
+
+    const handleSetReorder = ({ data } : { data: WorkoutSet[] }) => {
+        const renumberedSets = data.map((set, index) => ({
+            ...set,
+            id: index,
+        }));
+
+        if (props.activeSet.exercise === props.exercise.index) {
+            props.updateActiveSet(-1, -1)
+        }
+
+        props.updateForm({ type: 'REORDER_SETS', exerciseIndex: props.exercise.index, newSetOrder: renumberedSets });
+    }
+
+    const renderSetItem = ({ item, drag, isActive } : RenderItemParams<WorkoutSet>) => {
+        return (
+            <ScaleDecorator>
+                <View style={{ flexDirection: 'row', alignItems: 'center', opacity: isActive ? 0.7 : 1 }}>
+                    <View style={{ flex: 1 }}>
+                        <NewSet
+                            exercise={props.exercise}
+                            updateForm={props.updateForm}
+                            set={item}
+                            activeSet={props.activeSet}
+                            updateActiveSet={props.updateActiveSet}
+                        />
+                    </View>
+                    <Pressable onPressIn={drag} style={{ paddingRight: 8, paddingVertical: 8 }}>
+                        <Text style={{ fontSize: 20 }}>☰</Text>
+                    </Pressable>
+                </View>
+            </ScaleDecorator>
+        )
+    } 
 
     const styles = StyleSheet.create({
         modalContainer: {
@@ -185,12 +220,22 @@ export default function NewExercise(props: Props) {
                 </View>
             </View>
 
-            <View>
+            {/* <View>
                 {
                     props.exercise.sets.map(set => {
                         return <NewSet key={set.id} exercise={props.exercise} updateForm={props.updateForm} set={set} activeSet={props.activeSet} updateActiveSet={props.updateActiveSet} />
                     })
                 }
+            </View> */}
+
+            <View>
+                <DraggableFlatList<WorkoutSet>
+                    data={props.exercise.sets}
+                    onDragEnd={handleSetReorder}
+                    keyExtractor={(set) => set.key}
+                    renderItem={renderSetItem}
+                    scrollEnabled={false}
+                />
             </View>
 
             <View>
