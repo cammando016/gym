@@ -62,6 +62,7 @@ type WorkoutAction =
 | { type: 'SET_SET_TYPE'; exerciseIndex: number; setIndex: number; value: SetType }
 | { type: 'SET_UNILATERAL_SET', exerciseIndex: number; setIndex: number; }
 | { type: 'REORDER_SETS'; exerciseIndex: number; newSetOrder: WorkoutSet[] }
+| { type: 'REORDER_EXERCISES'; newExerciseOrder: Exercise[] }
 | { type: 'VALIDATE_FULL_FORM' }
 | { type: 'RESET_FORM' }
 
@@ -78,6 +79,7 @@ interface WorkoutSet {
 }
 
 interface Exercise {
+    key: string;
     index: number;
     dbId: string;
     name: string;

@@ -1,11 +1,12 @@
 import { Exercise, WorkoutSet, SetTracker, PrivacyType, WorkoutAction, FormStateWithValidation, ErrorShape, FormPayload } from '@/types/workouts';
 import { useState, useReducer } from 'react';
-import { Button, Text, TextInput, View, ScrollView, StyleSheet } from 'react-native';
+import { Button, Text, TextInput, View, ScrollView, StyleSheet, Pressable } from 'react-native';
 import { RadioButton } from 'react-native-paper';
 import NewExercise from './NewExercise';
 import { useAuth } from '@/contexts/AuthContext';
 import { validateRequiredAlphanumericSymbolsField, validateRequiredAlphabeticalSpacesField, validateOptionalIntegerField, validateUpperRepsTarget } from '../utils/formValiditors';
 import { createWorkout } from '@/utils/workouts';
+import DraggableFlatList, { RenderItemParams, ScaleDecorator } from 'react-native-draggable-flatlist';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQueryClient } from '@tanstack/react-query';
 import { useWorkoutTemplates } from '@/hooks/useWorkoutTemplates';
@@ -33,6 +34,7 @@ export default function WorkoutForm () {
             privacy: activeWorkout.privacy,
             exercises: activeWorkout.exercises.map(e => {
                 return {
+                    key: Crypto.randomUUID(),
                     index: e.exerciseIndex,
                     dbId: e.exerciseId,
                     name: e.exerciseName,
@@ -68,6 +70,7 @@ export default function WorkoutForm () {
             name: '', 
             privacy: PrivacyType.Private, 
             exercises: [{ 
+                key: Crypto.randomUUID(),
                 index: 0, 
                 dbId: '', 
                 name: '', 
@@ -117,6 +120,7 @@ export default function WorkoutForm () {
                 return {
                     ...state,
                     values: {...state.values, exercises: [...state.values.exercises, {
+                        key: Crypto.randomUUID(),
                         index: action.exerciseIndex,
                         dbId: '',
                         name: '',
@@ -345,6 +349,12 @@ export default function WorkoutForm () {
                     }) }
                 }
             }
+            case 'REORDER_EXERCISES': {
+                return {
+                    ...state,
+                    values: { ...state.values, exercises: action.newExerciseOrder }
+                }
+            }
             case 'SET_SET_TYPE': {
                 return {
                     ...state,
@@ -393,6 +403,45 @@ export default function WorkoutForm () {
     }
 
     const [form, dispatch] = useReducer(workoutReducer, initialFormState);
+
+    //Drag and drop exercise reordering
+    const handleExerciseReorder = ({ data } : { data: Exercise[] }) => {
+        const renumberedExercises = data.map((ex, idx) => ({
+            ...ex,
+            index: idx
+        }));
+
+        dispatch({ type: 'REORDER_EXERCISES', newExerciseOrder: renumberedExercises });
+    }
+
+    const renderExerciseItem = ({ item, drag, isActive } : RenderItemParams<Exercise>) => {
+        return (
+            <ScaleDecorator>
+                <View style={{ flexDirection: 'column', opacity: isActive ? 0.7 : 1 }}>
+                    <View style={{ flexDirection: 'row', flex: 1, justifyContent: 'space-between' }}>
+                        <View>
+                            <Text>Exercise {item.index + 1}</Text>
+                        </View>
+                        <Pressable onPressIn={drag} style={{ paddingRight: 8, paddingVertical: 8 }}>
+                            <Text style={{ fontSize: 20 }}>☰</Text>
+                        </Pressable>
+                    </View>
+                    <View style={{ flex: 1 }}>
+                        <NewExercise
+                            exerciseErrors={form.errors.exercises[item.index]}
+                            exercise={item}
+                            updateForm={dispatch}
+                            exerciseCount={form.values.exercises.length}
+                            activeSet={activeSet}
+                            activeExercise={activeExercise}
+                            updateActiveSet={updateActiveSet}
+                            updateActiveExercise={updateActiveExercise}
+                        />
+                    </View>
+                </View>
+            </ScaleDecorator>
+        )
+    }
 
     //Passed down to NewSet to show only one set type drop down at a time
     const updateActiveSet = (exerciseId: number, setId: number) => setActiveSet({exercise: exerciseId, set: setId});
@@ -501,11 +550,19 @@ export default function WorkoutForm () {
 
                 <View>
                     <View id='exercises'>
-                        {
+                        {/* {
                             form.values.exercises.map((exercise, i) => {
                                 return <NewExercise key={exercise.index} exerciseErrors={form.errors.exercises[i]} updateForm={dispatch} exercise={exercise} exerciseCount={form.values.exercises.length} activeSet={activeSet} activeExercise={activeExercise} updateActiveSet={updateActiveSet} updateActiveExercise={updateActiveExercise}></NewExercise>
                             })
-                        }
+                        } */}
+
+                        <DraggableFlatList<Exercise>
+                            data={form.values.exercises}
+                            onDragEnd={handleExerciseReorder}
+                            keyExtractor={(e) => e.key}
+                            renderItem={renderExerciseItem}
+                            scrollEnabled={false}
+                        />
                     </View>
 
                     <View>
