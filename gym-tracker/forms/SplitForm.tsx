@@ -7,11 +7,11 @@ import { useRouter } from 'expo-router';
 import { createSplit, editSplit } from '@/utils/workouts';
 import { useAuth } from "@/contexts/AuthContext";
 import { useQueryClient } from "@tanstack/react-query";
-
+import DraggableFlatList, { RenderItemParams, ScaleDecorator } from 'react-native-draggable-flatlist';
+import * as Crypto from 'expo-crypto';
 
 // <--------- TO DO -------------->
 /*
-Reorder workouts
 Implement advanced search for workout templates, text input runs basic string match on user's own workouts, limited results
 Advanced Search:
 Filters for muscle groups trained in workout, name, privacy, more than limited number of options returned on basic search
@@ -31,6 +31,7 @@ export default function SplitForm( props: Props ) {
     const [form, setForm] = useState<SplitDay[]>( props.existingSplit ? 
         props.existingSplit.workouts.map((w, i) => {
             return {
+                key: Crypto.randomUUID(),
                 dayIndex: i,
                 workoutTemplateId: w.workoutId,
                 workoutName: w.workoutName,
@@ -39,6 +40,7 @@ export default function SplitForm( props: Props ) {
         })
         : 
         [{
+            key: Crypto.randomUUID(),
             dayIndex: 0,
             workoutTemplateId: '',
             workoutName: '',
@@ -97,6 +99,7 @@ export default function SplitForm( props: Props ) {
         setForm(prev => [
             ...prev,
             {
+                key: Crypto.randomUUID(),
                 dayIndex: newDayIndex,
                 workoutTemplateId: '',
                 workoutName: '',
@@ -105,6 +108,88 @@ export default function SplitForm( props: Props ) {
         ]);
         setErrors(prev => [...prev, {error: true, index: newDayIndex}]);
         setNewDayIndex(newDayIndex + 1);
+    }
+
+    const handleWorkoutReorder = ({ data } : { data : SplitDay[] }) => {
+        const reorderedExercises = data.map((day, ind) => ({
+            ...day,
+            dayIndex: ind
+        }))
+
+        setForm(reorderedExercises);
+    }
+
+    const renderSplitDay = ({ item, drag, isActive } : RenderItemParams<SplitDay>) => {
+        return (
+            <ScaleDecorator>
+                <View key={item.dayIndex} style= {{ opacity: isActive ? 0.7 : 1 }}>
+                    <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
+                        { form.length > 1 && editMode && <Pressable onPress={() => handleDeleteDay(item.dayIndex)} style={{borderWidth: 0.5, borderColor: 'black'}}><Text>X</Text></Pressable> }
+                        <Text>Day {item.dayIndex + 1}:</Text>
+                        <View style={{flexGrow: 1, borderWidth: 0.5, borderColor: 'black'}}>
+                            <TextInput
+                                placeholder={item.restDay ? 'REST DAY SELECTED' : 'Search Templates'}
+                                value={item.restDay ? '' : item.workoutName}
+                                onChangeText={(value: string) => {
+                                    setForm(prev =>
+                                        prev.map(d => d.dayIndex === item.dayIndex ? {...d, workoutName: value} : d )    
+                                    );
+                                }}
+                                editable={editMode && !item.restDay && item.workoutTemplateId === ''}
+                                onFocus={() => {
+                                    setActiveDay(item.dayIndex);
+                                    setExerciseListOpen(true);
+                                }}
+                            />
+                        </View>
+                        <View style={{display: 'flex', flexDirection: 'row'}}>
+                            <Checkbox 
+                                disabled={!editMode}
+                                value={item.restDay}
+                                onValueChange={(value: boolean) => {
+                                    setForm(prev =>
+                                        prev.map(d => d.dayIndex === item.dayIndex ? {...d, restDay: value, workoutTemplateId: '', workoutName: ''} : d )
+                                    );
+                                    setErrors(prev => 
+                                        prev.map(e => e.index === item.dayIndex ? {...e, error: value === true ? false : true} : e )
+                                    );
+                                }}
+                            />
+                            <Text>Rest Day</Text>
+                        </View>
+                        <View>
+                            <Pressable onPress={() => setForm(prev => prev.map(d => d.dayIndex === item.dayIndex ? {...d, workoutTemplateId: '', workoutName: ''} : d ))} >
+                                <Text>Clear Workout</Text>
+                            </Pressable>
+                        </View>
+                            
+                        { editMode && 
+                            <Pressable onPressIn={drag} style={{ paddingRight: 8, paddingVertical: 8 }}>
+                                <Text style={{ fontSize: 20 }}>☰</Text>
+                            </Pressable>
+                        }
+                    </View>
+
+                    <View>
+                        { item.dayIndex === activeDay && exerciseListOpen && item.workoutName.length > 0 && (
+                            workouts?.filter(workout => workout.workoutName.includes(form[item.dayIndex].workoutName.toLowerCase().trim())).map(w => {
+                                return (
+                                    <Pressable 
+                                        onPress={() => {
+                                            handleSelectWorkout(w.workoutId, w.workoutName, item.dayIndex);
+                                            setErrors(prev => prev.map(e => e.index === item.dayIndex ? {...e, error: false} : e ))
+                                        }} 
+                                        key={w.workoutId}
+                                    >
+                                        <Text>{w.workoutName}</Text>
+                                    </Pressable>
+                                )
+                            })
+                        )}
+                    </View>
+                </View>
+            </ScaleDecorator>
+        )
     }
 
     const handleDeleteDay = (dayIndex: number) => { 
@@ -187,73 +272,13 @@ export default function SplitForm( props: Props ) {
                 }
             </View>
             <View>
-                {
-                    form.map((day, i) => {
-                        return (
-                            <View key={day.dayIndex}>
-                                <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
-                                    <Text>Day {i + 1}:</Text>
-                                    <View style={{flexGrow: 1, borderWidth: 0.5, borderColor: 'black'}}>
-                                        <TextInput
-                                            placeholder={day.restDay ? 'REST DAY SELECTED' : 'Search Templates'}
-                                            value={day.restDay ? '' : day.workoutName}
-                                            onChangeText={(value: string) => {
-                                                setForm(prev =>
-                                                    prev.map(d => d.dayIndex === day.dayIndex ? {...d, workoutName: value} : d )    
-                                                );
-                                            }}
-                                            editable={editMode && !day.restDay && day.workoutTemplateId === ''}
-                                            onFocus={() => {
-                                                setActiveDay(day.dayIndex);
-                                                setExerciseListOpen(true);
-                                            }}
-                                        />
-                                    </View>
-                                    <View style={{display: 'flex', flexDirection: 'row'}}>
-                                        <Checkbox 
-                                            disabled={!editMode}
-                                            value={day.restDay}
-                                            onValueChange={(value: boolean) => {
-                                                setForm(prev =>
-                                                    prev.map(d => d.dayIndex === day.dayIndex ? {...d, restDay: value, workoutTemplateId: '', workoutName: ''} : d )
-                                                );
-                                                setErrors(prev => 
-                                                    prev.map(e => e.index === day.dayIndex ? {...e, error: value === true ? false : true} : e )
-                                                );
-                                            }}
-                                        />
-                                        <Text>Rest Day</Text>
-                                    </View>
-                                    <View>
-                                        <Pressable onPress={() => setForm(prev => prev.map(d => d.dayIndex === day.dayIndex ? {...d, workoutTemplateId: '', workoutName: ''} : d ))} >
-                                            <Text>Clear Workout</Text>
-                                        </Pressable>
-                                    </View>
-                                    { form.length > 1 && editMode && <Pressable onPress={() => handleDeleteDay(day.dayIndex)} style={{borderWidth: 0.5, borderColor: 'black'}}><Text>X</Text></Pressable> }
-                                </View>
-
-                                <View>
-                                    { day.dayIndex === activeDay && exerciseListOpen && day.workoutName.length > 0 && (
-                                        workouts?.filter(workout => workout.workoutName.includes(form[i].workoutName.toLowerCase().trim())).map(w => {
-                                            return (
-                                                <Pressable 
-                                                    onPress={() => {
-                                                        handleSelectWorkout(w.workoutId, w.workoutName, day.dayIndex);
-                                                        setErrors(prev => prev.map(e => e.index === day.dayIndex ? {...e, error: false} : e ))
-                                                    }} 
-                                                    key={w.workoutId}
-                                                >
-                                                    <Text>{w.workoutName}</Text>
-                                                </Pressable>
-                                            )
-                                        })
-                                    )}
-                                </View>
-                                
-                            </View>
-                        )
-                    })
-                }
+                <DraggableFlatList<SplitDay>
+                    data={form}
+                    onDragEnd={handleWorkoutReorder}
+                    keyExtractor={(e) => e.key}
+                    renderItem={renderSplitDay}
+                    scrollEnabled={false}    
+                />
                 <Pressable onPress={handleAddDay}><Text>Add Day</Text></Pressable>
             </View>
 

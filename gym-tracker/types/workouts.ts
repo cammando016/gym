@@ -191,6 +191,7 @@ interface WorkoutTemplateType {
 }
 
 interface SplitDay {
+    key: string;
     dayIndex: number;
     workoutTemplateId: string;
     workoutName: string;
