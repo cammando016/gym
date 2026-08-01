@@ -12,12 +12,30 @@ const workoutStyles = StyleSheet.create({
     exerciseContainer: {
         borderWidth: 1,
         borderColor: '#619888',
-        borderRadius: '2%',
+        borderRadius: 10,
         margin: 2,
     },
     exerciseHeader: {
         backgroundColor: '#619888',
-        borderRadius: '2%',
+        borderTopLeftRadius: 9,
+        borderTopRightRadius: 9,
+        display: 'flex',
+        flex: 1,
+        justifyContent: 'space-between',
+    },
+    exerciseFooter: {
+        backgroundColor: '#619888',
+        borderBottomLeftRadius: 9,
+        borderBottomRightRadius: 9,
+        display: 'flex',
+        flex: 1,
+        justifyContent: 'space-between',
+    },
+    exerciseSetNotes: {
+        backgroundColor: '#619888',
+        display: 'flex',
+        flex: 1,
+        justifyContent: 'space-between',
     },
     headerText: {
         color: 'white'

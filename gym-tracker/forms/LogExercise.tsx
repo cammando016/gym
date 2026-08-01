@@ -16,11 +16,12 @@ interface Props {
     lastTrainedExercise?: LoggedWorkoutExercise,
     updateActiveSet: (exerciseId: string, setId: string, setType: string) => void,
     exerciseErrors: LoggedExerciseError,
+    showSets: boolean,
 }
 
 export default function LogExercise ( props: Props ) {
     //Toggle showing full set list for each exercise
-    const [showSets, setShowSets] = useState<boolean>(true);
+    //const [showSets, setShowSets] = useState<boolean>(true);
     //Show modal for adding a new exercise into workout
     const [showAddExercise, setShowAddExercise] = useState<boolean>(false);
     //Substitute exercise modal
@@ -58,7 +59,7 @@ export default function LogExercise ( props: Props ) {
     }, [debouncedExerciseName]);
 
     return (
-        <View style={workoutStyles.exerciseContainer}>
+        <View>
             {/* Modal to search DB for exercises to either add an exercise or substitute exercise */}
             {(showAddExercise || subExercise) && (
                 <Modal>
@@ -177,24 +178,10 @@ export default function LogExercise ( props: Props ) {
                     </View>
                 </Modal>
             )}
-            <View style={[workoutStyles.exerciseHeader, layoutStyles.rowFlex]}>
+            <View style={[workoutStyles.exerciseSetNotes, layoutStyles.rowFlex]}>
                 <View style={{flexGrow: 1}}>
-                    {/* <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
-                        <View style={{display: 'flex', flexDirection: 'row'}}>
-                            <Text style={[workoutStyles.headerTextBold, workoutStyles.headerText]}>Exercise: </Text>
-                            {props.exerciseData.subbedExercise?.subbedExerciseId ?
-                                <Text>{props.exerciseData.subbedExercise.exerciseName}</Text>
-                                :
-                                <Text style={workoutStyles.headerText}>{props.exerciseData.exerciseName}</Text>
-                            }
-                        </View>
-                        <View style={{display: 'flex', flexDirection: 'row'}}>
-                            <Text style={[workoutStyles.headerTextBold, workoutStyles.headerText]}>Target Reps: </Text> 
-                            <Text style={workoutStyles.headerText}>{props.exerciseData.exerciseRepsLower} to {props.exerciseData.exerciseRepsUpper}</Text>
-                        </View>
-                    </View> */}
                     {
-                        showSets ? (
+                        props.showSets ? (
                             <View>
                                 {
                                     props.exerciseData.setupNotes && 
@@ -219,15 +206,9 @@ export default function LogExercise ( props: Props ) {
                         )
                     }
                 </View>
-                <View style={{paddingLeft: 20, paddingRight: 15, alignSelf: 'center'}}>
-                    <Pressable onPress={() => setShowSets(!showSets)}>
-                        {/* Currently button text is exercise index, allows testing moving exercises before setting actual button as well */}
-                        <Text style={workoutStyles.headerText}>{props.exerciseData.exerciseIndex}</Text> 
-                    </Pressable>
-                </View>
             </View>
             {
-                showSets && (
+                props.showSets && (
                     <View>
                         {
                             props.exerciseData.sets.map((s, i) => {
@@ -265,10 +246,7 @@ export default function LogExercise ( props: Props ) {
 
             }
 
-            <View style={[layoutStyles.rowFlex, workoutStyles.exerciseHeader, {padding: 3, justifyContent: 'space-evenly'}]}>
-                <Pressable onPress={() => props.dispatch({ type: 'REMOVE_EXERCISE', exerciseIndex: props.exerciseData.exerciseIndex })}>
-                    <Text style={workoutStyles.headerText}>Delete Exercise</Text>
-                </Pressable>
+            <View style={[layoutStyles.rowFlex, workoutStyles.exerciseFooter, {padding: 3, justifyContent: 'space-evenly'}]}>
                 <Pressable onPress={() => setShowAddExercise(true)}>
                     <Text style={workoutStyles.headerText}>Add Exercise</Text>
                 </Pressable>

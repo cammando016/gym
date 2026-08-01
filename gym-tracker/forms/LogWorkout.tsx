@@ -14,7 +14,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import DraggableFlatList, { RenderItemParams, ScaleDecorator, ShadowDecorator, OpacityDecorator } from 'react-native-draggable-flatlist';
+import DraggableFlatList, { RenderItemParams, ShadowDecorator } from 'react-native-draggable-flatlist';
 
 interface Props {
     activeWorkout: boolean, //True for when logging working, false when viewing past workout
@@ -1623,11 +1623,21 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
     }
 
     const renderExerciseItem = ({ item, drag, isActive } : RenderItemParams<LoggedWorkoutExercise>) => {
+        const [showSets, setShowSets] = useState<boolean>(true);
         return (
             <ShadowDecorator>
-                <View style={{flex: 1}}>
-                    <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
-                        <View style={{display: 'flex', flexDirection: 'column' }}>
+                <View style={workoutStyles.exerciseContainer}>
+                    <View style={[workoutStyles.exerciseHeader, layoutStyles.rowFlex]}>
+                        <Pressable
+                            onPress={() => dispatch({ type: 'REMOVE_EXERCISE', exerciseIndex: item.exerciseIndex })}
+                            style={{ paddingHorizontal: 8, paddingVertical: 8, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: 'red' }}
+                        >
+                            <Text>X</Text>
+                        </Pressable>
+                        <Pressable 
+                            style={{display: 'flex', flexDirection: 'column', flexGrow: 1, alignItems: 'center', borderWidth: 1, borderColor: 'red', marginLeft: 10, marginRight: 10}}
+                            onPress={() => setShowSets(!showSets)}
+                        >
                             <View style={{display: 'flex', flexDirection: 'row'}}>
                                 <Text style={[workoutStyles.headerTextBold, workoutStyles.headerText]}>Exercise: </Text>
                                 {item.subbedExercise?.subbedExerciseId ?
@@ -1640,9 +1650,9 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
                                 <Text style={[workoutStyles.headerTextBold, workoutStyles.headerText]}>Target Reps: </Text> 
                                 <Text style={workoutStyles.headerText}>{item.exerciseRepsLower} to {item.exerciseRepsUpper}</Text>
                             </View>
-                        </View>
+                        </Pressable>
 
-                        <Pressable onPressIn={drag} style={{ paddingRight: 8, paddingVertical: 8 }}>
+                        <Pressable onPressIn={drag} style={{ paddingHorizontal: 8, paddingVertical: 8, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: 'red' }}>
                             <Text style={{ fontSize: 20 }}>☰</Text>
                         </Pressable>
                     </View>
@@ -1655,6 +1665,7 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
                             lastTrainedExercise={lastTrained?.exercises.find(exc => exc.exerciseId === item.exerciseId)}
                             updateActiveSet={updateActiveSet}
                             exerciseErrors={workoutForm.errors.exercises[item.exerciseIndex]}
+                            showSets={showSets}
                         />
                     </View>
                 </View>
