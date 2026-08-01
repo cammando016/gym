@@ -72,6 +72,7 @@ export default function NewExercise(props: Props) {
         setShowCreateExercise(false);
     }
 
+    //Drag and drop set reordering
     const handleSetReorder = ({ data } : { data: WorkoutSet[] }) => {
         const renumberedSets = data.map((set, index) => ({
             ...set,
@@ -219,14 +220,6 @@ export default function NewExercise(props: Props) {
                     </View>
                 </View>
             </View>
-
-            {/* <View>
-                {
-                    props.exercise.sets.map(set => {
-                        return <NewSet key={set.id} exercise={props.exercise} updateForm={props.updateForm} set={set} activeSet={props.activeSet} updateActiveSet={props.updateActiveSet} />
-                    })
-                }
-            </View> */}
 
             <View>
                 <DraggableFlatList<WorkoutSet>

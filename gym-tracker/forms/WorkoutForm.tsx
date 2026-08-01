@@ -550,12 +550,6 @@ export default function WorkoutForm () {
 
                 <View>
                     <View id='exercises'>
-                        {/* {
-                            form.values.exercises.map((exercise, i) => {
-                                return <NewExercise key={exercise.index} exerciseErrors={form.errors.exercises[i]} updateForm={dispatch} exercise={exercise} exerciseCount={form.values.exercises.length} activeSet={activeSet} activeExercise={activeExercise} updateActiveSet={updateActiveSet} updateActiveExercise={updateActiveExercise}></NewExercise>
-                            })
-                        } */}
-
                         <DraggableFlatList<Exercise>
                             data={form.values.exercises}
                             onDragEnd={handleExerciseReorder}
