@@ -179,7 +179,7 @@ export default function LogExercise ( props: Props ) {
             )}
             <View style={[workoutStyles.exerciseHeader, layoutStyles.rowFlex]}>
                 <View style={{flexGrow: 1}}>
-                    <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
+                    {/* <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
                         <View style={{display: 'flex', flexDirection: 'row'}}>
                             <Text style={[workoutStyles.headerTextBold, workoutStyles.headerText]}>Exercise: </Text>
                             {props.exerciseData.subbedExercise?.subbedExerciseId ?
@@ -192,7 +192,7 @@ export default function LogExercise ( props: Props ) {
                             <Text style={[workoutStyles.headerTextBold, workoutStyles.headerText]}>Target Reps: </Text> 
                             <Text style={workoutStyles.headerText}>{props.exerciseData.exerciseRepsLower} to {props.exerciseData.exerciseRepsUpper}</Text>
                         </View>
-                    </View>
+                    </View> */}
                     {
                         showSets ? (
                             <View>
@@ -264,9 +264,6 @@ export default function LogExercise ( props: Props ) {
                 )
 
             }
-            {
-                
-            }
 
             <View style={[layoutStyles.rowFlex, workoutStyles.exerciseHeader, {padding: 3, justifyContent: 'space-evenly'}]}>
                 <Pressable onPress={() => props.dispatch({ type: 'REMOVE_EXERCISE', exerciseIndex: props.exerciseData.exerciseIndex })}>
@@ -283,18 +280,6 @@ export default function LogExercise ( props: Props ) {
                         :
                         <Pressable onPress={() => setSubExercise(true)}>
                             <Text style={workoutStyles.headerText}>Sub Exercise</Text>
-                        </Pressable>
-                }
-                {
-                    props.exerciseData.exerciseIndex > 0 && 
-                        <Pressable onPress={() => props.dispatch({ type: 'MOVE_EXERCISE_UP', exerciseIndex: props.exerciseData.exerciseIndex })}>
-                            <Text style={workoutStyles.headerText}>U</Text>
-                        </Pressable>
-                }
-                {
-                    props.exerciseData.exerciseIndex < props.exerciseCount - 1 &&
-                        <Pressable onPress={() => props.dispatch({ type: 'MOVE_EXERCISE_DOWN', exerciseIndex: props.exerciseData.exerciseIndex })}>
-                            <Text style={workoutStyles.headerText}>D</Text>
                         </Pressable>
                 }
             </View>

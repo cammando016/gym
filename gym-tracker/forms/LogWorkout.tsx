@@ -1,6 +1,6 @@
 import { Text, View, TextInput, ScrollView, Pressable, AppState } from 'react-native';
 import { useReducer, useState, forwardRef, useImperativeHandle, useRef, useEffect } from 'react';
-import { activeSetType, LogWorkoutAction, LogWorkoutForm, LogWorkoutPayload, WorkoutTemplateType } from '@/types/workouts';
+import { activeSetType, LoggedWorkoutExercise, LogWorkoutAction, LogWorkoutForm, LogWorkoutPayload, WorkoutTemplateType } from '@/types/workouts';
 import { useWorkoutTemplates } from '@/hooks/useWorkoutTemplates';
 import LogExercise from './LogExercise';
 import { useWorkoutHistory } from '@/hooks/useWorkoutHistory';
@@ -14,6 +14,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import DraggableFlatList, { RenderItemParams, ScaleDecorator, ShadowDecorator, OpacityDecorator } from 'react-native-draggable-flatlist';
 
 interface Props {
     activeWorkout: boolean, //True for when logging working, false when viewing past workout
@@ -53,8 +54,6 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
         loadCache();
     }, []);
 
-    console.log('CACHE:', JSON.stringify(cachedForm));
-
     const { data: workouts } = useWorkoutTemplates();
     const workoutTemplate : WorkoutTemplateType | undefined = workouts?.find(w => w.workoutId === props.templateId);
     
@@ -64,13 +63,16 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
 
     //Used to toggle last session set display between single set and all sets of an exercise
     const [fullPastSetList, setFullPastSetList] = useState<boolean>(false);
-    const toggleFullPastSetList = () => setFullPastSetList(!fullPastSetList)
+    const toggleFullPastSetList = () => setFullPastSetList(!fullPastSetList);
+
+    const exerciseKeys = new Map(workoutTemplate?.exercises.map( e => [e.exerciseIndex, randomUUID()] ));
 
     const initialFormState: LogWorkoutForm = props.resumingWorkout && cachedForm ? cachedForm : {
         values : {
             workoutNotes: '',
-            exercises: workoutTemplate.exercises.map(e => {
+            exercises: workoutTemplate!.exercises.map(e => {
                 return {
+                    key: exerciseKeys.get(e.exerciseIndex)!,
                     exerciseId: e.exerciseId,
                     exerciseIndex: e.exerciseIndex,
                     exerciseName: e.exerciseName,
@@ -133,12 +135,14 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
         },
         errors: {
             workoutNotes: undefined,
-            exercises: workoutTemplate.exercises.map(e => {
+            exercises: workoutTemplate!.exercises.map(e => {
                 return {
+                    key: exerciseKeys.get(e.exerciseIndex)!,
                     exerciseNotes: undefined,
                     exerciseIndex: e.exerciseIndex,
                     sets: e.sets.map(s => {
                         if (s.isUnilateralSet || e.unilateralExercise) return {
+                            key: randomUUID(),
                             weight: undefined,
                             setNotes: undefined,
                             setIndex: s.setIndex,
@@ -155,6 +159,7 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
                             }
                         }
                         else return {
+                            key: randomUUID(),
                             weight: undefined,
                             setNotes: undefined,
                             setIndex: s.setIndex,
@@ -168,8 +173,6 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
             })
         }
     }
-
-    console.log('INITIAL:', JSON.stringify(initialFormState));
 
     //Track the current focused set for showing the matching set from last session
     const [activeSet, setActiveSet] = useState<activeSetType>({activeExerciseId: initialFormState.values.exercises[0].exerciseId, activeSetType: 'working', activeSetIndex: 0})
@@ -259,6 +262,7 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
                                     if (action.setIndex !== j) return s
                                     if (s.unilateralSet) return {
                                         ...s,
+                                        key: randomUUID(),
                                         unilateralSet: false,
                                         fullReps: undefined,
                                         partialReps: undefined,
@@ -266,6 +270,7 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
                                     }
                                     return {
                                         ...s,
+                                        key: randomUUID(),
                                         unilateralSet: true,
                                         left: { fullReps: undefined, partialReps: undefined, assistedReps: undefined },
                                         right: { fullReps: undefined, partialReps: undefined, assistedReps: undefined },
@@ -719,6 +724,7 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
                                 sets: [
                                     ...e.sets.slice(0, action.setIndexAddedAfter + 1),
                                     state.values.exercises[i].unilateralExercise ? {
+                                        key: randomUUID(),
                                         weight: undefined,
                                         setNotes: undefined,
                                         setIndex: action.setIndexAddedAfter + 1,
@@ -726,6 +732,7 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
                                         left: { fullReps: undefined, assistedReps: undefined, partialReps: undefined },
                                         right: { fullReps: undefined, assistedReps: undefined, partialReps: undefined }
                                     } : {
+                                        key: randomUUID(),
                                         weight: undefined,
                                         setNotes: undefined,
                                         setIndex: action.setIndexAddedAfter + 1,
@@ -784,6 +791,7 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
                 }
             }
             case 'ADD_EXERCISE': {
+                const newKey = randomUUID();
                 return {
                     ...state,
                     values: {
@@ -791,6 +799,7 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
                         exercises: [
                             ...state.values.exercises.slice(0, action.exerciseIndexAddedAfter + 1),
                             {
+                                key: newKey,
                                 exerciseId: action.exericseId,
                                 exerciseName: action.exerciseName,
                                 exerciseIndex: action.exerciseIndexAddedAfter + 1,
@@ -854,16 +863,19 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
                         exercises: [
                             ...state.errors.exercises.slice(0, action.exerciseIndexAddedAfter + 1),
                             {
+                                key: newKey,
                                 exerciseNotes: undefined,
                                 exerciseIndex: action.exerciseIndexAddedAfter + 1,
                                 sets: action.unilateralExercise ? [{
                                     setNotes: undefined,
+                                    key: randomUUID(),
                                     setIndex: 0,
                                     weight: undefined,
                                     unilateralSet: true,
                                     left: { fullReps: undefined, assistedReps: undefined, partialReps: undefined },
                                     right: { fullReps: undefined, assistedReps: undefined, partialReps: undefined }
                                 }] : [{
+                                    key: randomUUID(),
                                     setNotes: undefined,
                                     setIndex: 0,
                                     weight: undefined,
@@ -1033,6 +1045,13 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
                             }
                         })
                     }
+                }
+            }
+            case 'REORDER_EXERCISES': {
+                return {
+                    ...state,
+                    values: { ...state.values, exercises: action.newExerciseOrder },
+                    errors: { ...state.errors, exercises: action.newErrorOrder }
                 }
             }
             case 'MOVE_EXERCISE_UP': {
@@ -1585,6 +1604,64 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
 
     if (!formReady || !workoutTemplate) return <View><Text>Loading Workout Template</Text></View>
 
+    //Reordering exercises drag and drop
+    const handleExerciseReorder = ({ data } : { data: LoggedWorkoutExercise[] }) => {
+        const reorderedExercises = data.map((e, i) => ({
+            ...e,
+            exerciseIndex: i
+        }))
+
+        const reorderedErrors = data.map((exc, ind) => {
+            const matchingError = workoutForm.errors.exercises.find(err => err.key === exc.key);
+            return {
+                ...matchingError!,
+                exerciseIndex: ind
+            }
+        })
+
+        dispatch({ type: 'REORDER_EXERCISES', newExerciseOrder: reorderedExercises, newErrorOrder: reorderedErrors });
+    }
+
+    const renderExerciseItem = ({ item, drag, isActive } : RenderItemParams<LoggedWorkoutExercise>) => {
+        return (
+            <ShadowDecorator>
+                <View style={{flex: 1}}>
+                    <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
+                        <View style={{display: 'flex', flexDirection: 'column' }}>
+                            <View style={{display: 'flex', flexDirection: 'row'}}>
+                                <Text style={[workoutStyles.headerTextBold, workoutStyles.headerText]}>Exercise: </Text>
+                                {item.subbedExercise?.subbedExerciseId ?
+                                    <Text>{item.subbedExercise.exerciseName}</Text>
+                                    :
+                                    <Text style={workoutStyles.headerText}>{item.exerciseName}</Text>
+                                }
+                            </View>
+                            <View style={{display: 'flex', flexDirection: 'row'}}>
+                                <Text style={[workoutStyles.headerTextBold, workoutStyles.headerText]}>Target Reps: </Text> 
+                                <Text style={workoutStyles.headerText}>{item.exerciseRepsLower} to {item.exerciseRepsUpper}</Text>
+                            </View>
+                        </View>
+
+                        <Pressable onPressIn={drag} style={{ paddingRight: 8, paddingVertical: 8 }}>
+                            <Text style={{ fontSize: 20 }}>☰</Text>
+                        </Pressable>
+                    </View>
+                    <View style={{ opacity: isActive ? 0.7 : 1 }}>
+                        <LogExercise 
+                            dispatch={dispatch} 
+                            exerciseData={item}
+                            activeWorkout={props.activeWorkout} 
+                            exerciseCount={initialFormState.values.exercises.length}
+                            lastTrainedExercise={lastTrained?.exercises.find(exc => exc.exerciseId === item.exerciseId)}
+                            updateActiveSet={updateActiveSet}
+                            exerciseErrors={workoutForm.errors.exercises[item.exerciseIndex]}
+                        />
+                    </View>
+                </View>
+            </ShadowDecorator>
+        )
+    }
+
     return (
         <ScrollView>
             <View>
@@ -1620,7 +1697,7 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
                         <Text>Toggle</Text>
                     </Pressable>
                 </View>
-                <View>
+                {/* <View>
                     {
                         initialFormState.values.exercises.slice().sort((a, b) => a.exerciseIndex - b.exerciseIndex).map(e => {
                             const exerciseErrors = initialFormState.errors.exercises.find(er => er.exerciseIndex === e.exerciseIndex)!
@@ -1637,6 +1714,15 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
                                 ></LogExercise>)
                         })
                     }
+                </View> */}
+                <View>
+                    <DraggableFlatList<LoggedWorkoutExercise>
+                        data={workoutForm.values.exercises}
+                        onDragEnd={handleExerciseReorder}
+                        keyExtractor={(e) => e.key}
+                        renderItem={renderExerciseItem}
+                        scrollEnabled={true}
+                    />
                 </View>
                 <View>
                     <Text>Today's Workout Notes</Text>

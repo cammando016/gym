@@ -275,6 +275,7 @@ type UnilateralSet = BaseLoggedSet & {
 type LoggedWorkoutSet = BilateralSet | UnilateralSet
 
 interface LoggedWorkoutExercise {
+    key: string,
     exerciseId: string,
     exerciseIndex: number,
     exerciseNotes: string,
@@ -314,6 +315,7 @@ interface LoggedWorkout {
 }
 
 type LoggedSetError = {
+    key: string,
     weight?: string,
     setNotes?: string,
     setIndex: number,
@@ -322,6 +324,7 @@ type LoggedSetError = {
     assistedReps?: string,
     partialReps?: string,
 } | {
+    key: string,
     weight?: string, 
     setNotes?: string,
     setIndex: number,
@@ -339,6 +342,7 @@ type LoggedSetError = {
 }
 
 interface LoggedExerciseError {
+    key: string,
     exerciseNotes?: string,
     exerciseIndex: number,
     sets: LoggedSetError[]
@@ -433,6 +437,8 @@ type LogWorkoutAction =
 | { type: 'REMOVE_EXERCISE'; exerciseIndex: number }
 | { type: 'SUBSTITUTE_EXERCISE'; exerciseIndex: number, newExerciseId: string, exerciseName: string, unilateralExercise: boolean, unilateralOption: boolean, beltOption: boolean, strapsOption: boolean }
 | { type: 'CLEAR_SUB'; exerciseIndex: number }
+| { type: 'REORDER_EXERCISES'; newExerciseOrder: LoggedWorkoutExercise[], newErrorOrder: LoggedExerciseError[] }
+| { type: 'REORDER_SETS'; exerciseIndex: number; newSetOrder: LoggedWorkoutSet[] }
 | { type: 'MOVE_EXERCISE_UP'; exerciseIndex: number }
 | { type: 'MOVE_EXERCISE_DOWN'; exerciseIndex: number }
 | { type: 'VALIDATE_WORKOUT_NOTES'; value: string }
