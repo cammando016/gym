@@ -196,6 +196,7 @@ interface SplitDay {
     workoutTemplateId: string;
     workoutName: string;
     restDay: boolean;
+    error: boolean;
 }
 
 interface SplitFormPayload {

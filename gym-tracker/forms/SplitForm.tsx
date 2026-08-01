@@ -35,7 +35,8 @@ export default function SplitForm( props: Props ) {
                 dayIndex: i,
                 workoutTemplateId: w.workoutId,
                 workoutName: w.workoutName,
-                restDay: w.restDay
+                restDay: w.restDay,
+                error: w.restDay === false && w.workoutId === ''
             }
         })
         : 
@@ -45,6 +46,7 @@ export default function SplitForm( props: Props ) {
             workoutTemplateId: '',
             workoutName: '',
             restDay: false,
+            error: true
         }]
     );
 
@@ -59,22 +61,11 @@ export default function SplitForm( props: Props ) {
     const [splitName, setSplitName] = useState<string>(props.existingSplit ? props.existingSplit.splitName : '');
     const [exerciseListOpen, setExerciseListOpen] = useState<boolean>(false);
 
-    //Error handling
-    const [errors, setErrors] = useState<{error: boolean, index: number}[]>(props.existingSplit ? 
-        props.existingSplit.workouts.map(w => {
-            return {
-                error: w.restDay === false && w.workoutId === '',
-                index: w.dayIndex
-            }
-        })
-        :
-        [{error: true, index: 0}]
-    );
     const [nameError, setNameError] = useState<boolean> (splitName === '' ? true : false);
 
     const submitDisabled = useMemo(() => {
-        return errors.some(e => e.error === true);
-    }, [errors])
+        return form.some(f => f.error === true);
+    }, [form])
 
     const handleSubmit = async () => {
         const formPayload : SplitFormPayload = {
@@ -104,9 +95,9 @@ export default function SplitForm( props: Props ) {
                 workoutTemplateId: '',
                 workoutName: '',
                 restDay: false,
+                error: true
             }
         ]);
-        setErrors(prev => [...prev, {error: true, index: newDayIndex}]);
         setNewDayIndex(newDayIndex + 1);
     }
 
@@ -148,22 +139,19 @@ export default function SplitForm( props: Props ) {
                                 value={item.restDay}
                                 onValueChange={(value: boolean) => {
                                     setForm(prev =>
-                                        prev.map(d => d.dayIndex === item.dayIndex ? {...d, restDay: value, workoutTemplateId: '', workoutName: ''} : d )
-                                    );
-                                    setErrors(prev => 
-                                        prev.map(e => e.index === item.dayIndex ? {...e, error: value === true ? false : true} : e )
+                                        prev.map(d => d.dayIndex === item.dayIndex ? {...d, restDay: value, workoutTemplateId: '', workoutName: '', error: !value } : d )
                                     );
                                 }}
                             />
                             <Text>Rest Day</Text>
                         </View>
                         <View>
-                            <Pressable onPress={() => setForm(prev => prev.map(d => d.dayIndex === item.dayIndex ? {...d, workoutTemplateId: '', workoutName: ''} : d ))} >
+                            <Pressable onPress={() => setForm(prev => prev.map(d => d.dayIndex === item.dayIndex ? {...d, workoutTemplateId: '', workoutName: '', error: true } : d ))} >
                                 <Text>Clear Workout</Text>
                             </Pressable>
                         </View>
                             
-                        { editMode && 
+                        { editMode && form.length > 1 && 
                             <Pressable onPressIn={drag} style={{ paddingRight: 8, paddingVertical: 8 }}>
                                 <Text style={{ fontSize: 20 }}>☰</Text>
                             </Pressable>
@@ -177,7 +165,7 @@ export default function SplitForm( props: Props ) {
                                     <Pressable 
                                         onPress={() => {
                                             handleSelectWorkout(w.workoutId, w.workoutName, item.dayIndex);
-                                            setErrors(prev => prev.map(e => e.index === item.dayIndex ? {...e, error: false} : e ))
+                                            setForm(prev => prev.map(d => d.dayIndex === item.dayIndex ? {...d, error: false } : d ))
                                         }} 
                                         key={w.workoutId}
                                     >
@@ -193,8 +181,7 @@ export default function SplitForm( props: Props ) {
     }
 
     const handleDeleteDay = (dayIndex: number) => { 
-        setForm(form.filter(f => f.dayIndex !== dayIndex));
-        setErrors(errors.filter(e => e.index !== dayIndex)); 
+        setForm(prev => prev.filter(f => f.dayIndex !== dayIndex).map((f, i) => ({...f, dayIndex: i})))
     }
 
     const handleSelectWorkout = (workoutId: string, workoutName: string, clickedIndex: number) => {
