@@ -1,11 +1,11 @@
 import { Link } from 'expo-router';
 import { Text, View } from 'react-native';
 
-export default function Schedule() {
+export default function Feed() {
     return (
         <View>
             <Text>Schedule Page</Text>
-            <Link href='/schedule/EditSchedule' withAnchor>Edit Schedule</Link>
+            <Link href='/feed/EditSchedule' withAnchor>Edit Schedule</Link>
         </View>
     )
 }
