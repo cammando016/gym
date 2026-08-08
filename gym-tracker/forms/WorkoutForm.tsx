@@ -1,12 +1,12 @@
-import { Exercise, WorkoutSet, SetTracker, PrivacyType, WorkoutAction, FormStateWithValidation, ErrorShape, FormPayload } from '@/types/workouts';
+import { Exercise, SetTracker, PrivacyType, WorkoutAction, FormStateWithValidation, ErrorShape, FormPayload } from '@/types/workouts';
 import { useState, useReducer } from 'react';
-import { Button, Text, TextInput, View, ScrollView, StyleSheet, Pressable } from 'react-native';
+import { Button, Text, TextInput, View, StyleSheet, Pressable } from 'react-native';
 import { RadioButton } from 'react-native-paper';
 import NewExercise from './NewExercise';
 import { useAuth } from '@/contexts/AuthContext';
 import { validateRequiredAlphanumericSymbolsField, validateRequiredAlphabeticalSpacesField, validateOptionalIntegerField, validateUpperRepsTarget } from '../utils/formValiditors';
 import { createWorkout } from '@/utils/workouts';
-import DraggableFlatList, { RenderItemParams, ScaleDecorator } from 'react-native-draggable-flatlist';
+import { RenderItemParams, ScaleDecorator, NestableDraggableFlatList, NestableScrollContainer } from 'react-native-draggable-flatlist';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQueryClient } from '@tanstack/react-query';
 import { useWorkoutTemplates } from '@/hooks/useWorkoutTemplates';
@@ -518,58 +518,56 @@ export default function WorkoutForm () {
     })
 
     return (
-        <View>
-            <ScrollView>
-                <View>
-                    <Text>Workout Name</Text>
-                    <TextInput 
-                        placeholder='Enter workout name'
-                        value={form.values.name}
-                        onChangeText={(text: string) => dispatch({ type: 'SET_WORKOUT_NAME', value: text })}
-                        onEndEditing={() => dispatch({ type: 'VALIDATE_WORKOUT_NAME', value: form.values.name })}
-                    />
-                    {form.errors.name && <Text style={[styles.errorDescription]}>{form.errors.name}</Text>}
-                </View>
-                
-                <RadioButton.Group onValueChange={(newValue: string) => dispatch({ type: 'SET_WORKOUT_PRIVACY', value: newValue })} value={form.values.privacy}>
-                    <View style={[styles.privacy]}>
-                        <View>
-                            <Text>Private</Text>
-                            <RadioButton value={PrivacyType.Private}/>
-                        </View>
-                        <View>
-                            <Text>Friends</Text>
-                            <RadioButton value={PrivacyType.Friends}/>
-                        </View>
-                        <View>
-                            <Text>Public</Text>
-                            <RadioButton value={PrivacyType.Public}/>
-                        </View>
-                    </View>
-                </RadioButton.Group>
-
-                <View>
-                    <View id='exercises'>
-                        <DraggableFlatList<Exercise>
-                            data={form.values.exercises}
-                            onDragEnd={handleExerciseReorder}
-                            keyExtractor={(e) => e.key}
-                            renderItem={renderExerciseItem}
-                            scrollEnabled={false}
-                        />
-                    </View>
-
+        <NestableScrollContainer>
+            <View>
+                <Text>Workout Name</Text>
+                <TextInput 
+                    placeholder='Enter workout name'
+                    value={form.values.name}
+                    onChangeText={(text: string) => dispatch({ type: 'SET_WORKOUT_NAME', value: text })}
+                    onEndEditing={() => dispatch({ type: 'VALIDATE_WORKOUT_NAME', value: form.values.name })}
+                />
+                {form.errors.name && <Text style={[styles.errorDescription]}>{form.errors.name}</Text>}
+            </View>
+            
+            <RadioButton.Group onValueChange={(newValue: string) => dispatch({ type: 'SET_WORKOUT_PRIVACY', value: newValue })} value={form.values.privacy}>
+                <View style={[styles.privacy]}>
                     <View>
-                        <Button title='Add Exercise' onPress={() => dispatch({ type: 'ADD_EXERCISE', exerciseIndex: form.values.exercises.length })} />
+                        <Text>Private</Text>
+                        <RadioButton value={PrivacyType.Private}/>
+                    </View>
+                    <View>
+                        <Text>Friends</Text>
+                        <RadioButton value={PrivacyType.Friends}/>
+                    </View>
+                    <View>
+                        <Text>Public</Text>
+                        <RadioButton value={PrivacyType.Public}/>
                     </View>
                 </View>
+            </RadioButton.Group>
 
-                <View style={{display: 'flex', flexDirection: 'row'}}>
-                    <Button title='Cancel' onPress={() => router.back()} />
-                    <Button title='Reset Form' onPress={() => dispatch({ type: 'RESET_FORM' })} />
-                    <Button title='Submit' onPress={handleSubmit} />
+            <View>
+                <View id='exercises'>
+                    <NestableDraggableFlatList<Exercise>
+                        data={form.values.exercises}
+                        onDragEnd={handleExerciseReorder}
+                        keyExtractor={(e) => e.key}
+                        renderItem={renderExerciseItem}
+                        scrollEnabled={false}
+                    />
                 </View>
-            </ScrollView>
-        </View>
+
+                <View>
+                    <Button title='Add Exercise' onPress={() => dispatch({ type: 'ADD_EXERCISE', exerciseIndex: form.values.exercises.length })} />
+                </View>
+            </View>
+
+            <View style={{display: 'flex', flexDirection: 'row'}}>
+                <Button title='Cancel' onPress={() => router.back()} />
+                <Button title='Reset Form' onPress={() => dispatch({ type: 'RESET_FORM' })} />
+                <Button title='Submit' onPress={handleSubmit} />
+            </View>
+        </NestableScrollContainer>
     )
 }

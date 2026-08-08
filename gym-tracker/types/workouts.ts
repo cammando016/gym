@@ -284,6 +284,7 @@ interface LoggedWorkoutExercise {
     exerciseRepsLower: number,
     exerciseRepsUpper: number,
     unilateralExercise: boolean,
+    setsHidden: boolean,
     changedExerciseIndex: {
         originalIndex: number,
         updatedExerciseIndex?: number,
@@ -441,6 +442,7 @@ type LogWorkoutAction =
 | { type: 'REORDER_SETS'; exerciseIndex: number; newSetOrder: LoggedWorkoutSet[] }
 | { type: 'MOVE_EXERCISE_UP'; exerciseIndex: number }
 | { type: 'MOVE_EXERCISE_DOWN'; exerciseIndex: number }
+| { type: 'TOGGLE_SHOW_SETS'; exerciseIndex: number }
 | { type: 'VALIDATE_WORKOUT_NOTES'; value: string }
 | { type: 'VALIDATE_EXERCISE_NOTES'; value: string; exerciseIndex: number }
 | { type: 'VALIDATE_SET_WEIGHT'; value: string; exerciseIndex: number; setIndex: number }

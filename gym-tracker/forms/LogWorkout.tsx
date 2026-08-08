@@ -1,4 +1,4 @@
-import { Text, View, TextInput, ScrollView, Pressable, AppState } from 'react-native';
+import { Text, View, TextInput, Pressable, AppState } from 'react-native';
 import { useReducer, useState, forwardRef, useImperativeHandle, useRef, useEffect } from 'react';
 import { activeSetType, LoggedWorkoutExercise, LogWorkoutAction, LogWorkoutForm, LogWorkoutPayload, WorkoutTemplateType } from '@/types/workouts';
 import { useWorkoutTemplates } from '@/hooks/useWorkoutTemplates';
@@ -14,7 +14,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import DraggableFlatList, { RenderItemParams, ShadowDecorator } from 'react-native-draggable-flatlist';
+import { RenderItemParams, ShadowDecorator, NestableScrollContainer, NestableDraggableFlatList } from 'react-native-draggable-flatlist';
 
 interface Props {
     activeWorkout: boolean, //True for when logging working, false when viewing past workout
@@ -80,6 +80,7 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
                     exerciseRepsUpper: e.repRangeUpper,
                     setupNotes: e.exerciseNotes,
                     exerciseNotes: '',
+                    setsHidden: false,
                     changedExerciseIndex: {
                         originalIndex: e.exerciseIndex
                     },
@@ -808,6 +809,7 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
                                 exerciseRepsLower: Number(action.repsLower),
                                 exerciseRepsUpper: Number(action.repsUpper),
                                 unilateralExercise: action.unilateralExercise,
+                                setsHidden: false,
                                 changedExerciseIndex: {
                                     originalIndex: action.exerciseIndexAddedAfter + 1,
                                 },
@@ -1054,84 +1056,17 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
                     errors: { ...state.errors, exercises: action.newErrorOrder }
                 }
             }
-            case 'MOVE_EXERCISE_UP': {
+            case 'TOGGLE_SHOW_SETS': {
                 return {
                     ...state,
                     values: {
                         ...state.values,
-                        exercises: state.values.exercises.map(e => {
-                            if (e.exerciseIndex === action.exerciseIndex) return {
+                        exercises: state.values.exercises.map((e) => {
+                            if (action.exerciseIndex !== e.exerciseIndex) return e;
+                            return {
                                 ...e,
-                                exerciseIndex: action.exerciseIndex - 1,
-                                changedExerciseIndex: {
-                                    ...e.changedExerciseIndex,
-                                    updatedExerciseIndex: action.exerciseIndex - 1
-                                }
+                                setsHidden: !e.setsHidden
                             }
-                            if (e.exerciseIndex === action.exerciseIndex - 1) return {
-                                ...e,
-                                exerciseIndex: action.exerciseIndex,
-                                changedExerciseIndex: {
-                                    ...e.changedExerciseIndex,
-                                    updatedExerciseIndex: action.exerciseIndex
-                                }
-                            }
-                            return e
-                        })
-                    },
-                    errors: {
-                        ...state.errors,
-                        exercises: state.errors.exercises.map(e => {
-                            if (e.exerciseIndex === action.exerciseIndex) return {
-                                ...e,
-                                exerciseIndex: action.exerciseIndex - 1
-                            }
-                            if (e.exerciseIndex === action.exerciseIndex - 1) return {
-                                ...e,
-                                exerciseIndex: action.exerciseIndex
-                            }
-                            return e
-                        })
-                    }
-                }
-            }
-            case 'MOVE_EXERCISE_DOWN': {
-                return {
-                    ...state,
-                    values: {
-                        ...state.values,
-                        exercises: state.values.exercises.map(e => {
-                            if (e.exerciseIndex === action.exerciseIndex) return {
-                                ...e,
-                                exerciseIndex: action.exerciseIndex + 1,
-                                changedExerciseIndex: {
-                                    ...e.changedExerciseIndex,
-                                    updatedExerciseIndex: action.exerciseIndex + 1
-                                }
-                            }
-                            if (e.exerciseIndex === action.exerciseIndex + 1) return {
-                                ...e,
-                                exerciseIndex: action.exerciseIndex,
-                                changedExerciseIndex: {
-                                    ...e.changedExerciseIndex,
-                                    updatedExerciseIndex: action.exerciseIndex
-                                }
-                            }
-                            return e
-                        })
-                    },
-                    errors: {
-                        ...state.errors,
-                        exercises: state.errors.exercises.map(e => {
-                            if (e.exerciseIndex === action.exerciseIndex) return {
-                                ...e,
-                                exerciseIndex: action.exerciseIndex + 1
-                            }
-                            if (e.exerciseIndex === action.exerciseIndex + 1) return {
-                                ...e,
-                                exerciseIndex: action.exerciseIndex
-                            }
-                            return e
                         })
                     }
                 }
@@ -1623,7 +1558,6 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
     }
 
     const renderExerciseItem = ({ item, drag, isActive } : RenderItemParams<LoggedWorkoutExercise>) => {
-        const [showSets, setShowSets] = useState<boolean>(true);
         return (
             <ShadowDecorator>
                 <View style={workoutStyles.exerciseContainer}>
@@ -1636,7 +1570,7 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
                         </Pressable>
                         <Pressable 
                             style={{display: 'flex', flexDirection: 'column', flexGrow: 1, alignItems: 'center', borderWidth: 1, borderColor: 'red', marginLeft: 10, marginRight: 10}}
-                            onPress={() => setShowSets(!showSets)}
+                            onPress={() => dispatch({ type: 'TOGGLE_SHOW_SETS', exerciseIndex: item.exerciseIndex }) }
                         >
                             <View style={{display: 'flex', flexDirection: 'row'}}>
                                 <Text style={[workoutStyles.headerTextBold, workoutStyles.headerText]}>Exercise: </Text>
@@ -1665,7 +1599,7 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
                             lastTrainedExercise={lastTrained?.exercises.find(exc => exc.exerciseId === item.exerciseId)}
                             updateActiveSet={updateActiveSet}
                             exerciseErrors={workoutForm.errors.exercises[item.exerciseIndex]}
-                            showSets={showSets}
+                            showSets={item.setsHidden}
                         />
                     </View>
                 </View>
@@ -1674,79 +1608,59 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
     }
 
     return (
-        <ScrollView>
-            <View>
-                <Text>Last {workoutTemplate?.workoutName} session notes: {lastTrained?.workoutNotes}</Text>
-                <View style={[layoutStyles.rowFlex]}>
-                    <View>
-                        {
-                            fullPastSetList ? (
-                                lastTrained?.exercises.filter(e => e.exerciseId === activeSet.activeExerciseId)[0].sets.map(s => {
-                                    return (
-                                        <LastTrainedSet 
-                                            key={s.setId}
-                                            lastTrainedSet={lastTrained.exercises.filter(e => e.exerciseId === activeSet.activeExerciseId)[0].sets[s.setIndex]}
-                                            activeSetIndex={s.setIndex}
-                                            allSets={fullPastSetList}
-                                        />
-                                    )
-                                })
-                            ) : (
-                                activeSet.activeSetIndex !== undefined ? 
-                                    <LastTrainedSet
-                                        lastTrainedSet={lastTrained?.exercises.filter(e => e.exerciseId === activeSet.activeExerciseId)[0].sets.filter(s => s.setType === activeSet.activeSetType)[activeSet.activeSetIndex]}
-                                        activeSetIndex={activeSet.activeSetIndex}
+        <NestableScrollContainer style={{ flex: 1}} contentContainerStyle={{flexGrow: 1}}>
+            <Text>Last {workoutTemplate?.workoutName} session notes: {lastTrained?.workoutNotes}</Text>
+            <View style={[layoutStyles.rowFlex]}>
+                <View>
+                    {
+                        fullPastSetList ? (
+                            lastTrained?.exercises.filter(e => e.exerciseId === activeSet.activeExerciseId)[0].sets.map(s => {
+                                return (
+                                    <LastTrainedSet 
+                                        key={s.setId}
+                                        lastTrainedSet={lastTrained.exercises.filter(e => e.exerciseId === activeSet.activeExerciseId)[0].sets[s.setIndex]}
+                                        activeSetIndex={s.setIndex}
                                         allSets={fullPastSetList}
                                     />
-                                : (
-                                    <View><Text>No matching set from past workout </Text></View>
                                 )
+                            })
+                        ) : (
+                            activeSet.activeSetIndex !== undefined ? 
+                                <LastTrainedSet
+                                    lastTrainedSet={lastTrained?.exercises.filter(e => e.exerciseId === activeSet.activeExerciseId)[0].sets.filter(s => s.setType === activeSet.activeSetType)[activeSet.activeSetIndex]}
+                                    activeSetIndex={activeSet.activeSetIndex}
+                                    allSets={fullPastSetList}
+                                />
+                            : (
+                                <View><Text>No matching set from past workout </Text></View>
                             )
-                        }
-                    </View>
-                    <Pressable onPress={toggleFullPastSetList}>
-                        <Text>Toggle</Text>
-                    </Pressable>
-                </View>
-                {/* <View>
-                    {
-                        initialFormState.values.exercises.slice().sort((a, b) => a.exerciseIndex - b.exerciseIndex).map(e => {
-                            const exerciseErrors = initialFormState.errors.exercises.find(er => er.exerciseIndex === e.exerciseIndex)!
-                            return (
-                                <LogExercise 
-                                    key={e.exerciseId} 
-                                    dispatch={dispatch} 
-                                    exerciseData={e}
-                                    activeWorkout={props.activeWorkout} 
-                                    exerciseCount={initialFormState.values.exercises.length}
-                                    lastTrainedExercise={lastTrained?.exercises.find(exc => exc.exerciseId === e.exerciseId)}
-                                    updateActiveSet={updateActiveSet}
-                                    exerciseErrors={exerciseErrors}
-                                ></LogExercise>)
-                        })
+                        )
                     }
-                </View> */}
-                <View>
-                    <DraggableFlatList<LoggedWorkoutExercise>
-                        data={workoutForm.values.exercises}
-                        onDragEnd={handleExerciseReorder}
-                        keyExtractor={(e) => e.key}
-                        renderItem={renderExerciseItem}
-                        scrollEnabled={true}
-                    />
                 </View>
-                <View>
-                    <Text>Today's Workout Notes</Text>
-                    <TextInput 
-                        placeholder='Leave any notes from this workout for the next session here'
-                        value={workoutForm.values.workoutNotes}
-                        onChangeText={(s: string) => dispatch({ type: 'UPDATE_WORKOUT_NOTES', value: s })}
-                        onEndEditing={(event) => { console.log(event.nativeEvent.text); dispatch({ type: 'VALIDATE_WORKOUT_NOTES', value: event.nativeEvent.text }) } }
-                    />
-                    {workoutForm.errors.workoutNotes && <Text style={[workoutStyles.errorText]}>{workoutForm.errors.workoutNotes}</Text>}
-                </View>
+                <Pressable onPress={toggleFullPastSetList}>
+                    <Text>Toggle</Text>
+                </Pressable>
             </View>
-        </ScrollView>
+            <View>
+                <NestableDraggableFlatList<LoggedWorkoutExercise>
+                    data={workoutForm.values.exercises}
+                    onDragEnd={handleExerciseReorder}
+                    keyExtractor={(e) => e.key}
+                    renderItem={renderExerciseItem}
+                    scrollEnabled={false}
+                />
+            </View>
+            <View>
+                <Text>Today's Workout Notes</Text>
+                <TextInput 
+                    placeholder='Leave any notes from this workout for the next session here'
+                    value={workoutForm.values.workoutNotes}
+                    onChangeText={(s: string) => dispatch({ type: 'UPDATE_WORKOUT_NOTES', value: s })}
+                    onEndEditing={(event) => { console.log(event.nativeEvent.text); dispatch({ type: 'VALIDATE_WORKOUT_NOTES', value: event.nativeEvent.text }) } }
+                />
+                {workoutForm.errors.workoutNotes && <Text style={[workoutStyles.errorText]}>{workoutForm.errors.workoutNotes}</Text>}
+            </View>
+        </NestableScrollContainer>
     )
 })
 
