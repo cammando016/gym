@@ -13,6 +13,7 @@ export default function RecentWorkoutSummary(props: Props) {
             <View style={{display: 'flex', flexGrow: 1}}>
                 <Text>{props.workoutData.workoutName}</Text>
                 <Text>Status: {props.workoutData.status}</Text>
+                <Text>Date: {props.workoutData.dateStarted.toString().slice(0, 10)}</Text>
                 <Text>Duration: {formatDateDifferenceHMS(dayjs(props.workoutData.dateEnded).diff(dayjs(props.workoutData.dateStarted)))}</Text>
             </View>
             <View>

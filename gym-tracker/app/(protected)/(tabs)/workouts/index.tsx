@@ -74,7 +74,7 @@ export default function WorkoutsPage() {
                 <View>
                     { lastThreeLoading ? <SkeletonSmall /> : (
                         !lastThreeTrained ? <Text>No workouts found</Text> : (
-                            lastThreeTrained.map(lt => <RecentWorkoutSummary workoutData={lt} />)
+                            lastThreeTrained.map(lt => <RecentWorkoutSummary key={lt.id} workoutData={lt} />)
                     ))}
                 </View>
                 <View>
