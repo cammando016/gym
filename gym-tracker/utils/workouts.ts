@@ -47,6 +47,14 @@ export const fetchLastTrained = async (workoutId: string) => {
     return await res.json();
 }
 
+export const fetchLastThreeWorkouts = async () => {
+    const token = await AsyncStorage.getItem('token');
+    const res = await fetch(`http://localhost:3000/api/workouts/last-three`, {
+        headers: { Authorization: `Bearer ${token}`}
+    });
+    return await res.json();
+}
+
 export const createSplit = async (details: SplitFormPayload) => {
     const token = await AsyncStorage.getItem('token');
     const res = await fetch(`http://localhost:3000/api/workouts/split/create`, {

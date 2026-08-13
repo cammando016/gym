@@ -3,10 +3,13 @@ import { Text, View } from 'react-native';
 import { useWorkoutTemplates } from "@/hooks/useWorkoutTemplates";
 import { useSplits } from '@/hooks/useSplit';
 import SkeletonSmall from '@/components/SkeletonSmall';
+import { useLastThreeWorkouts } from '@/hooks/useWorkoutHistory';
+import RecentWorkoutSummary from '@/components/RecentWorkoutSummary';
 
 export default function WorkoutsPage() {
     const { data: workoutTemplateList, isLoading, error } = useWorkoutTemplates();
     const { data } = useSplits();
+    const { data: lastThreeTrained, isLoading: lastThreeLoading } = useLastThreeWorkouts();
 
     return (
         <View>
@@ -64,16 +67,18 @@ export default function WorkoutsPage() {
             </View>
 
             <View style={{padding: 20}}>
-                <Text style={{textAlign: 'center'}}>Completed Workouts</Text>
                 <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
-                    <View>
-                        <Text>LAST TRAINED:</Text>
-                        <Text>STREAK: x DAYS</Text>
-                    </View>
-                    <View>
-                        {/* <Link href='/workouts/EditSplit' withAnchor>Edit Split</Link> */}
-                        <Text>LINK HERE</Text>
-                    </View>
+                    <Text style={{fontWeight: 'bold'}}>Recent Workouts</Text>
+                    <Text>View All</Text>
+                </View>
+                <View>
+                    { lastThreeLoading ? <SkeletonSmall /> : (
+                        !lastThreeTrained ? <Text>No workouts found</Text> : (
+                            lastThreeTrained.map(lt => <RecentWorkoutSummary workoutData={lt} />)
+                    ))}
+                </View>
+                <View>
+                    <Text>Streak: COMING SOON</Text>
                 </View>
             </View>
         </View>

@@ -315,6 +315,14 @@ interface LoggedWorkout {
     exercises: LoggedWorkoutExercise [],
 }
 
+interface LoggedWorkoutBasicDetails {
+    dateEnded: Date,
+    dateStarted: Date,
+    id: string,
+    workoutName: string,
+    status: string,
+}
+
 type LoggedSetError = {
     key: string,
     weight?: string,
@@ -481,7 +489,8 @@ export {
     EditSplitPayload,
     Split, 
     UserSplits, 
-    LoggedWorkout, 
+    LoggedWorkout,
+    LoggedWorkoutBasicDetails, 
     LoggedWorkoutExercise, 
     LoggedWorkoutSet, 
     LoggedExerciseError, 

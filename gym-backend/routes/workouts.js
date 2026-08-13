@@ -283,7 +283,7 @@ router.get('/active', authenticateToken, async (req, res) => {
             workout: activeWorkout
         })
     } catch (error) {
-        console.log(error.message);
+        console.error(error.message);
         return res.status(500).json({
             error: error.message
         })
@@ -379,7 +379,44 @@ router.get('/:workoutId/last', authenticateToken, async (req, res) => {
             workout: workoutQuery.rows[0]
         });
     } catch (error) {
-        console.log(error.message);
+        console.error(error.message);
+        return res.status(500).json({
+            error: error.message
+        });
+    }
+});
+
+//Get basic details of last three workouts (active or completed)
+router.get('/last-three', authenticateToken, async (req, res) => {
+    console.log('Reached here');
+    const userId = req.user.id;
+
+    try {
+        console.log('Fetching last three workouts');
+        const lastThreeWorkoutsQuery = await pool.query(
+            `SELECT 
+                w.id, w.date_started AS "dateStarted", w.date_ended AS "dateEnded", w.status, wt.workout_name AS "workoutName"
+            FROM
+                workouts w
+            JOIN 
+                workout_templates wt ON w.workout_template_id = wt.id
+            WHERE 
+                w.user_id = $1
+            ORDER BY 
+                w.date_started DESC
+            LIMIT 3
+            `, [userId]
+        );
+
+        if(lastThreeWorkoutsQuery.rows.length === 0) return res.status(404).json({error: `No past workouts found for user`});
+
+        console.log(lastThreeWorkoutsQuery.rows);
+
+        return res.status(200).json({
+            workouts: lastThreeWorkoutsQuery.rows
+        });
+    } catch (error) {
+        console.error(error.message);
         return res.status(500).json({
             error: error.message
         });
