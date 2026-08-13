@@ -266,7 +266,7 @@ export default function SplitForm( props: Props ) {
                     renderItem={renderSplitDay}
                     scrollEnabled={false}    
                 />
-                <Pressable onPress={handleAddDay}><Text>Add Day</Text></Pressable>
+                { editMode && <Pressable onPress={handleAddDay}><Text>Add Day</Text></Pressable> }
             </View>
 
             <View style={{display: 'flex', flexDirection: 'row', }}>
@@ -275,7 +275,7 @@ export default function SplitForm( props: Props ) {
                 </Pressable>
 
                 {
-                    props.existingSplit ? (
+                    props.existingSplit ? ( editMode && 
                         <Pressable onPress={handleSubmitEditSplit} disabled={nameError || submitDisabled} >
                             <Text style={{color: nameError || submitDisabled ? 'red' : 'green'}}>Edit Split</Text>
                         </Pressable>
