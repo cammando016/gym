@@ -1,8 +1,6 @@
-# Gym Tracker
+# About This Project: Gym Tracker
 
-_About This Project_
-
-Please note I am actively in development on this app, and it is currently not published or publicly available for preview. However, if you are interested in my progress on this app, please visit the repo to see the code I have completed so far
+_Please note I am actively in development on this app, it is currently not published or available for preview. However, if you are interested in my progress on this app, please visit the repo to see the code I have completed so far_
 
 My current in development project is a React Native app I am building to track my training sessions at the gym. Other apps I had tried always had something I would prefer to be designed differently, so I decided to build an app customised to my preferences for tracking my workouts.
 
@@ -10,7 +8,7 @@ The early version of the app is close to complete, which I will be using with th
 
 In future I will be adding group features to use with friends, including shared training splits, the ability to add workout templates created by other users and view each other's active workout streak.
 
-Future features for personal use I also intent to implement are milestone tracking and the ability to set and track progress towards custom training goals.
+Future features for personal use I also intend to implement include milestone tracking, plus the ability to set and track progress towards custom training goals, and a feed of workouts completed by app friends.
 
 _Tech Stack_
 
