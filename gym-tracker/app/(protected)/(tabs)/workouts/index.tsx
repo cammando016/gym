@@ -5,6 +5,8 @@ import { useSplits } from '@/hooks/useSplit';
 import SkeletonSmall from '@/components/SkeletonSmall';
 import { useLastThreeWorkouts } from '@/hooks/useWorkoutHistory';
 import RecentWorkoutSummary from '@/components/RecentWorkoutSummary';
+import AddNewButton from '@/components/AddNewButton';
+import ViewAllButton from '@/components/ViewAllButton';
 
 export default function WorkoutsPage() {
     const { data: workoutTemplateList, isLoading, error } = useWorkoutTemplates();
@@ -16,18 +18,16 @@ export default function WorkoutsPage() {
             <View style={{padding: 20}}>
                 <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
                     <Text style={{fontWeight: 'bold'}}>My Templates</Text>
-                    <Link href='/workouts/ViewWorkouts' withAnchor>View All</Link>
+                    <View style={{display: 'flex', flexDirection: 'row', gap: 5}}>
+                        <ViewAllButton path={'/workouts/ViewWorkouts'} />
+                        <AddNewButton path={'/workouts/AddWorkout'} />
+                    </View>
                 </View>
                 {
                     isLoading ? ( <SkeletonSmall></SkeletonSmall> ) :
                     (
                         <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
-                            <View>
-                                <Text>{workoutTemplateList?.filter(w => w.isActive === true).length} active workouts</Text>
-                            </View>
-                            <View>
-                                <Link href='/workouts/AddWorkout' withAnchor>Create New Template</Link>
-                            </View>
+                            <Text>{workoutTemplateList?.filter(w => w.isActive === true).length} active workouts</Text>
                         </View>
                     )
                 }
@@ -36,7 +36,10 @@ export default function WorkoutsPage() {
             <View style={{padding: 20}}>
                 <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
                     <Text style={{fontWeight: 'bold'}}>My Splits</Text>
-                    <Link href='/workouts/EditSplit' >Create New</Link>
+                    <View style={{display: 'flex', flexDirection: 'row', gap: 5}}>
+                        {data && data.splits.length > 3 && <ViewAllButton path={"/"} />} {/* Replace with actual path once route created */}
+                        <AddNewButton path={'/workouts/EditSplit'} />
+                    </View>
                 </View>
                 <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
                     {
@@ -51,7 +54,7 @@ export default function WorkoutsPage() {
                         })
                     }
                     {
-                        data?.splits.filter(sp => !sp.isActive).map(s => {
+                        data?.splits.filter(sp => !sp.isActive).slice(0, 2).map(s => {
                             return (
                                 <View key={s.splitId}>
                                     <Link href={`/workouts/${s.splitId}`}>
@@ -67,7 +70,7 @@ export default function WorkoutsPage() {
             <View style={{padding: 20}}>
                 <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
                     <Text style={{fontWeight: 'bold'}}>Recent Workouts</Text>
-                    <Text>View All</Text>
+                    <Text>View All</Text> {/* Replace with ViewAll component button once route created */}
                 </View>
                 <View>
                     { lastThreeLoading ? <SkeletonSmall /> : (
@@ -75,8 +78,9 @@ export default function WorkoutsPage() {
                             lastThreeTrained.map(lt => <RecentWorkoutSummary key={lt.id} workoutData={lt} />)
                     ))}
                 </View>
-                <View>
-                    <Text>Streak: COMING SOON</Text>
+                <View style={{display: 'flex', flexDirection: 'row'}}>
+                    <Text>Streak: COMING SOON </Text>
+                    <Text>Best: ?</Text>
                 </View>
             </View>
         </View>
