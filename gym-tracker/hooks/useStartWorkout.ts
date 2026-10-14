@@ -9,14 +9,14 @@ export function useStartWorkout() {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: startWorkout,
-        onSuccess: (data : {sessionId: string, templateId: string, workoutName: string, dateStarted: string}) => {
+        onSuccess: (data : {sessionId: string, templateId: string, workoutName: string, dateStarted: string, activeWorkout: string}) => {
             console.log('SUCCESS:', data);
 
             queryClient.invalidateQueries({ queryKey: ['splitDay', user?.username]});
             
             router.replace({
                 pathname: `/sessions/${data.sessionId}`,
-                params: { templateId: data.templateId, workoutName: data.workoutName, dateStarted: data.dateStarted, resumed: 'false' }
+                params: { templateId: data.templateId, workoutName: data.workoutName, dateStarted: data.dateStarted, resumed: 'false', activeWorkout: 'true' }
             });
         },
         onError: (err) => {

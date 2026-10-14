@@ -65,7 +65,7 @@ export default function App() {
   const resumeWorkout = (workout: ActiveWorkout) => {
     router.replace({
       pathname: `/sessions/${workout.workout.id}`,
-      params: { templateId: workout.workout.templateId, workoutName: workout.workout.workoutName, dateStarted: workout.workout.dateStarted, resumed: 'true' }
+      params: { templateId: workout.workout.templateId, workoutName: workout.workout.workoutName, dateStarted: workout.workout.dateStarted, resumed: 'true', activeWorkout: 'true' }
     })
   }
 

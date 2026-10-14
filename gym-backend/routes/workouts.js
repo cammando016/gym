@@ -366,9 +366,10 @@ router.get('/:workoutId/last', authenticateToken, async (req, res) => {
             JOIN exercise_list el ON w.id = el.workout_id
             WHERE u.id = $1
             AND w.workout_template_id = $2
+            AND NOT w.status = $3
             ORDER BY w.date_started DESC
             LIMIT 1`, 
-            [userId, templateId]
+            [userId, templateId, "active"]
         );
 
         if(workoutQuery.rows.length === 0) return res.status(404).json({error: 'No previous workout found'});
@@ -395,7 +396,7 @@ router.get('/last-three', authenticateToken, async (req, res) => {
         console.log('Fetching last three workouts');
         const lastThreeWorkoutsQuery = await pool.query(
             `SELECT 
-                w.id, w.date_started AS "dateStarted", w.date_ended AS "dateEnded", w.status, wt.workout_name AS "workoutName"
+                w.id, w.date_started AS "dateStarted", w.date_ended AS "dateEnded", w.status, wt.workout_name AS "workoutName", w.workout_template_id AS "templateId"
             FROM
                 workouts w
             JOIN 

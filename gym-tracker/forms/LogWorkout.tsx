@@ -1609,38 +1609,44 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
 
     return (
         <NestableScrollContainer style={{ flex: 1}} contentContainerStyle={{flexGrow: 1}}>
-            <Text>Last {workoutTemplate?.workoutName} session notes: {lastTrained?.workoutNotes}</Text>
-            <View style={[layoutStyles.rowFlex]}>
-                <View>
-                    {
-                        fullPastSetList ? (
-                            lastTrained?.exercises.filter(e => e.exerciseId === activeSet.activeExerciseId)[0].sets.map(s => {
-                                return (
-                                    <LastTrainedSet 
-                                        key={s.setId}
-                                        lastTrainedSet={lastTrained.exercises.filter(e => e.exerciseId === activeSet.activeExerciseId)[0].sets[s.setIndex]}
-                                        activeSetIndex={s.setIndex}
+            { props.activeWorkout ?
+                <Text>Session Notes: {lastTrained?.workoutNotes}</Text>
+                :
+                <Text>Last {workoutTemplate?.workoutName} session notes: {lastTrained?.workoutNotes}</Text>
+            }
+            { props.activeWorkout && 
+                <View style={[layoutStyles.rowFlex]}>
+                    <View>
+                        {
+                            fullPastSetList ? (
+                                lastTrained?.exercises.filter(e => e.exerciseId === activeSet.activeExerciseId)[0].sets.map(s => {
+                                    return (
+                                        <LastTrainedSet 
+                                            key={s.setId}
+                                            lastTrainedSet={lastTrained.exercises.filter(e => e.exerciseId === activeSet.activeExerciseId)[0].sets[s.setIndex]}
+                                            activeSetIndex={s.setIndex}
+                                            allSets={fullPastSetList}
+                                        />
+                                    )
+                                })
+                            ) : (
+                                activeSet.activeSetIndex !== undefined ? 
+                                    <LastTrainedSet
+                                        lastTrainedSet={lastTrained?.exercises.filter(e => e.exerciseId === activeSet.activeExerciseId)[0].sets.filter(s => s.setType === activeSet.activeSetType)[activeSet.activeSetIndex]}
+                                        activeSetIndex={activeSet.activeSetIndex}
                                         allSets={fullPastSetList}
                                     />
+                                : (
+                                    <View><Text>No matching set from past workout </Text></View>
                                 )
-                            })
-                        ) : (
-                            activeSet.activeSetIndex !== undefined ? 
-                                <LastTrainedSet
-                                    lastTrainedSet={lastTrained?.exercises.filter(e => e.exerciseId === activeSet.activeExerciseId)[0].sets.filter(s => s.setType === activeSet.activeSetType)[activeSet.activeSetIndex]}
-                                    activeSetIndex={activeSet.activeSetIndex}
-                                    allSets={fullPastSetList}
-                                />
-                            : (
-                                <View><Text>No matching set from past workout </Text></View>
                             )
-                        )
-                    }
-                </View>
-                <Pressable onPress={toggleFullPastSetList}>
-                    <Text>Toggle</Text>
-                </Pressable>
-            </View>
+                        }
+                    </View>
+                    <Pressable onPress={toggleFullPastSetList}>
+                        <Text>Toggle</Text>
+                    </Pressable>
+                </View> 
+            }
             <View>
                 <NestableDraggableFlatList<LoggedWorkoutExercise>
                     data={workoutForm.values.exercises}
@@ -1650,16 +1656,18 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
                     scrollEnabled={false}
                 />
             </View>
-            <View>
-                <Text>Today's Workout Notes</Text>
-                <TextInput 
-                    placeholder='Leave any notes from this workout for the next session here'
-                    value={workoutForm.values.workoutNotes}
-                    onChangeText={(s: string) => dispatch({ type: 'UPDATE_WORKOUT_NOTES', value: s })}
-                    onEndEditing={(event) => { console.log(event.nativeEvent.text); dispatch({ type: 'VALIDATE_WORKOUT_NOTES', value: event.nativeEvent.text }) } }
-                />
-                {workoutForm.errors.workoutNotes && <Text style={[workoutStyles.errorText]}>{workoutForm.errors.workoutNotes}</Text>}
-            </View>
+            { props.activeWorkout && 
+                <View>
+                    <Text>Today's Workout Notes</Text>
+                    <TextInput 
+                        placeholder='Leave any notes from this workout for the next session here'
+                        value={workoutForm.values.workoutNotes}
+                        onChangeText={(s: string) => dispatch({ type: 'UPDATE_WORKOUT_NOTES', value: s })}
+                        onEndEditing={(event) => { console.log(event.nativeEvent.text); dispatch({ type: 'VALIDATE_WORKOUT_NOTES', value: event.nativeEvent.text }) } }
+                    />
+                    {workoutForm.errors.workoutNotes && <Text style={[workoutStyles.errorText]}>{workoutForm.errors.workoutNotes}</Text>}
+                </View>
+            }
         </NestableScrollContainer>
     )
 })

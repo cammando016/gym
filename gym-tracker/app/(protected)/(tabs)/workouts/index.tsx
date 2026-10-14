@@ -13,12 +13,11 @@ export default function WorkoutsPage() {
 
     return (
         <View>
-            <View>
-                <Text>Workouts Page</Text>
-            </View>
-
             <View style={{padding: 20}}>
-                <Text style={{textAlign: 'center'}}>Workout Templates</Text>
+                <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
+                    <Text style={{fontWeight: 'bold'}}>My Templates</Text>
+                    <Link href='/workouts/ViewWorkouts' withAnchor>View All</Link>
+                </View>
                 {
                     isLoading ? ( <SkeletonSmall></SkeletonSmall> ) :
                     (
@@ -28,7 +27,6 @@ export default function WorkoutsPage() {
                             </View>
                             <View>
                                 <Link href='/workouts/AddWorkout' withAnchor>Create New Template</Link>
-                                <Link href='/workouts/ViewWorkouts' withAnchor>View Templates</Link>
                             </View>
                         </View>
                     )
@@ -37,7 +35,7 @@ export default function WorkoutsPage() {
         
             <View style={{padding: 20}}>
                 <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
-                    <Text style={{fontWeight: 'bold'}}>Splits</Text>
+                    <Text style={{fontWeight: 'bold'}}>My Splits</Text>
                     <Link href='/workouts/EditSplit' >Create New</Link>
                 </View>
                 <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
@@ -46,7 +44,7 @@ export default function WorkoutsPage() {
                             return (
                                 <View key={s.splitId}>
                                     <Link href={`/workouts/${s.splitId}`}>
-                                        <Text>{s.workouts.length} Day Split: {s.splitName}</Text>
+                                        <Text>Active Split: {s.splitName}</Text>
                                     </Link>
                                 </View>
                             )

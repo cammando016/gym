@@ -321,6 +321,7 @@ interface LoggedWorkoutBasicDetails {
     id: string,
     workoutName: string,
     status: string,
+    templateId: string,
 }
 
 type LoggedSetError = {
