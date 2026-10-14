@@ -50,6 +50,7 @@ type WorkoutAction =
 | { type: 'VALIDATE_EXERCISE_REPS_TARGET_LOWER'; exerciseIndex: number; value: string }
 | { type: 'SET_EXERCISE_REPS_TARGET_UPPER'; exerciseIndex: number; value: string }
 | { type: 'VALIDATE_EXERCISE_REPS_TARGET_UPPER'; exerciseIndex: number; value: string; repsLower: string }
+| { type: 'SET_EXERCISE_SETUP_NOTES'; exerciseIndex: number; value: string }
 | { type: 'CREATE_DB_EXERCISE'; exerciseIndex: number }
 | { type: 'SET_DB_EXERCISE_TARGET_MUSCLE'; exerciseIndex: number; value: string }
 | { type: 'SET_DB_EXERCISE_UNILATERAL'; exerciseIndex: number; value: boolean }
@@ -91,6 +92,7 @@ interface Exercise {
     setOptionalUnilateral: boolean;
     setOptionalStraps: boolean;
     setOptionalBelt: boolean;
+    setupNotes?: string;
 }
 
 interface CreatedExercise {
@@ -134,6 +136,7 @@ interface FormPayload {
         exerciseName: string,
         repRangeLower: number,
         repRangeHigher: number,
+        setupNotes: string,
         targetMuscle: string | undefined,
         unilateralExercise: boolean,
         setOptionalUnilateral: boolean,

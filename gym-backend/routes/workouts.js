@@ -507,6 +507,25 @@ router.post('/templates/create', async(req, res) => {
             );
             console.log('Sets added.');
             console.log('Exercise added.');
+
+            //Create or update setup notes for any exercises with notes provided by user
+            console.log('Notes: ', exc.setupNotes);
+            if(exc.setupNotes === '') {
+                await client.query(
+                    `DELETE FROM users_exercises_setup_notes
+                    WHERE user_id = $1 AND exercise_id = $2`,
+                    [userId, exerciseId]
+                );
+            } else {
+                await client.query(
+                    `INSERT INTO users_exercises_setup_notes
+                    (user_id, exercise_id, setup_notes)
+                    VALUES ($1, $2, $3)
+                    ON CONFLICT (user_id, exercise_id)
+                    DO UPDATE SET setup_notes = EXCLUDED.setup_notes`,
+                    [userId, exerciseId, exc.setupNotes]
+                )
+            }
         }
 
         await client.query('COMMIT');

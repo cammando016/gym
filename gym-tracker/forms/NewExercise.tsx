@@ -219,6 +219,17 @@ export default function NewExercise(props: Props) {
                         {props.exerciseErrors?.repRangeUpper && <Text>{props.exerciseErrors.repRangeUpper}</Text>}
                     </View>
                 </View>
+
+                <View>
+                    <Text>Setup Notes</Text>
+                    <TextInput 
+                        placeholder='Exercise setup notes'
+                        value={props.exercise.setupNotes}
+                        onChangeText={(s : string) => {
+                            props.updateForm({ type: 'SET_EXERCISE_SETUP_NOTES', exerciseIndex: props.exercise.index, value: s })
+                        }}
+                    />
+                </View>
             </View>
 
             <View>

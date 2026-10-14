@@ -40,6 +40,7 @@ export default function WorkoutForm () {
                     name: e.exerciseName,
                     repRangeLower: e.repRangeLower.toString(),
                     repRangeHigher: e.repRangeUpper.toString(),
+                    setupNotes: '',
                     isUnilateral: e.unilateralExercise,
                     setOptionalUnilateral: e.optionalSetModifiers.unilateral,
                     setOptionalStraps: e.optionalSetModifiers.straps,
@@ -76,6 +77,7 @@ export default function WorkoutForm () {
                 name: '', 
                 repRangeLower: '0', 
                 repRangeHigher: '0', 
+                setupNotes: '',
                 isUnilateral: false, 
                 setOptionalUnilateral: false,
                 setOptionalStraps: false,
@@ -248,6 +250,16 @@ export default function WorkoutForm () {
                             if (state.values.exercises[i].index === action.exerciseIndex) return {...err, repRangeUpper: validation}
                             return {...err}
                         })
+                    }
+                }
+            }
+            case 'SET_EXERCISE_SETUP_NOTES': {
+                return {
+                    ...state,
+                    values: {...state.values, exercises: state.values.exercises.map(exc => {
+                        if (exc.index === action.exerciseIndex) return {...exc, setupNotes: action.value}
+                        return exc;
+                    })
                     }
                 }
             }
@@ -462,7 +474,6 @@ export default function WorkoutForm () {
             alert('Your workout has errors.');
             return;
         }
-        //else alert(JSON.stringify(form));
 
         let payload : FormPayload;
 
@@ -481,6 +492,7 @@ export default function WorkoutForm () {
                         exerciseName: exc.name.toLowerCase().trim(),
                         repRangeLower: Number(exc.repRangeLower),
                         repRangeHigher: Number(exc.repRangeHigher),
+                        setupNotes: exc.setupNotes ? exc.setupNotes.trim() : '',
                         targetMuscle: exc.targetMuscle,
                         unilateralExercise: exc.isUnilateral,
                         setOptionalUnilateral: exc.setOptionalUnilateral,
