@@ -40,7 +40,7 @@ export default function WorkoutForm () {
                     name: e.exerciseName,
                     repRangeLower: e.repRangeLower.toString(),
                     repRangeHigher: e.repRangeUpper.toString(),
-                    setupNotes: '',
+                    setupNotes: e.exerciseNotes,
                     isUnilateral: e.unilateralExercise,
                     setOptionalUnilateral: e.optionalSetModifiers.unilateral,
                     setOptionalStraps: e.optionalSetModifiers.straps,

@@ -1584,6 +1584,12 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
                                 <Text style={[workoutStyles.headerTextBold, workoutStyles.headerText]}>Target Reps: </Text> 
                                 <Text style={workoutStyles.headerText}>{item.exerciseRepsLower} to {item.exerciseRepsUpper}</Text>
                             </View>
+                            { item.setupNotes &&
+                                <View style={{display: 'flex', flexDirection: 'row'}}>
+                                    <Text style={[workoutStyles.headerTextBold, workoutStyles.headerText]}>Setup Notes: </Text>
+                                    <Text style={workoutStyles.headerText}>{item.setupNotes}</Text>
+                                </View>
+                            }
                         </Pressable>
 
                         <Pressable onPressIn={drag} style={{ paddingHorizontal: 8, paddingVertical: 8, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: 'red' }}>
@@ -1609,7 +1615,7 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
 
     return (
         <NestableScrollContainer style={{ flex: 1}} contentContainerStyle={{flexGrow: 1}}>
-            { props.activeWorkout ?
+            { !props.activeWorkout ?
                 <Text>Session Notes: {lastTrained?.workoutNotes}</Text>
                 :
                 <Text>Last {workoutTemplate?.workoutName} session notes: {lastTrained?.workoutNotes}</Text>

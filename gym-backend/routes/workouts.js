@@ -217,6 +217,7 @@ router.get('/templates', authenticateToken, async (req, res) => {
                             'exerciseIndex', e.exercise_index,
                             'exerciseName', ex.name,
                             'exerciseId', e.exercise_id,
+                            'exerciseNotes', es.setup_notes,
                             'repRangeLower', e.rep_range_lower,
                             'repRangeUpper', e.rep_range_upper,
                             'unilateralExercise', ex.is_unilateral,
@@ -227,6 +228,7 @@ router.get('/templates', authenticateToken, async (req, res) => {
                     ) AS exercises
                 FROM workout_template_exercises e
                 JOIN exercises ex ON e.exercise_id = ex.id
+                LEFT JOIN users_exercises_setup_notes es ON ex.id = es.exercise_id
                 JOIN optionalSetModifiers osm ON ex.id = osm.id
                 JOIN sets sl ON e.id = sl.workout_template_exercise_id
                 GROUP BY e.workout_template_id

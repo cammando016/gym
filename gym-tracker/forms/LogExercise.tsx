@@ -184,13 +184,6 @@ export default function LogExercise ( props: Props ) {
                         props.showSets ? (
                             <View>
                                 {
-                                    props.exerciseData.setupNotes && 
-                                    <View>
-                                        <Text style={[workoutStyles.headerTextBold, workoutStyles.headerText]}>Setup Notes:</Text>
-                                        <Text style={workoutStyles.headerText}>{props.exerciseData.setupNotes}</Text>
-                                    </View>
-                                }
-                                {
                                     props.lastTrainedExercise?.exerciseNotes &&
                                     <View style={{display: 'flex', flexDirection: 'row', flexWrap: 'wrap'}}>
                                         <Text style={[workoutStyles.headerTextBold, workoutStyles.headerText]}>Last session notes: </Text>
