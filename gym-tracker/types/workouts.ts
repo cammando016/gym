@@ -432,6 +432,10 @@ interface WorkoutSession {
     status: string,
 }
 
+interface LogWorkoutRef {
+    handleSubmit: () => void
+}
+
 type LogWorkoutAction = 
 | { type: 'UPDATE_WORKOUT_NOTES'; value: string }
 | { type: 'UPDATE_EXERCISE_NOTES'; value: string; exerciseIndex: number }
@@ -512,4 +516,5 @@ export {
     activeSetType, 
     LogWorkoutPayload,
     WorkoutSession,
+    LogWorkoutRef,
 };

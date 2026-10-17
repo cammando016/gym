@@ -15,8 +15,7 @@ export function useStartWorkout() {
                 templateId: data.templateId,
                 workoutName: data.workoutName,
                 dateStarted: data.dateStarted,
-                resumed: false,
-                active: true,
+                status: 'active',
             })
 
             queryClient.invalidateQueries({ queryKey: ['splitDay', user?.username]});

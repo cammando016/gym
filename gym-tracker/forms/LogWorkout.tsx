@@ -1,7 +1,6 @@
 import { Text, View, TextInput, Pressable, AppState } from 'react-native';
 import { useReducer, useState, forwardRef, useImperativeHandle, useRef, useEffect } from 'react';
-import { activeSetType, LoggedWorkoutExercise, LogWorkoutAction, LogWorkoutForm, LogWorkoutPayload, WorkoutTemplateType } from '@/types/workouts';
-import { useWorkoutTemplates } from '@/hooks/useWorkoutTemplates';
+import { activeSetType, LoggedWorkoutExercise, LogWorkoutAction, LogWorkoutForm, LogWorkoutPayload, LogWorkoutRef, WorkoutSession, WorkoutTemplateType } from '@/types/workouts';
 import LogExercise from './LogExercise';
 import { useWorkoutHistory } from '@/hooks/useWorkoutHistory';
 import { randomUUID } from 'expo-crypto'
@@ -13,198 +12,29 @@ import { completeWorkout } from '@/utils/workouts';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { RenderItemParams, ShadowDecorator, NestableScrollContainer, NestableDraggableFlatList } from 'react-native-draggable-flatlist';
-import { useSession } from '@/hooks/useSession';
+import { buildInitialForm } from '@/utils/buildLogWorkoutForm';
 
 interface Props {
-    activeWorkout: boolean, //True for when logging working, false when viewing past workout
-    sessionId: string,
-    templateId: string,
-    resumingWorkout: boolean
-}
-
-//Used to pass handle submit function back up to parent index page for header button submit
-export interface LogWorkoutRef {
-    handleSubmit: () => void
+    session: WorkoutSession,
+    template: WorkoutTemplateType,
+    lastTrained?: ReturnType<typeof useWorkoutHistory>['data'],
+    draft: LogWorkoutForm | null,
+    saveDraft: (form: LogWorkoutForm) => Promise<void>,
+    clearDraft: () => Promise<void>,
 }
 
 const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
     useImperativeHandle(ref, () => ({
         handleSubmit
     }));
+    
     const router = useRouter();
+    const isActive = props.session.status === 'active'; //Only 'active' status workouts are editable
+
     //Passed in to the completeWorkout function in handleSubmit to invalidate lastTrained data on home page, once new workout is logged
     const { user } = useAuth()
     const queryClient = useQueryClient();
-
-    const [formReady, setFormReady] = useState<boolean>(false);
-    const [cachedForm, setCachedForm] = useState<LogWorkoutForm | null>(null);
-
-    //Check if workout is being resumed, and get data from cache if so
-    useEffect(() => {
-        if (!props.resumingWorkout) {
-            setFormReady(true);
-            return;
-        }
-        const loadCache = async () => {
-            const cachedData = await AsyncStorage.getItem(`workout_draft_${user?.username}`);
-            if (cachedData) setCachedForm(JSON.parse(cachedData));
-            setFormReady(true);
-        }
-        loadCache();
-    }, []);
-
-    const { data: workouts } = useWorkoutTemplates();
-    const workoutTemplate : WorkoutTemplateType | undefined = workouts?.find(w => w.workoutId === props.templateId);
-    
-    const { data: lastTrained } = useWorkoutHistory(props.templateId);
-
-    const saveWorkoutToAsyncStorage = async (formState: LogWorkoutForm) => await AsyncStorage.setItem(`workout_draft_${user?.username}`, JSON.stringify(formState));
-
-    //Used to toggle last session set display between single set and all sets of an exercise
-    const [fullPastSetList, setFullPastSetList] = useState<boolean>(false);
-    const toggleFullPastSetList = () => setFullPastSetList(!fullPastSetList);
-
-    const exerciseKeys = new Map(workoutTemplate?.exercises.map( e => [e.exerciseIndex, randomUUID()] ));
-
-    const initialFormState: LogWorkoutForm = props.resumingWorkout && cachedForm ? cachedForm : {
-        values : {
-            workoutNotes: '',
-            exercises: workoutTemplate!.exercises.map(e => {
-                return {
-                    key: exerciseKeys.get(e.exerciseIndex)!,
-                    exerciseId: e.exerciseId,
-                    exerciseIndex: e.exerciseIndex,
-                    exerciseName: e.exerciseName,
-                    exerciseRepsLower: e.repRangeLower,
-                    exerciseRepsUpper: e.repRangeUpper,
-                    setupNotes: e.exerciseNotes,
-                    exerciseNotes: '',
-                    setsHidden: false,
-                    changedExerciseIndex: {
-                        originalIndex: e.exerciseIndex
-                    },
-                    optionalSetModifiers: {
-                        unilateral: e.optionalSetModifiers.unilateral,
-                        belt: e.optionalSetModifiers.belt,
-                        straps: e.optionalSetModifiers.straps
-                    },
-                    unilateralExercise: e.unilateralExercise,
-                    sets: e.sets.map(s => {
-                        if (s.isUnilateralSet || e.unilateralExercise) return {
-                            isUnilateral: true,
-                            setIndex: s.setIndex,
-                            setId: randomUUID(),
-                            setType: s.setType,
-                            showSetTypeDropdown: false,
-                            weight: '0',
-                            setNotes: '',
-                            usedBelt: false,
-                            usedStraps: false,
-                            reps: {
-                                left: {
-                                    fullReps: '0',
-                                    assistedReps: '0',
-                                    partialReps: '0'
-                                },
-                                right: {
-                                    fullReps: '0',
-                                    assistedReps: '0',
-                                    partialReps: '0'
-                                }
-                            }
-                        }
-                        else return {
-                            isUnilateral: false,
-                            setIndex: s.setIndex,
-                            setId: randomUUID(),
-                            setType: s.setType,
-                            showSetTypeDropdown: false,
-                            weight: '0',
-                            setNotes: '',
-                            usedBelt: false,
-                            usedStraps: false,
-                            reps: {
-                                fullReps: '0',
-                                assistedReps: '0',
-                                partialReps: '0'
-                            }
-                        }
-                    })
-                }
-            }),
-        },
-        errors: {
-            workoutNotes: undefined,
-            exercises: workoutTemplate!.exercises.map(e => {
-                return {
-                    key: exerciseKeys.get(e.exerciseIndex)!,
-                    exerciseNotes: undefined,
-                    exerciseIndex: e.exerciseIndex,
-                    sets: e.sets.map(s => {
-                        if (s.isUnilateralSet || e.unilateralExercise) return {
-                            key: randomUUID(),
-                            weight: undefined,
-                            setNotes: undefined,
-                            setIndex: s.setIndex,
-                            unilateralSet: true,
-                            left: {
-                                fullReps: undefined,
-                                assistedReps: undefined,
-                                partialReps: undefined,
-                            },
-                            right: {
-                                fullReps: undefined,
-                                assistedReps: undefined,
-                                partialReps: undefined,
-                            }
-                        }
-                        else return {
-                            key: randomUUID(),
-                            weight: undefined,
-                            setNotes: undefined,
-                            setIndex: s.setIndex,
-                            unilateralSet: false,
-                            fullReps: undefined,
-                            assistedReps: undefined,
-                            partialReps: undefined
-                        }
-                    })
-                }
-            })
-        }
-    }
-
-    //Track the current focused set for showing the matching set from last session
-    const [activeSet, setActiveSet] = useState<activeSetType>({activeExerciseId: initialFormState.values.exercises[0].exerciseId, activeSetType: 'working', activeSetIndex: 0})
-    const updateActiveSet = async (exerciseId: string, setId: string, setType: string) => {
-        await saveWorkoutToAsyncStorage(workoutForm);
-        //Check exercise is in previous session at all
-        const exerciseFromLastTrained = lastTrained?.exercises.find(e => e.exerciseId === exerciseId);
-        if (!exerciseFromLastTrained) {setActiveSet({activeExerciseId: exerciseId, activeSetType: setType, activeSetIndex: undefined}); return;}
- 
-        //If exercise found, check for any logged sets (should never be null, no exercise should be logged without sets but fallback for possible error in previous log)
-        const lastSessionSets = lastTrained?.exercises.find(e => e.exerciseId === exerciseId)?.sets;
-        if (!lastSessionSets) {setActiveSet({activeExerciseId: exerciseId, activeSetType: setType, activeSetIndex: undefined}); return;}
-
-        //Get which index of the specific set type the clicked set in current workout is (ie 5th overall set but 3rd working set returns index: 2)
-        const currentSessionSetIndex = workoutForm.values.exercises.find(e => e.exerciseId === exerciseId)?.sets.filter(s => s.setType === setType).findIndex(st => st.setId === setId);
-        if (currentSessionSetIndex === undefined || currentSessionSetIndex === -1) {setActiveSet({activeExerciseId: exerciseId, activeSetType: setType, activeSetIndex: undefined}); return}
- 
-        //Check if there was a matching index set from last trained.
-        //If user on 3rd working set this workout, but last session only logged 2 working sets, will return undefined
-        if (lastSessionSets.filter(s => s.setType === setType)[currentSessionSetIndex]) {
-            setActiveSet({
-                activeExerciseId: exerciseFromLastTrained.exerciseId, 
-                activeSetType: setType,
-                activeSetIndex: currentSessionSetIndex
-            });
-            return;
-        }
-
-        setActiveSet({activeExerciseId: exerciseId, activeSetType: setType, activeSetIndex: undefined});
-    }
 
     const logWorkoutReducer = (state: LogWorkoutForm, action: LogWorkoutAction) : LogWorkoutForm => {
         switch (action.type) {
@@ -1398,33 +1228,55 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
         }
     }
 
-    const [workoutForm, dispatch] = useReducer(logWorkoutReducer, initialFormState);
+    const [workoutForm, dispatch] = useReducer(
+        logWorkoutReducer,
+        undefined,
+        () => (isActive && props.draft) || buildInitialForm(props.template)
+    )
+
+    //Used to toggle last session set display between single set and all sets of an exercise
+    const [fullPastSetList, setFullPastSetList] = useState<boolean>(false);
+    const toggleFullPastSetList = () => setFullPastSetList(!fullPastSetList);
+
+    //Track the current focused set for showing the matching set from last session
+    const [activeSet, setActiveSet] = useState<activeSetType>({activeExerciseId: workoutForm.values.exercises[0].exerciseId, activeSetType: 'working', activeSetIndex: 0})
+    const updateActiveSet = async (exerciseId: string, setId: string, setType: string) => {
+        props.saveDraft(workoutForm).catch(console.error); //Any time the user changes to a different set, update async storage draft workout
+
+        //Get sets from exercise if exercise was done in previous workout (lastTrained)
+        const lastSets = props.lastTrained?.exercises.find(e => e.exerciseId === exerciseId)?.sets;
+        const currentIndex = workoutForm.values.exercises
+            .find(e => e.exerciseId === exerciseId)
+            ?.sets.filter(s => s.setType === setType)
+            .findIndex(s => s.setId === setId)
+        ;
+
+        //Check if the lastTrained sets included a matching set type and index, ie 2nd working set
+        const hasMatchingSet = currentIndex !== undefined && currentIndex >= 0 && !!lastSets?.filter(s => s.setType === setType)[currentIndex];
+
+        setActiveSet({
+            activeExerciseId: exerciseId,
+            activeSetType: setType,
+            activeSetIndex: hasMatchingSet ? currentIndex : undefined
+        })
+    }
 
     const errorCheck = () => {
         if (workoutForm.errors.workoutNotes) return true;
-
-        workoutForm.errors.exercises.some(e => {
-            if (e.exerciseNotes) return true;
-
-            e.sets.some(s => {
-                if (s.setNotes || s.weight) return true;
-                if (s.unilateralSet) {
-                    if (   s.left.fullReps
-                        || s.left.assistedReps 
-                        || s.left.partialReps
-                        || s.right.fullReps
-                        || s.right.assistedReps
-                        || s.right.partialReps
-                    ) return true
-                }
-                else {
-                    if ( s.fullReps || s.assistedReps || s.partialReps ) return true
-                }
-            })
-        })
-
-        return false;
-    }
+      
+        return workoutForm.errors.exercises.some(e => {
+          if (e.exerciseNotes) return true;
+      
+          return e.sets.some(s => {
+            if (s.setNotes || s.weight) return true;
+            if (s.unilateralSet) {
+              return !!(s.left.fullReps || s.left.assistedReps || s.left.partialReps
+                || s.right.fullReps || s.right.assistedReps || s.right.partialReps);
+            }
+            return !!(s.fullReps || s.assistedReps || s.partialReps);
+          });
+        });
+      };
 
     const handleSubmit = async () => {
         //Check for any form errors before continuing with form submission
@@ -1437,8 +1289,8 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
         
         //Get required data for DB submission from form values
         const formPayload : LogWorkoutPayload = {
-            templateId: props.templateId,
-            workoutId: props.sessionId,
+            templateId: props.session.templateId,
+            workoutId: props.session.sessionId,
             workoutNotes: workoutForm.values.workoutNotes,
             exercises: workoutForm.values.exercises.filter(exc => 
                 exc.sets.some(s => {
@@ -1521,7 +1373,7 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
 
         const result = await completeWorkout(formPayload, queryClient, user?.username!);
         if (result.status === 201) {
-            await AsyncStorage.removeItem(`workout_draft_${user?.username}`);
+            await props.clearDraft();
             router.replace('/(protected)/(tabs)');
         }
     }
@@ -1532,13 +1384,19 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
         workoutFormRef.current = workoutForm;
     }, [workoutForm]);
     useEffect(() => {
+        if (!isActive) return;
         const subscription = AppState.addEventListener('change', state => {
-            if (state === 'background' || state === 'inactive') saveWorkoutToAsyncStorage(workoutFormRef.current)
+            if (state === 'background' || state === 'inactive') props.saveDraft(workoutFormRef.current)
         });
         return () => subscription.remove();
-    }, []);
+    }, [isActive, props.saveDraft]);
 
-    if (!formReady || !workoutTemplate) return <View><Text>Loading Workout Template</Text></View>
+    const activeLastExercise = props.lastTrained?.exercises.find(e => e.exerciseId === activeSet.activeExerciseId);
+    const activeLastSet = 
+        activeSet.activeSetIndex !== undefined
+        ? activeLastExercise?.sets.filter(s => s.setType === activeSet.activeSetType)[activeSet.activeSetIndex]
+        : undefined
+    ;
 
     //Reordering exercises drag and drop
     const handleExerciseReorder = ({ data } : { data: LoggedWorkoutExercise[] }) => {
@@ -1558,7 +1416,7 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
         dispatch({ type: 'REORDER_EXERCISES', newExerciseOrder: reorderedExercises, newErrorOrder: reorderedErrors });
     }
 
-    const renderExerciseItem = ({ item, drag, isActive } : RenderItemParams<LoggedWorkoutExercise>) => {
+    const renderExerciseItem = ({ item, drag, isActive: isDragging } : RenderItemParams<LoggedWorkoutExercise>) => {
         return (
             <ShadowDecorator>
                 <View style={workoutStyles.exerciseContainer}>
@@ -1597,13 +1455,13 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
                             <Text style={{ fontSize: 20 }}>☰</Text>
                         </Pressable>
                     </View>
-                    <View style={{ opacity: isActive ? 0.7 : 1 }}>
+                    <View style={{ opacity: isDragging ? 0.7 : 1 }}>
                         <LogExercise 
                             dispatch={dispatch} 
                             exerciseData={item}
-                            activeWorkout={props.activeWorkout} 
-                            exerciseCount={initialFormState.values.exercises.length}
-                            lastTrainedExercise={lastTrained?.exercises.find(exc => exc.exerciseId === item.exerciseId)}
+                            activeWorkout={isActive} 
+                            exerciseCount={workoutForm.values.exercises.length}
+                            lastTrainedExercise={props.lastTrained?.exercises.find(exc => exc.exerciseId === item.exerciseId)}
                             updateActiveSet={updateActiveSet}
                             exerciseErrors={workoutForm.errors.exercises[item.exerciseIndex]}
                             showSets={item.setsHidden}
@@ -1616,21 +1474,22 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
 
     return (
         <NestableScrollContainer style={{ flex: 1}} contentContainerStyle={{flexGrow: 1}}>
-            { !props.activeWorkout ?
-                <Text>Session Notes: {lastTrained?.workoutNotes}</Text>
-                :
-                <Text>Last {workoutTemplate?.workoutName} session notes: {lastTrained?.workoutNotes}</Text>
-            }
-            { props.activeWorkout && 
+                <Text>
+                    {   !isActive 
+                        ? `Session Notes: ${props.lastTrained?.workoutNotes}` 
+                        : `Last ${props.template?.workoutName} session notes: ${props.lastTrained?.workoutNotes}`
+                    }
+                </Text>
+            { isActive && 
                 <View style={[layoutStyles.rowFlex]}>
                     <View>
                         {
                             fullPastSetList ? (
-                                lastTrained?.exercises.filter(e => e.exerciseId === activeSet.activeExerciseId)[0].sets.map(s => {
+                                activeLastExercise?.sets.map(s => {
                                     return (
                                         <LastTrainedSet 
                                             key={s.setId}
-                                            lastTrainedSet={lastTrained.exercises.filter(e => e.exerciseId === activeSet.activeExerciseId)[0].sets[s.setIndex]}
+                                            lastTrainedSet={s}
                                             activeSetIndex={s.setIndex}
                                             allSets={fullPastSetList}
                                         />
@@ -1639,7 +1498,7 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
                             ) : (
                                 activeSet.activeSetIndex !== undefined ? 
                                     <LastTrainedSet
-                                        lastTrainedSet={lastTrained?.exercises.filter(e => e.exerciseId === activeSet.activeExerciseId)[0].sets.filter(s => s.setType === activeSet.activeSetType)[activeSet.activeSetIndex]}
+                                        lastTrainedSet={activeLastSet}
                                         activeSetIndex={activeSet.activeSetIndex}
                                         allSets={fullPastSetList}
                                     />
@@ -1663,7 +1522,7 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
                     scrollEnabled={false}
                 />
             </View>
-            { props.activeWorkout && 
+            { isActive && 
                 <View>
                     <Text>Today's Workout Notes</Text>
                     <TextInput 
