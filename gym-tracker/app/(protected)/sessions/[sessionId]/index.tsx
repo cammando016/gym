@@ -4,33 +4,36 @@ import { useEffect, useState, useRef } from "react";
 import { View, Text, Pressable } from 'react-native';
 import dayjs from "dayjs";
 import { formatDateDifferenceHMS } from "@/utils/dates";
+import { useSession } from "@/hooks/useSession";
 
 export default function StartWorkout () {
-    const { sessionId, templateId, workoutName, dateStarted, resumed, activeWorkout } = useLocalSearchParams<{ sessionId: string, templateId: string, workoutName: string, dateStarted: string, resumed: string, activeWorkout?: string }>();
+    const { sessionId } = useLocalSearchParams<{ sessionId: string }>();
+    const { data: session, isLoading, error } = useSession(sessionId);
     
     const [workoutDuration, setWorkoutDuration] = useState<string>('');
     const router = useRouter();
 
-    const resumedAsBool = resumed === 'true';
-    const activeAsBool = activeWorkout === 'true';
+    const resumedAsBool = false;
+    const activeAsBool = true;
 
     const logWorkoutRef = useRef<LogWorkoutRef>(null);
 
     useEffect(() => {
-        if(!activeAsBool) return;
+        if(!activeAsBool || !session || isLoading) return;
         const interval = setInterval(() => {
-            const dateDiff: string = formatDateDifferenceHMS( dayjs().diff(dayjs(dateStarted)) );
+            const dateDiff: string = formatDateDifferenceHMS( dayjs().diff(dayjs(session.dateStarted)) );
 
             setWorkoutDuration(dateDiff);
         }, 1000)
 
         return () => clearInterval(interval);
-    }, [dateStarted, activeAsBool])
+    }, [session?.dateStarted, activeAsBool])
 
+    if (!session) return <><View><Text>Error</Text></View></>
     return (
         <>
             <Stack.Screen options={{
-                title: activeAsBool ? `Logging Workout` : workoutName,
+                title: activeAsBool ? `Logging Workout` : session.workoutName,
                 headerLeft: () => (<Pressable onPress={() => router.replace('/(protected)/(tabs)')}><Text>Cancel</Text></Pressable>),
                 headerRight: () => (
                     <Pressable onPress={ () => logWorkoutRef.current?.handleSubmit() }>
@@ -38,9 +41,9 @@ export default function StartWorkout () {
                     </Pressable>
                 )
             }} />
-            <LogWorkout ref={logWorkoutRef} sessionId={sessionId} activeWorkout={activeAsBool} templateId={templateId} resumingWorkout={resumedAsBool} />
+            <LogWorkout ref={logWorkoutRef} sessionId={sessionId} activeWorkout={activeAsBool} templateId={session.templateId} resumingWorkout={resumedAsBool} />
             <View style={{padding: 10, backgroundColor: '#619888', display: 'flex', flexDirection: 'row', justifyContent: 'space-around'}}>
-                <Text style={{color: 'white', textAlign: 'center'}}>{workoutName} Day</Text>
+                <Text style={{color: 'white', textAlign: 'center'}}>{session.workoutName} Day</Text>
                 <Text style={{color: 'white', textAlign: 'center'}}>{workoutDuration}</Text>
             </View>
         </>

@@ -15,6 +15,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { RenderItemParams, ShadowDecorator, NestableScrollContainer, NestableDraggableFlatList } from 'react-native-draggable-flatlist';
+import { useSession } from '@/hooks/useSession';
 
 interface Props {
     activeWorkout: boolean, //True for when logging working, false when viewing past workout

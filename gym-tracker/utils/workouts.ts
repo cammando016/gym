@@ -1,5 +1,5 @@
 import { useAuth } from "@/contexts/AuthContext";
-import { EditSplitPayload, FormPayload, LogWorkoutPayload, SplitFormPayload } from "@/types/workouts";
+import { EditSplitPayload, FormPayload, LogWorkoutPayload, SplitFormPayload, WorkoutSession } from "@/types/workouts";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { QueryClient, useQueryClient } from "@tanstack/react-query";
 
@@ -102,6 +102,15 @@ export const startWorkout = async ( templateId : string ) => {
         body: JSON.stringify({templateId}),
     })
     if(!res.ok) throw new Error('Failed to start workout');
+    return res.json();
+}
+
+export const fetchSession = async (sessionId : string): Promise<WorkoutSession> => {
+    const token = await AsyncStorage.getItem('token');
+    const res = await fetch(`http://localhost:3000/api/workouts/sessions/${sessionId}`,{
+        headers: {authorization: `Bearer ${token}`},
+    });
+    if (!res.ok) throw new Error(`Failed to load session (${res.status})`);
     return res.json();
 }
 

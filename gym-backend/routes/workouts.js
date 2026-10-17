@@ -42,6 +42,34 @@ router.post('/sessions', authenticateToken, deactivateActiveWorkouts, setSplitDa
     }
 });
 
+router.get('/sessions/:sessionId', authenticateToken, async (req, res) => {
+    const userId = req.user.id;
+    const { sessionId } = req.params;
+
+    try {
+        const result = await pool.query(
+            `SELECT
+                w.id AS "sessionId",
+                w.date_started AS "dateStarted",
+                w.status,
+                wt.workout_name AS "workoutName",
+                w.workout_template_id AS "templateId"
+            FROM workouts w
+            JOIN workout_templates wt ON w.workout_template_id = wt.id
+            WHERE w.id = $2 AND w.user_id = $2`,
+            [sessionId, userId]
+        );
+
+        const session = result.rows[0];
+        if (!session) return res.status(404).json({ message: 'Session not found' });
+
+        return res.status(200).json(session);
+    } catch (error) {
+        console.error(error.message);
+        return res.status(500).json({ error: error.message });
+    }
+})
+
 //Submit logged workout data
 router.post('/complete', authenticateToken, async(req, res) => {
     console.log('Received request to submit workout');

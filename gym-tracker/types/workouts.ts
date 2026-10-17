@@ -424,6 +424,14 @@ interface activeSetType {
     activeSetIndex?: number
 }
 
+interface WorkoutSession {
+    sessionId: string,
+    templateId: string,
+    workoutName: string,
+    dateStarted: string,
+    status: string,
+}
+
 type LogWorkoutAction = 
 | { type: 'UPDATE_WORKOUT_NOTES'; value: string }
 | { type: 'UPDATE_EXERCISE_NOTES'; value: string; exerciseIndex: number }
@@ -503,4 +511,5 @@ export {
     LogWorkoutAction, 
     activeSetType, 
     LogWorkoutPayload,
+    WorkoutSession,
 };
