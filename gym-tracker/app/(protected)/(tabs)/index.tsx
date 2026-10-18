@@ -35,9 +35,9 @@ export default function App() {
   const { mutate: startWorkout, isPending } = useStartWorkout();
   const { data: workouts } = useWorkoutTemplates();
   const activeSplit = splitsData?.activeSplit;
-
+  
   const workoutTemplateId = useMemo(() => {
-    if (!activeSplit || (splitDay < 0)) return undefined;
+    if (!activeSplit || !splitDay || (splitDay < 0)) return undefined;
 
     const workout = activeSplit.workouts?.[splitDay]
     return workout?.workoutId
@@ -62,11 +62,9 @@ export default function App() {
     }, [])
   );
 
-  const resumeWorkout = (workout: ActiveWorkout) => {
-    router.replace({
-      pathname: `/sessions/${workout.workout.id}`,
-      params: { templateId: workout.workout.templateId, workoutName: workout.workout.workoutName, dateStarted: workout.workout.dateStarted, resumed: 'true', activeWorkout: 'true' }
-    })
+  const resumeWorkout = () => {
+    if (!workoutInProgress) return;
+    router.replace(`/sessions/${workoutInProgress.workout.id}`);
   }
 
   //State values for selecting manual workout
@@ -168,7 +166,7 @@ export default function App() {
 
             { workoutInProgress && (
               <View style={{backgroundColor: '#619888', padding: 5}}>
-                <Pressable onPress={() => resumeWorkout(workoutInProgress)}>
+                <Pressable onPress={resumeWorkout}>
                   <Text style={{textAlign: 'center'}}>Resume {workoutInProgress.workout.workoutName} workout started on {workoutInProgress.workout.dateStarted.slice(0, 10)} ?</Text>
                 </Pressable>
               </View>

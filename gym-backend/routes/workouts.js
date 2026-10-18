@@ -56,7 +56,7 @@ router.get('/sessions/:sessionId', authenticateToken, async (req, res) => {
                 w.workout_template_id AS "templateId"
             FROM workouts w
             JOIN workout_templates wt ON w.workout_template_id = wt.id
-            WHERE w.id = $2 AND w.user_id = $2`,
+            WHERE w.id = $1 AND w.user_id = $2`,
             [sessionId, userId]
         );
 
