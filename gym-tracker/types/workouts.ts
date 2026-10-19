@@ -311,7 +311,7 @@ interface LoggedWorkoutExercise {
 }
 
 interface LoggedWorkout {
-    dateEnded: Date,
+    duration: number,
     dateStarted: Date,
     id: string,
     workoutNotes?: string,
@@ -319,7 +319,7 @@ interface LoggedWorkout {
 }
 
 interface LoggedWorkoutBasicDetails {
-    dateEnded: Date,
+    duration: number,
     dateStarted: Date,
     id: string,
     workoutName: string,

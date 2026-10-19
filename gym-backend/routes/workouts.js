@@ -357,7 +357,7 @@ router.get('/:workoutId/last', authenticateToken, async (req, res) => {
             SELECT
                 w.id,
                 w.date_started AS "dateStarted",
-                w.date_ended AS "dateEnded",
+                w.duration AS "duration",
                 w.workout_notes as "workoutNotes",
                 COALESCE(el.exercise_list, '[]'::jsonb) AS exercises
             FROM workouts w
@@ -395,7 +395,7 @@ router.get('/last-three', authenticateToken, async (req, res) => {
         console.log('Fetching last three workouts');
         const lastThreeWorkoutsQuery = await pool.query(
             `SELECT 
-                w.id, w.date_started AS "dateStarted", w.date_ended AS "dateEnded", w.status, wt.workout_name AS "workoutName", w.workout_template_id AS "templateId"
+                w.id, w.date_started AS "dateStarted", w.duration, w.status, wt.workout_name AS "workoutName", w.workout_template_id AS "templateId"
             FROM
                 workouts w
             JOIN 

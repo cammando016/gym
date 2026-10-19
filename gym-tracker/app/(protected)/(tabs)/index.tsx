@@ -5,11 +5,9 @@ import { formatDateDifferenceHMS } from '@/utils/dates';
 import { checkForActiveWorkout } from '@/utils/workouts';
 import React, { useMemo, useState, useCallback } from 'react';
 import { Button, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
-import dayjs from 'dayjs';
 import { useStartWorkout } from '@/hooks/useStartWorkout';
 import { useFocusEffect } from '@react-navigation/native';
 import { useWorkoutTemplates } from '@/hooks/useWorkoutTemplates';
-import { useRouter } from 'expo-router';
 import { useResumeWorkout } from '@/hooks/useResumeWorkout';
 
 const styles = StyleSheet.create({
@@ -29,7 +27,6 @@ interface ActiveWorkout {
 
 export default function App() {
   const today = new Date();
-  const router = useRouter();
   const { user } = useAuth();
   const { data: splitDay, isLoading: splitDayLoading } = useDayOfSplit();
   const { data: splitsData, isLoading: splitsDataLoading } = useSplits();
@@ -109,7 +106,7 @@ export default function App() {
                     { !(splitDay < 0) && <Text>{`${trainedToday ? 'Today\'s' : 'Last'} ${activeSplit?.workouts[splitDay].workoutName} Session`}</Text> }
                     <View>
                       { !trainedToday && <Text>{`Date Trained: ${lastWorkout.dateStarted.toString().slice(0, 10)}`}</Text> }
-                      <Text>{`DURATION: ${formatDateDifferenceHMS(dayjs(lastWorkout.dateEnded).diff(dayjs(lastWorkout.dateStarted)))}`}</Text>
+                      <Text>{`DURATION: ${formatDateDifferenceHMS(lastWorkout.duration*1000)}`}</Text>
                     </View>
                     {
                       lastWorkout.workoutNotes && (

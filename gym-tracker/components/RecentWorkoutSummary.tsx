@@ -1,6 +1,5 @@
 import { LoggedWorkoutBasicDetails } from "@/types/workouts";
 import { formatDateDifferenceHMS } from "@/utils/dates";
-import dayjs from "dayjs";
 import { useRouter } from "expo-router";
 import { View, Text, Pressable } from 'react-native';
 
@@ -16,7 +15,7 @@ export default function RecentWorkoutSummary(props: Props) {
                 <Text>{props.workoutData.workoutName}</Text>
                 <Text>Status: {props.workoutData.status}</Text>
                 <Text>Date: {props.workoutData.dateStarted.toString().slice(0, 10)}</Text>
-                <Text>Duration: {formatDateDifferenceHMS(dayjs(props.workoutData.dateEnded).diff(dayjs(props.workoutData.dateStarted)))}</Text>
+                <Text>Duration: {formatDateDifferenceHMS(props.workoutData.duration * 1000)}</Text>
             </View>
             <View>
                 { props.workoutData.status === 'active' ? (
