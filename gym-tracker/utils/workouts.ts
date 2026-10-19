@@ -9,7 +9,7 @@ export const dbExerciseSearch = async (search: string) => {
 }
 
 export const createWorkout = async (details: FormPayload) => {
-    const res = await fetch(`http://localhost:3000/api/workouts/templates/create`, {
+    const res = await fetch(`http://localhost:3000/api/templates/create`, {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(details),
@@ -33,7 +33,7 @@ export const checkForActiveWorkout = async () => {
 
 export const fetchWorkouts = async () => {
     const token = await AsyncStorage.getItem('token');
-    const res = await fetch(`http://localhost:3000/api/workouts/templates`, {
+    const res = await fetch(`http://localhost:3000/api/templates`, {
         headers: { Authorization: `Bearer ${token}`}
     });
     return await res.json();
@@ -57,7 +57,7 @@ export const fetchLastThreeWorkouts = async () => {
 
 export const createSplit = async (details: SplitFormPayload) => {
     const token = await AsyncStorage.getItem('token');
-    const res = await fetch(`http://localhost:3000/api/workouts/split/create`, {
+    const res = await fetch(`http://localhost:3000/api/splits/create`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -75,7 +75,7 @@ export const createSplit = async (details: SplitFormPayload) => {
 
 export const editSplit = async (details: EditSplitPayload, splitId: string) => {
     const token = await AsyncStorage.getItem('token');
-    const res = await fetch(`http://localhost:3000/api/workouts/split/${splitId}/edit`, {
+    const res = await fetch(`http://localhost:3000/api/splits/${splitId}/edit`, {
         method: 'PATCH',
         headers: {
             'Content-Type': 'application/json',
