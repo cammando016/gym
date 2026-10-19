@@ -10,6 +10,7 @@ import { useStartWorkout } from '@/hooks/useStartWorkout';
 import { useFocusEffect } from '@react-navigation/native';
 import { useWorkoutTemplates } from '@/hooks/useWorkoutTemplates';
 import { useRouter } from 'expo-router';
+import { useResumeWorkout } from '@/hooks/useResumeWorkout';
 
 const styles = StyleSheet.create({
   colflex: {
@@ -33,6 +34,7 @@ export default function App() {
   const { data: splitDay, isLoading: splitDayLoading } = useDayOfSplit();
   const { data: splitsData, isLoading: splitsDataLoading } = useSplits();
   const { mutate: startWorkout, isPending } = useStartWorkout();
+  const { mutate: resume } = useResumeWorkout();
   const { data: workouts } = useWorkoutTemplates();
   const activeSplit = splitsData?.activeSplit;
   
@@ -64,7 +66,7 @@ export default function App() {
 
   const resumeWorkout = () => {
     if (!workoutInProgress) return;
-    router.replace(`/sessions/${workoutInProgress.workout.id}`);
+    resume(workoutInProgress.workout.id)
   }
 
   //State values for selecting manual workout

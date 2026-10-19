@@ -15,6 +15,7 @@ export default function LogWorkoutTimer ( props : Props) {
 
     useEffect(() => {
         if (!props.active) return;
+
         const baseMs : number = props.duration * 1000;
         const anchorDate : Dayjs = dayjs(props.dateResumed ?? props.dateStarted);
 
@@ -23,15 +24,12 @@ export default function LogWorkoutTimer ( props : Props) {
         const tick = () => {
             const elapsedMs = baseMs + dayjs().diff(anchorDate);
             setText(formatDateDifferenceHMS(elapsedMs));
-            
-            const untilNextSecond = 1000 - (elapsedMs % 1000);
-            timeout = setTimeout(tick, untilNextSecond + 5);
+            timeout = setTimeout(tick, 1000 - (elapsedMs % 1000) + 5);
         }
         tick();
 
-        const interval = setInterval(tick, 250);
-        return () => clearInterval(interval);
+        return () => clearTimeout(timeout);
     }, [props.active, props.duration, props.dateResumed, props.dateStarted]);
-    
+
     return <Text style={{ color: 'white', textAlign: 'center' }}>{text}</Text>
 }

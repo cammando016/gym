@@ -105,6 +105,16 @@ export const startWorkout = async ( templateId : string ) => {
     return res.json();
 }
 
+export const resumeWorkout = async ( sessionId: string ) => {
+    const token = await AsyncStorage.getItem('token');
+    const res = await fetch(`http://localhost:3000/api/workouts/sessions/${sessionId}/resume`, {
+        method: 'POST',
+        headers: { authorization: `Bearer ${token}`}
+    });
+    if (!res.ok) throw new Error('Failed to resume workout');
+    return res.json();
+}
+
 export const fetchSession = async (sessionId : string): Promise<WorkoutSession> => {
     const token = await AsyncStorage.getItem('token');
     const res = await fetch(`http://localhost:3000/api/workouts/sessions/${sessionId}`,{

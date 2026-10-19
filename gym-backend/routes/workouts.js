@@ -42,6 +42,33 @@ router.post('/sessions', authenticateToken, deactivateActiveWorkouts, setSplitDa
     }
 });
 
+router.post('/sessions/:sessionId/resume', authenticateToken, async (req, res) => {
+    const userId = req.user.id;
+    const { sessionId } = req.params;
+
+    try {
+        const result = await pool.query(
+            `UPDATE workouts
+            SET date_resumed = now()
+            WHERE id = $1 AND user_id = $2 AND status = $3
+            RETURNING
+                id AS "sessionId",
+                date_started AS "dateStarted",
+                date_resumed AS "dateResumed",
+                duration,
+                status
+            `,
+            [sessionId, userId, 'active']
+        );
+
+        if (result.rowCount === 0) return res.status(404).json({ message: 'No active session found' });
+        return res.status(200).json(result.rows[0]);
+    } catch (error) {
+        console.error(error.message);
+        return res.status(500).json({ error: error.message });
+    }
+});
+
 router.get('/sessions/:sessionId', authenticateToken, async (req, res) => {
     const userId = req.user.id;
     const { sessionId } = req.params;
