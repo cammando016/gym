@@ -430,6 +430,7 @@ interface WorkoutSession {
     workoutName: string,
     dateStarted: string,
     status: string,
+    draft?: LogWorkoutForm | null,
 }
 
 interface LogWorkoutRef {

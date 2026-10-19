@@ -1,5 +1,5 @@
 import { useAuth } from "@/contexts/AuthContext";
-import { EditSplitPayload, FormPayload, LogWorkoutPayload, SplitFormPayload, WorkoutSession } from "@/types/workouts";
+import { EditSplitPayload, FormPayload, LogWorkoutForm, LogWorkoutPayload, SplitFormPayload, WorkoutSession } from "@/types/workouts";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { QueryClient, useQueryClient } from "@tanstack/react-query";
 
@@ -134,4 +134,13 @@ export const completeWorkout = async ( details: LogWorkoutPayload, queryClient: 
         status: res.status,
         ...response
     }
+}
+
+export const saveDraftToDb = async (sessionId: string, form: LogWorkoutForm) => {
+    const token = await AsyncStorage.getItem('token');
+    await fetch (`http://localhost:3000/api/workouts/sessions/${sessionId}/draft`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', authorization: `Bearer ${token}` },
+        body: JSON.stringify({ form }),
+    });
 }

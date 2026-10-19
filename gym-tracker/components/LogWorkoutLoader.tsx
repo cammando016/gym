@@ -27,7 +27,7 @@ const LogWorkoutLoader = forwardRef<LogWorkoutRef, Props>((props, ref) => {
             session={session}
             template={template}
             lastTrained={lastTrained}
-            draft={draft}
+            draft={draft ?? session.draft ?? null}
             saveDraft={saveDraft}
             clearDraft={clearDraft}
         />

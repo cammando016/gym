@@ -53,7 +53,8 @@ router.get('/sessions/:sessionId', authenticateToken, async (req, res) => {
                 w.date_started AS "dateStarted",
                 w.status,
                 wt.workout_name AS "workoutName",
-                w.workout_template_id AS "templateId"
+                w.workout_template_id AS "templateId",
+                w.draft
             FROM workouts w
             JOIN workout_templates wt ON w.workout_template_id = wt.id
             WHERE w.id = $1 AND w.user_id = $2`,
@@ -67,6 +68,27 @@ router.get('/sessions/:sessionId', authenticateToken, async (req, res) => {
     } catch (error) {
         console.error(error.message);
         return res.status(500).json({ error: error.message });
+    }
+})
+
+router.put('/sessions/:sessionId/draft', authenticateToken, async (req, res) => {
+    const userId = req.user.id;
+    const { sessionId } = req.params;
+    const { form } = req.body;
+    
+    try {
+        const result = await pool.query(
+            `UPDATE workouts
+            SET draft = $1::jsonb
+            WHERE id = $2 AND user_id = $3 AND status = $4`,
+            [JSON.stringify(form), sessionId, userId, 'active']
+        );
+
+        if (result.rowCount === 0) return res.status(404).json({message: 'No active session'});
+        return res.sendStatus(204);
+    } catch (error) {
+        console.error(error.message);
+        return res.status(500).json({ error: error.message })
     }
 })
 
@@ -102,7 +124,7 @@ router.post('/complete', authenticateToken, async(req, res) => {
         //Update workout details for date ended, notes and set status to complete
         await client.query(
             `UPDATE workouts 
-            SET date_ended = $1, workout_notes = $2, status = $3
+            SET date_ended = $1, workout_notes = $2, status = $3, draft = NULL
             WHERE id = $4`, 
             [dateEnded, workoutNotes, 'complete', workoutId]
         );
