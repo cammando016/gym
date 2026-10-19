@@ -429,6 +429,8 @@ interface WorkoutSession {
     templateId: string,
     workoutName: string,
     dateStarted: string,
+    dateResumed: string | null,
+    duration: number,
     status: string,
     draft?: LogWorkoutForm | null,
 }

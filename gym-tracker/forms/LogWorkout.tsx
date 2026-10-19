@@ -14,13 +14,14 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import { RenderItemParams, ShadowDecorator, NestableScrollContainer, NestableDraggableFlatList } from 'react-native-draggable-flatlist';
 import { buildInitialForm } from '@/utils/buildLogWorkoutForm';
+import dayjs from 'dayjs';
 
 interface Props {
     session: WorkoutSession,
     template: WorkoutTemplateType,
     lastTrained?: ReturnType<typeof useWorkoutHistory>['data'],
     draft: LogWorkoutForm | null,
-    saveDraft: (form: LogWorkoutForm) => Promise<void>,
+    saveDraft: (form: LogWorkoutForm, duration: number) => Promise<void>,
     clearDraft: () => Promise<void>,
 }
 
@@ -35,6 +36,15 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
     //Passed in to the completeWorkout function in handleSubmit to invalidate lastTrained data on home page, once new workout is logged
     const { user } = useAuth()
     const queryClient = useQueryClient();
+
+    //Determine elapsed duration of workout, excluding any time paused based on dateResumed
+    const hasResumed : boolean = props.session.dateResumed !== null;
+    const durationMs : number = props.session.duration * 1000;
+    const calculateElapsedDuration = () => {
+        return hasResumed ?
+        dayjs().diff(dayjs(props.session.dateResumed)) + durationMs :
+        dayjs().diff(dayjs(props.session.dateStarted))
+    }
 
     const logWorkoutReducer = (state: LogWorkoutForm, action: LogWorkoutAction) : LogWorkoutForm => {
         switch (action.type) {
@@ -1241,7 +1251,7 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
     //Track the current focused set for showing the matching set from last session
     const [activeSet, setActiveSet] = useState<activeSetType>({activeExerciseId: workoutForm.values.exercises[0].exerciseId, activeSetType: 'working', activeSetIndex: 0})
     const updateActiveSet = async (exerciseId: string, setId: string, setType: string) => {
-        props.saveDraft(workoutForm).catch(console.error); //Any time the user changes to a different set, update async storage draft workout
+        props.saveDraft(workoutForm, calculateElapsedDuration()).catch(console.error); //Any time the user changes to a different set, update async storage draft workout
 
         //Get sets from exercise if exercise was done in previous workout (lastTrained)
         const lastSets = props.lastTrained?.exercises.find(e => e.exerciseId === exerciseId)?.sets;
@@ -1380,13 +1390,14 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
 
     //Save form state to async storage if app state changes before workout is completed, ie closed mid workout
     const workoutFormRef = useRef(workoutForm);
+
     useEffect(() => {
         workoutFormRef.current = workoutForm;
     }, [workoutForm]);
     useEffect(() => {
         if (!isActive) return;
         const subscription = AppState.addEventListener('change', state => {
-            if (state === 'background' || state === 'inactive') props.saveDraft(workoutFormRef.current)
+            if (state === 'background' || state === 'inactive') props.saveDraft(workoutFormRef.current, calculateElapsedDuration())
         });
         return () => subscription.remove();
     }, [isActive, props.saveDraft]);

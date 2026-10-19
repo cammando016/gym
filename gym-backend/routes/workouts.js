@@ -54,6 +54,8 @@ router.get('/sessions/:sessionId', authenticateToken, async (req, res) => {
                 w.status,
                 wt.workout_name AS "workoutName",
                 w.workout_template_id AS "templateId",
+                w.date_resumed AS "dateResumed",
+                w.duration,
                 w.draft
             FROM workouts w
             JOIN workout_templates wt ON w.workout_template_id = wt.id
@@ -74,14 +76,14 @@ router.get('/sessions/:sessionId', authenticateToken, async (req, res) => {
 router.put('/sessions/:sessionId/draft', authenticateToken, async (req, res) => {
     const userId = req.user.id;
     const { sessionId } = req.params;
-    const { form } = req.body;
-    
+    const { form, durationSeconds } = req.body;
+
     try {
         const result = await pool.query(
             `UPDATE workouts
-            SET draft = $1::jsonb
+            SET draft = $1::jsonb, duration = $5
             WHERE id = $2 AND user_id = $3 AND status = $4`,
-            [JSON.stringify(form), sessionId, userId, 'active']
+            [JSON.stringify(form), sessionId, userId, 'active', durationSeconds]
         );
 
         if (result.rowCount === 0) return res.status(404).json({message: 'No active session'});

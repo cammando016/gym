@@ -136,11 +136,12 @@ export const completeWorkout = async ( details: LogWorkoutPayload, queryClient: 
     }
 }
 
-export const saveDraftToDb = async (sessionId: string, form: LogWorkoutForm) => {
+export const saveDraftToDb = async (sessionId: string, form: LogWorkoutForm, duration: number) => {
     const token = await AsyncStorage.getItem('token');
+    const durationSeconds = Math.floor(duration/1000);
     await fetch (`http://localhost:3000/api/workouts/sessions/${sessionId}/draft`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', authorization: `Bearer ${token}` },
-        body: JSON.stringify({ form }),
+        body: JSON.stringify({ form, durationSeconds }),
     });
 }

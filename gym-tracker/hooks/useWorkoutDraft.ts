@@ -23,9 +23,9 @@ export function useWorkoutDraft (sessionId: string) {
         }
     }, [key]);
 
-    const saveDraft = useCallback( async (form: LogWorkoutForm) => {
+    const saveDraft = useCallback( async (form: LogWorkoutForm, duration: number) => {
         await AsyncStorage.setItem(key, JSON.stringify(form));
-        saveDraftToDb(sessionId, form).catch(console.error);
+        saveDraftToDb(sessionId, form, duration).catch(console.error);
     }, [key, sessionId]);
 
     const clearDraft = useCallback(() => AsyncStorage.removeItem(key), [key]);

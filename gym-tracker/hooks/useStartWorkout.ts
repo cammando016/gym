@@ -15,6 +15,8 @@ export function useStartWorkout() {
                 templateId: data.templateId,
                 workoutName: data.workoutName,
                 dateStarted: data.dateStarted,
+                dateResumed: data.dateResumed,
+                duration: data.duration,
                 status: 'active',
             })
 
