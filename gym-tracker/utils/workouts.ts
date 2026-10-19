@@ -124,16 +124,20 @@ export const fetchSession = async (sessionId : string): Promise<WorkoutSession> 
     return res.json();
 }
 
-export const completeWorkout = async ( details: LogWorkoutPayload, queryClient: QueryClient, username: string ) => {
+export const completeWorkout = async ( details: LogWorkoutPayload, queryClient: QueryClient, username: string, duration: number ) => {
     const token = await AsyncStorage.getItem('token');
-    const res = await fetch(`http://localhost:3000/api/workouts/complete`, {
+    const sessionId = details.workoutId;
+    console.log(sessionId);
+    const durationSeconds = Math.floor(duration/1000);
+
+    const res = await fetch(`http://localhost:3000/api/workouts/sessions/${sessionId}/complete`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify(details)
-    })
+        body: JSON.stringify({ ...details, durationSeconds })
+    });
 
     const response = await res.json();
 

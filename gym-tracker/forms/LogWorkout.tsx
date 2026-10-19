@@ -1381,7 +1381,7 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
             })
         }
 
-        const result = await completeWorkout(formPayload, queryClient, user?.username!);
+        const result = await completeWorkout(formPayload, queryClient, user?.username!, calculateElapsedDuration());
         if (result.status === 201) {
             await props.clearDraft();
             router.replace('/(protected)/(tabs)');

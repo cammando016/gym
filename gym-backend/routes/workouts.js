@@ -122,16 +122,17 @@ router.put('/sessions/:sessionId/draft', authenticateToken, async (req, res) => 
 })
 
 //Submit logged workout data
-router.post('/complete', authenticateToken, async(req, res) => {
+router.post('/sessions/:sessionId/complete', authenticateToken, async(req, res) => {
     console.log('Received request to submit workout');
 
     const userId = req.user.id;
-    const { workoutId, workoutNotes, exercises } = req.body;
+    const { sessionId } = req.params;
+    const { workoutNotes, exercises, durationSeconds } = req.body;
     const dateEnded = new Date();
 
     //Check the user submitting the workout is the same user who started workout
     try {
-        const workoutQuery = await pool.query(`SELECT user_id, id FROM workouts WHERE id = $1 AND user_id = $2`, [workoutId, userId]);
+        const workoutQuery = await pool.query(`SELECT user_id, id FROM workouts WHERE id = $1 AND user_id = $2`, [sessionId, userId]);
         
         if (workoutQuery.rows.length === 0) {
             return res.status(403).json({
@@ -153,9 +154,9 @@ router.post('/complete', authenticateToken, async(req, res) => {
         //Update workout details for date ended, notes and set status to complete
         await client.query(
             `UPDATE workouts 
-            SET date_ended = $1, workout_notes = $2, status = $3, draft = NULL
+            SET date_ended = $1, workout_notes = $2, status = $3, draft = NULL, duration = $5
             WHERE id = $4`, 
-            [dateEnded, workoutNotes, 'complete', workoutId]
+            [dateEnded, workoutNotes, 'complete', sessionId, durationSeconds]
         );
 
         //Insert completed exercises
@@ -166,7 +167,7 @@ router.post('/complete', authenticateToken, async(req, res) => {
             RETURNING id, exercise_index
         `, 
         [
-            exercises.map(_ => workoutId),
+            exercises.map(_ => sessionId),
             exercises.map(e => e.exerciseIndex),
             exercises.map(e => e.exerciseId),
             exercises.map(e => e.exerciseNotes),
@@ -202,7 +203,7 @@ router.post('/complete', authenticateToken, async(req, res) => {
         `,
         [
             bilateralSets.map(s => s.setIndex),
-            bilateralSets.map(_ => workoutId),
+            bilateralSets.map(_ => sessionId),
             bilateralSets.map(s => s.setWeight),
             bilateralSets.map(s => s.fullReps),
             bilateralSets.map(s => s.partialReps),
@@ -224,7 +225,7 @@ router.post('/complete', authenticateToken, async(req, res) => {
         `,
         [
             unilateralSets.map(s => s.setIndex),
-            unilateralSets.map(_ => workoutId),
+            unilateralSets.map(_ => sessionId),
             unilateralSets.map(s => s.setWeight),
             unilateralSets.map(s => s.left.fullReps),
             unilateralSets.map(s => s.left.partialReps),
