@@ -1,6 +1,6 @@
 export const formatDateDifferenceHMS = (milliseconds: number) : string => {
-    const totalSeconds = Math.floor(milliseconds / 1000);
-    const hours = Math.floor(totalSeconds / 3600) % 24;
+    const totalSeconds = Math.floor(Math.max(0, milliseconds) / 1000);
+    const hours = Math.floor(totalSeconds / 3600);
     const minutes = Math.floor(totalSeconds / 60) % 60;
     const seconds = totalSeconds % 60;
 
