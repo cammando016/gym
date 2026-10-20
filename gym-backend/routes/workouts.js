@@ -174,7 +174,7 @@ router.get('/sessions/:sessionId/view', authenticateToken, async (req, res) => {
                 w.date_started AS "dateStarted",
                 w.status,
                 w.workout_name AS "workoutName",
-                w.date_ended AS "dateResumed",
+                w.date_ended AS "dateEnded",
                 w.duration,
                 w.workout_notes AS "workoutNotes",
                 COALESCE(e.exercises, '[]'::jsonb) AS exercises

@@ -1,5 +1,5 @@
 import { useAuth } from "@/contexts/AuthContext";
-import { EditSplitPayload, FormPayload, LogWorkoutForm, LogWorkoutPayload, SplitFormPayload, WorkoutSession } from "@/types/workouts";
+import { EditSplitPayload, FormPayload, LoggedWorkoutFullDetails, LogWorkoutForm, LogWorkoutPayload, SplitFormPayload, WorkoutSession } from "@/types/workouts";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { QueryClient, useQueryClient } from "@tanstack/react-query";
 
@@ -124,7 +124,7 @@ export const fetchSession = async (sessionId : string): Promise<WorkoutSession> 
     return res.json();
 }
 
-export const viewWorkout = async (sessionId: string) => {
+export const viewWorkout = async (sessionId: string) : Promise<LoggedWorkoutFullDetails> => {
     const token = await AsyncStorage.getItem('token');
     const res = await fetch(`http://localhost:3000/api/workouts/sessions/${sessionId}/view`, {
         headers: { authorization: `Bearer ${token}`}
@@ -132,8 +132,7 @@ export const viewWorkout = async (sessionId: string) => {
     if (!res.ok) throw new Error(`Failed to load workout to view: (${res.status})`);
 
     const response = await res.json();
-    console.log(response);
-    return response;
+    return response.workout;
 }
 
 export const completeWorkout = async ( details: LogWorkoutPayload, queryClient: QueryClient, username: string, duration: number ) => {

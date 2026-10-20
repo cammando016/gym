@@ -26,7 +26,7 @@ export default function RecentWorkoutSummary(props: Props) {
                 ) : (
                     <View>
                         <Pressable
-                            onPress={() => viewWorkout(props.workoutData.id)}
+                            onPress={() => router.push(`/sessions/${props.workoutData.id}`)}
                         >
                             <Text>View Workout</Text>
                         </Pressable>

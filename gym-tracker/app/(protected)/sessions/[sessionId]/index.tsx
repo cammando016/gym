@@ -5,6 +5,7 @@ import { useSession } from "@/hooks/useSession";
 import LogWorkoutLoader from "@/components/LogWorkoutLoader";
 import { LogWorkoutRef } from "@/types/workouts";
 import LogWorkoutTimer from "@/components/LogWorkoutTimer";
+import { ViewCompletedWorkoutLoader } from "@/components/CompletedWorkout/ViewCompletedWorkoutLoader";
 
 export default function StartWorkout () {
     const { sessionId } = useLocalSearchParams<{ sessionId: string }>();
@@ -14,27 +15,39 @@ export default function StartWorkout () {
     const logWorkoutRef = useRef<LogWorkoutRef>(null);
 
     if (!session) return <><View><Text>Error</Text></View></>
+    if (session.status === 'active') {
+        return (
+            <>
+                <Stack.Screen options={{
+                    title: `Logging Workout`,
+                    headerLeft: () => (<Pressable onPress={() => router.replace('/(protected)/(tabs)')}><Text>Cancel</Text></Pressable>),
+                    headerRight: () => (
+                        <Pressable onPress={ () => logWorkoutRef.current?.handleSubmit() }>
+                            <Text>Complete</Text>
+                        </Pressable>
+                    )
+                }} />
+                <LogWorkoutLoader ref={logWorkoutRef} sessionId={sessionId} />
+                <View style={{padding: 10, backgroundColor: '#619888', display: 'flex', flexDirection: 'row', justifyContent: 'space-around'}}>
+                    <Text style={{color: 'white', textAlign: 'center'}}>{session.workoutName} Day</Text>
+                    <LogWorkoutTimer 
+                        active={session.status === 'active'}
+                        duration={session.duration}
+                        dateResumed={session.dateResumed}
+                        dateStarted={session.dateStarted}
+                    />
+                </View>
+            </>
+        )
+    }
     return (
         <>
             <Stack.Screen options={{
-                title: session.status === 'active' ? `Logging Workout` : session.workoutName,
-                headerLeft: () => (<Pressable onPress={() => router.replace('/(protected)/(tabs)')}><Text>Cancel</Text></Pressable>),
-                headerRight: () => (
-                    <Pressable onPress={ () => logWorkoutRef.current?.handleSubmit() }>
-                        <Text>Complete</Text>
-                    </Pressable>
-                )
+                title: 'View Workout',
+                headerLeft: () => (<Pressable onPress={() => router.back()}><Text>{`<- Exit`}</Text></Pressable>)
             }} />
-            <LogWorkoutLoader ref={logWorkoutRef} sessionId={sessionId} />
-            <View style={{padding: 10, backgroundColor: '#619888', display: 'flex', flexDirection: 'row', justifyContent: 'space-around'}}>
-                <Text style={{color: 'white', textAlign: 'center'}}>{session.workoutName} Day</Text>
-                <LogWorkoutTimer 
-                    active={session.status === 'active'}
-                    duration={session.duration}
-                    dateResumed={session.dateResumed}
-                    dateStarted={session.dateStarted}
-                />
-            </View>
+
+            <ViewCompletedWorkoutLoader sessionId={session.sessionId} />
         </>
     )
 }

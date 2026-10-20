@@ -318,6 +318,58 @@ interface LoggedWorkout {
     exercises: LoggedWorkoutExercise [],
 }
 
+interface LoggedWorkoutSetList {
+    setIndex: number,
+    setType: SetType,
+    setNotes?: string,
+    setWeight: number,
+    setUsedBelt: boolean,
+    setUsedStraps: boolean,
+    setIsUnilateral: boolean,
+    reps: {
+        astdReps: number,
+        fullReps: number,
+        prtlReps: number, 
+    } | {
+        left: {
+            astdReps: number,
+            fullReps: number,
+            prtlReps: number
+        },
+        right: {
+            astdReps: number,
+            fullReps: number,
+            prtlReps: number
+        }
+    },
+}
+
+interface LoggedWorkoutExerciseList {
+    exerciseId: string,
+    exerciseName: string,
+    exerciseIndex: number,
+    exerciseNotes?: string,
+    exerciseSubbed: boolean,
+    exerciseIsUnilateral: boolean,
+    exerciseOptionalModifiers: {
+        beltOption: boolean,
+        strapsOption: boolean,
+        unilateralOption: boolean,
+    },
+    sets: LoggedWorkoutSetList [],
+}
+
+interface LoggedWorkoutFullDetails {
+    sessionId: string,
+    dateStarted: Date,
+    dateEnded?: Date,
+    duration: number,
+    status: string,
+    workoutName?: string,
+    workoutNotes?: string,
+    exercises: LoggedWorkoutExerciseList [],
+}
+
 interface LoggedWorkoutBasicDetails {
     duration: number,
     dateStarted: Date,
@@ -509,6 +561,9 @@ export {
     Split, 
     UserSplits, 
     LoggedWorkout,
+    LoggedWorkoutFullDetails,
+    LoggedWorkoutExerciseList,
+    LoggedWorkoutSetList,
     LoggedWorkoutBasicDetails, 
     LoggedWorkoutExercise, 
     LoggedWorkoutSet, 
