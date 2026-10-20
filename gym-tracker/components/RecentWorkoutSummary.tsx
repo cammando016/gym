@@ -1,5 +1,6 @@
 import { LoggedWorkoutBasicDetails } from "@/types/workouts";
 import { formatDateDifferenceHMS } from "@/utils/dates";
+import { viewWorkout } from "@/utils/workouts";
 import { useRouter } from "expo-router";
 import { View, Text, Pressable } from 'react-native';
 
@@ -24,10 +25,9 @@ export default function RecentWorkoutSummary(props: Props) {
                     </View>
                 ) : (
                     <View>
-                        <Pressable onPress={() => router.replace({
-                            pathname: `/sessions/${props.workoutData.id}`,
-                            params: { templateId: props.workoutData.templateId, workoutName: props.workoutData.workoutName, dateStarted: props.workoutData.dateStarted.toString(), resumed: 'false', activeWorkout: 'false' }
-                        })}>
+                        <Pressable
+                            onPress={() => viewWorkout(props.workoutData.id)}
+                        >
                             <Text>View Workout</Text>
                         </Pressable>
                     </View>

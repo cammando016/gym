@@ -100,6 +100,101 @@ router.get('/sessions/:sessionId', authenticateToken, async (req, res) => {
     }
 })
 
+router.get('/sessions/:sessionId/view', authenticateToken, async (req, res) => {
+    const userId = req.user.id;
+    const { sessionId } = req.params;
+
+    try {
+        //Get workouts and exercises in workouts
+        const workoutquery = await pool.query(
+            `WITH set_list AS (
+                SELECT
+                    s.workout_exercise_id,
+                    jsonb_agg(
+                        jsonb_build_object(
+                            'setIndex', s.set_index,
+                            'setWeight', s.weight,
+                            'setNotes', s.set_notes,
+                            'setIsUnilateral', s.is_unilateral,
+                            'setType', st.name,
+                            'setUsedStraps', s.used_straps,
+                            'setUsedBelt', s.used_belt,
+                            'reps', CASE
+                                WHEN s.is_unilateral = true THEN jsonb_build_object(
+                                    'left', jsonb_build_object(
+                                        'fullReps', s.ull_full_reps,
+                                        'prtlReps', s.ull_partial_reps,
+                                        'astdReps', s.ull_assisted_reps
+                                    ),
+                                    'right', jsonb_build_object(
+                                        'fullReps', s.ulr_full_reps,
+                                        'prtlReps', s.ulr_partial_reps,
+                                        'astdReps', s.ulr_assisted_reps
+                                    )
+                                ) ELSE jsonb_build_object(
+                                    'fullReps', s.full_reps,
+                                    'prtlReps', s.partial_reps,
+                                    'astdReps', s.assisted_reps
+                                )
+                            END
+                        )
+                        ORDER BY s.set_index
+                    ) AS sets
+                FROM workout_sets s
+                JOIN set_types st ON s.set_type = st.id
+                GROUP BY s.workout_exercise_id
+            ),
+            exercises AS (
+                SELECT
+                e.workout_id,
+                jsonb_agg(
+                    jsonb_build_object(
+                        'exerciseIndex', e.exercise_index,
+                        'exerciseId', e.id,
+                        'exerciseName', ex.name,
+                        'exerciseNotes', e.exercise_notes,
+                        'exerciseSubbed', e.subbed_exercise,
+                        'exerciseIsUnilateral', ex.is_unilateral,
+                        'exerciseOptionalModifiers', jsonb_build_object(
+                            'unilateralOption', ex.opt_set_mod_unilateral,
+                            'strapsOption', ex.opt_set_mod_straps,
+                            'beltOption', ex.opt_set_mod_belt
+                        ),
+                        'sets', COALESCE(sl.sets, '[]'::jsonb)
+                    )
+                    ORDER BY e.exercise_index
+                ) AS exercises
+                FROM workout_exercises e
+                LEFT JOIN exercises ex ON e.exercise_id = ex.id
+                LEFT JOIN set_list sl ON e.id = sl.workout_exercise_id
+                GROUP BY e.workout_id
+            )
+            SELECT
+                w.id AS "sessionId",
+                w.date_started AS "dateStarted",
+                w.status,
+                w.workout_name AS "workoutName",
+                w.date_ended AS "dateResumed",
+                w.duration,
+                w.workout_notes AS "workoutNotes",
+                COALESCE(e.exercises, '[]'::jsonb) AS exercises
+            FROM workouts w
+            LEFT JOIN exercises e ON w.id = e.workout_id
+            WHERE w.id = $1 AND w.user_id = $2`,
+            [sessionId, userId]
+        );
+
+        if (workoutquery.rowCount === 0) return res.status(404).json({ message: 'Workout not found' });
+
+        return res.status(200).json({ workout: workoutquery.rows[0] });
+
+    } catch (error) {
+        console.error(error.message);
+        return res.status(500).json({ error: error.message });
+    }
+})
+
+//Save draft of workout completed so far when switching sets, pausing workout
 router.put('/sessions/:sessionId/draft', authenticateToken, async (req, res) => {
     const userId = req.user.id;
     const { sessionId } = req.params;

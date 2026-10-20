@@ -124,6 +124,18 @@ export const fetchSession = async (sessionId : string): Promise<WorkoutSession> 
     return res.json();
 }
 
+export const viewWorkout = async (sessionId: string) => {
+    const token = await AsyncStorage.getItem('token');
+    const res = await fetch(`http://localhost:3000/api/workouts/sessions/${sessionId}/view`, {
+        headers: { authorization: `Bearer ${token}`}
+    });
+    if (!res.ok) throw new Error(`Failed to load workout to view: (${res.status})`);
+
+    const response = await res.json();
+    console.log(response);
+    return response;
+}
+
 export const completeWorkout = async ( details: LogWorkoutPayload, queryClient: QueryClient, username: string, duration: number ) => {
     const token = await AsyncStorage.getItem('token');
     const sessionId = details.workoutId;
