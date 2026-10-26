@@ -318,30 +318,36 @@ interface LoggedWorkout {
     exercises: LoggedWorkoutExercise [],
 }
 
-interface LoggedWorkoutSetList {
+interface LoggedWorkoutSetBase {
     setIndex: number,
     setType: SetType,
     setNotes?: string,
     setWeight: number,
     setUsedBelt: boolean,
     setUsedStraps: boolean,
-    setIsUnilateral: boolean,
+}
+
+type LoggedWorkoutSetList = LoggedWorkoutSetBase & {
+    setIsUnilateral: false,
     reps: {
         astdReps: number,
         fullReps: number,
-        prtlReps: number, 
-    } | {
+        prtlReps: number,
+    }
+} | LoggedWorkoutSetBase & {
+    setIsUnilateral: true,
+    reps: {
         left: {
             astdReps: number,
             fullReps: number,
-            prtlReps: number
-        },
+            prtlReps: number,
+        }, 
         right: {
             astdReps: number,
             fullReps: number,
-            prtlReps: number
+            prtlReps: number,
         }
-    },
+    }
 }
 
 interface LoggedWorkoutExerciseList {

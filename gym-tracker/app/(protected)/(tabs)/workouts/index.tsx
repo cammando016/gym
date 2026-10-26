@@ -37,7 +37,8 @@ export default function WorkoutsPage() {
                 <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
                     <Text style={{fontWeight: 'bold'}}>My Splits</Text>
                     <View style={{display: 'flex', flexDirection: 'row', gap: 5}}>
-                        {data && data.splits.length > 3 && <ViewAllButton path={"/"} />} {/* Replace with actual path once route created */}
+                        {/* Replace with actual path once route created */}
+                        {data && data.splits.length > 3 && <ViewAllButton path={"/"} />} 
                         <AddNewButton path={'/workouts/EditSplit'} />
                     </View>
                 </View>
@@ -70,7 +71,8 @@ export default function WorkoutsPage() {
             <View style={{padding: 20}}>
                 <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
                     <Text style={{fontWeight: 'bold'}}>Recent Workouts</Text>
-                    <Text>View All</Text> {/* Replace with ViewAll component button once route created */}
+                     {/* Replace with ViewAll component button once route created */}
+                    <Text>View All</Text>
                 </View>
                 <View>
                     { lastThreeLoading ? <SkeletonSmall /> : (
