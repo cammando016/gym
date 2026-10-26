@@ -1659,12 +1659,16 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
                                 left: {
                                     fullReps: Number(s.reps.left.fullReps),
                                     partialReps: Number(s.reps.left.partialReps),
-                                    assistedReps: Number(s.reps.left.assistedReps)
+                                    assistedReps: Number(s.reps.left.assistedReps),
+                                    rpe: Number(s.reps.left.rpe),
+                                    rir: Number(s.reps.left.rir)
                                 },
                                 right: {
                                     fullReps: Number(s.reps.right.fullReps),
                                     partialReps: Number(s.reps.right.partialReps),
-                                    assistedReps: Number(s.reps.right.assistedReps)
+                                    assistedReps: Number(s.reps.right.assistedReps),
+                                    rpe: Number(s.reps.right.rpe),
+                                    rir: Number(s.reps.right.rir)
                                 }
                             }
                         }
@@ -1678,7 +1682,9 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
                             setUnilateral: false,
                             fullReps: Number(s.reps.fullReps),
                             partialReps: Number(s.reps.partialReps),
-                            assistedReps: Number(s.reps.assistedReps)
+                            assistedReps: Number(s.reps.assistedReps),
+                            rpe: Number(s.reps.rpe),
+                            rir: Number(s.reps.rir)
                         }
                     })
                 }

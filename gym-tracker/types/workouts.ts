@@ -441,12 +441,16 @@ type LogSetPayload = {
     left: {
         fullReps: number,
         partialReps: number,
-        assistedReps: number
+        assistedReps: number,
+        rir: number,
+        rpe: number,
     },
     right: {
         fullReps: number,
         partialReps: number,
-        assistedReps: number
+        assistedReps: number,
+        rir: number,
+        rpe: number,
     }
 } | {
     setIndex: number,
@@ -458,7 +462,9 @@ type LogSetPayload = {
     setUnilateral: false,
     fullReps: number,
     partialReps: number,
-    assistedReps: number
+    assistedReps: number,
+    rir: number,
+    rpe: number,
 }
 
 interface LogExercisePayload {

@@ -292,9 +292,9 @@ router.post('/sessions/:sessionId/complete', authenticateToken, async(req, res) 
         //Insert bilateral sets
         await client.query(`
             INSERT INTO workout_sets
-            (set_index, workout_id, weight, full_reps, partial_reps, assisted_reps, set_notes, is_unilateral, set_type, workout_exercise_id, used_straps, used_belt)
+            (set_index, workout_id, weight, full_reps, partial_reps, assisted_reps, set_notes, is_unilateral, set_type, workout_exercise_id, used_straps, used_belt, reps_in_reserve, rate_perceived_exertion)
             SELECT * FROM
-                unnest( $1::int2[], $2::uuid[], $3::float4[], $4::int2[], $5::int2[], $6::int2[], $7::text[], $8::bool[], $9::uuid[], $10::uuid[], $11::bool[], $12::bool[] )
+                unnest( $1::int2[], $2::uuid[], $3::float4[], $4::int2[], $5::int2[], $6::int2[], $7::text[], $8::bool[], $9::uuid[], $10::uuid[], $11::bool[], $12::bool[], $13::int2[], $14::int2[] )
         `,
         [
             bilateralSets.map(s => s.setIndex),
@@ -309,14 +309,16 @@ router.post('/sessions/:sessionId/complete', authenticateToken, async(req, res) 
             bilateralSets.map(s => s.workoutExerciseId),
             bilateralSets.map(s => s.setUsedStraps),
             bilateralSets.map(s => s.setUsedBelt),
+            bilateralSets.map(s => s.rir),
+            bilateralSets.map(s => s.rpe)
         ]);
 
         //Insert unilateral sets
         await client.query(`
             INSERT INTO workout_sets
-            (set_index, workout_id, weight, ull_full_reps, ull_partial_reps, ull_assisted_reps, ulr_full_reps, ulr_partial_reps, ulr_assisted_reps, set_notes, is_unilateral, set_type, workout_exercise_id, used_straps, used_belt)
+            (set_index, workout_id, weight, ull_full_reps, ull_partial_reps, ull_assisted_reps, ulr_full_reps, ulr_partial_reps, ulr_assisted_reps, set_notes, is_unilateral, set_type, workout_exercise_id, used_straps, used_belt, ull_reps_in_reserve, ull_rate_perceived_exertion, ulr_reps_in_reserve, ulr_rate_perceived_exertion)
             SELECT * FROM
-                unnest( $1::int2[], $2::uuid[], $3::float4[], $4::int2[], $5::int2[], $6::int2[], $7::int2[], $8::int2[], $9::int2[], $10::text[], $11::bool[], $12::uuid[], $13::uuid[], $14::bool[], $15::bool[] )
+                unnest( $1::int2[], $2::uuid[], $3::float4[], $4::int2[], $5::int2[], $6::int2[], $7::int2[], $8::int2[], $9::int2[], $10::text[], $11::bool[], $12::uuid[], $13::uuid[], $14::bool[], $15::bool[], $16::int2[], $17::int2[], $18::int2[], $19::int2[] )
         `,
         [
             unilateralSets.map(s => s.setIndex),
@@ -334,6 +336,10 @@ router.post('/sessions/:sessionId/complete', authenticateToken, async(req, res) 
             unilateralSets.map(s => s.workoutExerciseId),
             unilateralSets.map(s => s.setUsedStraps),
             unilateralSets.map(s => s.setUsedBelt),
+            unilateralSets.map(s => s.left.rir),
+            unilateralSets.map(s => s.left.rpe),
+            unilateralSets.map(s => s.right.rir),
+            unilateralSets.map(s => s.right.rpe)
         ]);
 
         await client.query('COMMIT');
