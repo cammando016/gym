@@ -237,86 +237,7 @@ interface UserSplits {
     splits: Split []
 }
 
-interface BaseLoggedSet {
-    setIndex: number,
-    setId: string,
-    weight: string,
-    setNotes: string,
-    setType: string,
-    showSetTypeDropdown: boolean,
-    usedBelt: boolean,
-    usedStraps: boolean,
-}
-
-interface BilateralReps {
-    fullReps: string,
-    assistedReps: string,
-    partialReps: string
-}   
-
-interface UnilateralSide {
-    fullReps: string,
-    assistedReps: string,
-    partialReps: string
-}
-
-interface UnilateralReps {
-    left: UnilateralSide,
-    right: UnilateralSide
-}
-
-type BilateralSet = BaseLoggedSet & {
-    isUnilateral: false,
-    reps: BilateralReps
-}
-
-type UnilateralSet = BaseLoggedSet & {
-    isUnilateral: true,
-    reps: UnilateralReps
-}
-
-type LoggedWorkoutSet = BilateralSet | UnilateralSet
-
-interface LoggedWorkoutExercise {
-    key: string,
-    exerciseId: string,
-    exerciseIndex: number,
-    exerciseNotes: string,
-    setupNotes: string,
-    exerciseName: string,
-    exerciseRepsLower: number,
-    exerciseRepsUpper: number,
-    unilateralExercise: boolean,
-    setsHidden: boolean,
-    changedExerciseIndex: {
-        originalIndex: number,
-        updatedExerciseIndex?: number,
-    }
-    optionalSetModifiers: {
-        unilateral: boolean,
-        belt: boolean,
-        straps: boolean,
-    },
-    subbedExercise?: {
-        subbedExerciseId: string,
-        exerciseName: string,
-        unilateralExercise: boolean,
-        optionalSetModifiers: {
-            unilateral: boolean,
-            belt: boolean,
-            straps: boolean
-        }
-    }
-    sets: LoggedWorkoutSet [],
-}
-
-interface LoggedWorkout {
-    duration: number,
-    dateStarted: Date,
-    id: string,
-    workoutNotes?: string,
-    exercises: LoggedWorkoutExercise [],
-}
+// <----------- TYPES USED FOR VIEWING A PREVIOUSLY LOGGED WORKOUT --------->
 
 interface LoggedWorkoutSetBase {
     setIndex: number,
@@ -385,6 +306,79 @@ interface LoggedWorkoutBasicDetails {
     templateId: string,
 }
 
+// <----------- TYPES USED WHILE LOGGING WORKOUT ----------->
+
+interface BaseLoggedSet {
+    setIndex: number,
+    setId: string,
+    weight: string,
+    setNotes: string,
+    setType: string,
+    showSetTypeDropdown: boolean,
+    usedBelt: boolean,
+    usedStraps: boolean,
+}
+
+interface Reps {
+    fullReps: string,
+    assistedReps: string,
+    partialReps: string,
+    rir: string,
+    rpe: string,
+}
+
+type LoggedWorkoutSet = BaseLoggedSet & {
+    isUnilateral: true,
+    reps: {
+        left: Reps,
+        right: Reps
+    }
+} | BaseLoggedSet & {
+    isUnilateral: false,
+    reps: Reps,
+}
+
+interface LoggedWorkoutExercise {
+    key: string,
+    exerciseId: string,
+    exerciseIndex: number,
+    exerciseNotes: string,
+    setupNotes: string,
+    exerciseName: string,
+    exerciseRepsLower: number,
+    exerciseRepsUpper: number,
+    unilateralExercise: boolean,
+    setsHidden: boolean,
+    changedExerciseIndex: {
+        originalIndex: number,
+        updatedExerciseIndex?: number,
+    }
+    optionalSetModifiers: {
+        unilateral: boolean,
+        belt: boolean,
+        straps: boolean,
+    },
+    subbedExercise?: {
+        subbedExerciseId: string,
+        exerciseName: string,
+        unilateralExercise: boolean,
+        optionalSetModifiers: {
+            unilateral: boolean,
+            belt: boolean,
+            straps: boolean
+        }
+    }
+    sets: LoggedWorkoutSet [],
+}
+
+interface LoggedWorkout {
+    duration: number,
+    dateStarted: Date,
+    id: string,
+    workoutNotes?: string,
+    exercises: LoggedWorkoutExercise [],
+}
+
 type LoggedSetError = {
     key: string,
     weight?: string,
@@ -394,6 +388,8 @@ type LoggedSetError = {
     fullReps?: string,
     assistedReps?: string,
     partialReps?: string,
+    rir?: string,
+    rpe?: string,
 } | {
     key: string,
     weight?: string, 
@@ -404,11 +400,15 @@ type LoggedSetError = {
         fullReps?: string,
         assistedReps?: string,
         partialReps?: string,
+        rir?: string,
+        rpe?: string,
     },
     right: {
         fullReps?: string,
         assistedReps?: string,
         partialReps?: string,
+        rir?: string,
+        rpe?: string,
     }
 }
 
@@ -507,12 +507,18 @@ type LogWorkoutAction =
 | { type: 'UPDATE_SET_FULL_REPS'; value: string; exerciseIndex: number; setIndex: number }
 | { type: 'UPDATE_SET_ASTD_REPS'; value: string; exerciseIndex: number; setIndex: number }
 | { type: 'UPDATE_SET_PRTL_REPS'; value: string; exerciseIndex: number; setIndex: number }
+| { type: 'UPDATE_SET_RPE'; value: string; exerciseIndex: number; setIndex: number }
+| { type: 'UPDATE_SET_RIR'; value: string; exerciseIndex: number; setIndex: number }
 | { type: 'UPDATE_SET_LEFT_FULL_REPS'; value: string; exerciseIndex: number; setIndex: number }
 | { type: 'UPDATE_SET_LEFT_ASTD_REPS'; value: string; exerciseIndex: number; setIndex: number }
 | { type: 'UPDATE_SET_LEFT_PRTL_REPS'; value: string; exerciseIndex: number; setIndex: number }
+| { type: 'UPDATE_SET_LEFT_RPE'; value: string; exerciseIndex: number; setIndex: number }
+| { type: 'UPDATE_SET_LEFT_RIR'; value: string; exerciseIndex: number; setIndex: number }
 | { type: 'UPDATE_SET_RIGHT_FULL_REPS'; value: string; exerciseIndex: number; setIndex: number }
 | { type: 'UPDATE_SET_RIGHT_ASTD_REPS'; value: string; exerciseIndex: number; setIndex: number }
 | { type: 'UPDATE_SET_RIGHT_PRTL_REPS'; value: string; exerciseIndex: number; setIndex: number }
+| { type: 'UPDATE_SET_RIGHT_RIR'; value: string; exerciseIndex: number; setIndex: number }
+| { type: 'UPDATE_SET_RIGHT_RPE'; value: string; exerciseIndex: number; setIndex: number }
 | { type: 'TOGGLE_SET_TYPE_DROPDOWN'; exerciseIndex: number; setIndex: number }
 | { type: 'TOGGLE_SET_USE_BELT'; exerciseIndex: number; setIndex: number }
 | { type: 'TOGGLE_SET_USE_STRAPS'; exerciseIndex: number; setIndex: number }
@@ -535,12 +541,18 @@ type LogWorkoutAction =
 | { type: 'VALIDATE_FULL_REPS'; value: string; exerciseIndex: number; setIndex: number }
 | { type: 'VALIDATE_ASTD_REPS'; value: string; exerciseIndex: number; setIndex: number }
 | { type: 'VALIDATE_PRTL_REPS'; value: string; exerciseIndex: number; setIndex: number }
+| { type: 'VALIDATE_RIR'; value: string; exerciseIndex: number; setIndex: number }
+| { type: 'VALIDATE_RPE'; value: string; exerciseIndex: number; setIndex: number }
 | { type: 'VALIDATE_LEFT_FULL_REPS'; value: string; exerciseIndex: number; setIndex: number }
 | { type: 'VALIDATE_LEFT_ASTD_REPS'; value: string; exerciseIndex: number; setIndex: number }
 | { type: 'VALIDATE_LEFT_PRTL_REPS'; value: string; exerciseIndex: number; setIndex: number }
+| { type: 'VALIDATE_LEFT_RIR'; value: string; exerciseIndex: number; setIndex: number }
+| { type: 'VALIDATE_LEFT_RPE'; value: string; exerciseIndex: number; setIndex: number }
 | { type: 'VALIDATE_RIGHT_FULL_REPS'; value: string; exerciseIndex: number; setIndex: number }
 | { type: 'VALIDATE_RIGHT_ASTD_REPS'; value: string; exerciseIndex: number; setIndex: number }
 | { type: 'VALIDATE_RIGHT_PRTL_REPS'; value: string; exerciseIndex: number; setIndex: number }
+| { type: 'VALIDATE_RIGHT_RIR'; value: string; exerciseIndex: number; setIndex: number }
+| { type: 'VALIDATE_RIGHT_RPE'; value: string; exerciseIndex: number; setIndex: number }
 | { type: 'VALIDATE_ALL' }
 
 export { 

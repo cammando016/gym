@@ -11,7 +11,6 @@ import ExerciseSearchResult from '@/components/ExerciseSearchResult';
 interface Props {
     dispatch: Dispatch<LogWorkoutAction>,
     exerciseData: LoggedWorkoutExercise,
-    activeWorkout: boolean,
     exerciseCount: number,
     lastTrainedExercise?: LoggedWorkoutExercise,
     updateActiveSet: (exerciseId: string, setId: string, setType: string) => void,
@@ -209,7 +208,6 @@ export default function LogExercise ( props: Props ) {
                                 <LogSet 
                                     key={s.setId} 
                                     dispatch={props.dispatch}
-                                    activeWorkout={props.activeWorkout}
                                     setData={s}
                                     updateActiveSet={props.updateActiveSet}
                                     exerciseIndex={props.exerciseData.exerciseIndex}

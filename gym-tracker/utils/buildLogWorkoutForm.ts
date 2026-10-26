@@ -42,12 +42,16 @@ export function buildInitialForm(template: WorkoutTemplateType) : LogWorkoutForm
                                 left: {
                                     fullReps: '0',
                                     assistedReps: '0',
-                                    partialReps: '0'
+                                    partialReps: '0',
+                                    rpe: '0',
+                                    rir: '0'
                                 },
                                 right: {
                                     fullReps: '0',
                                     assistedReps: '0',
-                                    partialReps: '0'
+                                    partialReps: '0',
+                                    rpe: '0',
+                                    rir: '0'
                                 }
                             }
                         }
@@ -64,7 +68,9 @@ export function buildInitialForm(template: WorkoutTemplateType) : LogWorkoutForm
                             reps: {
                                 fullReps: '0',
                                 assistedReps: '0',
-                                partialReps: '0'
+                                partialReps: '0',
+                                rpe: '0',
+                                rir: '0'
                             }
                         }
                     })
@@ -89,11 +95,15 @@ export function buildInitialForm(template: WorkoutTemplateType) : LogWorkoutForm
                                 fullReps: undefined,
                                 assistedReps: undefined,
                                 partialReps: undefined,
+                                rir: undefined,
+                                rpe: undefined,
                             },
                             right: {
                                 fullReps: undefined,
                                 assistedReps: undefined,
                                 partialReps: undefined,
+                                rir: undefined,
+                                rpe: undefined,
                             }
                         }
                         else return {
@@ -104,7 +114,9 @@ export function buildInitialForm(template: WorkoutTemplateType) : LogWorkoutForm
                             unilateralSet: false,
                             fullReps: undefined,
                             assistedReps: undefined,
-                            partialReps: undefined
+                            partialReps: undefined,
+                            rir: undefined,
+                            rpe: undefined,
                         }
                     })
                 }

@@ -80,14 +80,14 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
                                     else if (s.isUnilateral) return {
                                         ...s,
                                         isUnilateral: false,
-                                        reps: { fullReps: '0', assistedReps: '0', partialReps: '0' }
+                                        reps: { fullReps: '0', assistedReps: '0', partialReps: '0', rir: '0', rpe: '0' }
                                     }
                                     return {
                                         ...s,
                                         isUnilateral: true,
                                         reps: {
-                                            left: { fullReps: '0', assistedReps: '0', partialReps: '0' },
-                                            right: { fullReps: '0', assistedReps: '0', partialReps: '0' }
+                                            left: { fullReps: '0', assistedReps: '0', partialReps: '0', rir: '0', rpe: '0' },
+                                            right: { fullReps: '0', assistedReps: '0', partialReps: '0', rir: '0', rpe: '0' }
                                         }
                                     }
                                 })
@@ -258,6 +258,54 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
                     }
                 }
             }
+            case 'UPDATE_SET_RIR': {
+                return {
+                    ...state,
+                    values: {
+                        ...state.values,
+                        exercises: state.values.exercises.map(e => {
+                            if (e.exerciseIndex !== action.exerciseIndex) return e;
+                            return {
+                                ...e,
+                                sets: e.sets.map(s => {
+                                    if (s.setIndex !== action.setIndex || s.isUnilateral) return s;
+                                    return {
+                                        ...s,
+                                        reps: {
+                                            ...s.reps,
+                                            rir: action.value
+                                        }
+                                    }
+                                })
+                            }
+                        })
+                    }
+                }
+            }
+            case 'UPDATE_SET_RPE': {
+                return {
+                    ...state,
+                    values: {
+                        ...state.values,
+                        exercises: state.values.exercises.map(e => {
+                            if (e.exerciseIndex !== action.exerciseIndex) return e;
+                            return {
+                                ...e,
+                                sets: e.sets.map(s => {
+                                    if (s.setIndex !== action.setIndex || s.isUnilateral) return s;
+                                    return {
+                                        ...s,
+                                        reps: {
+                                            ...s.reps,
+                                            rpe: action.value
+                                        }
+                                    }
+                                })
+                            }
+                        })
+                    }
+                }
+            }
             case 'UPDATE_SET_LEFT_FULL_REPS': {
                 return {
                     ...state,
@@ -339,6 +387,60 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
                     }
                 }
             }
+            case 'UPDATE_SET_LEFT_RIR': {
+                return {
+                    ...state,
+                    values: {
+                        ...state.values,
+                        exercises: state.values.exercises.map(e => {
+                            if (e.exerciseIndex !== action.exerciseIndex) return e;
+                            return {
+                                ...e,
+                                sets: e.sets.map(s => {
+                                    if (s.setIndex !== action.setIndex || !s.isUnilateral) return s;
+                                    return {
+                                        ...s,
+                                        reps: {
+                                            ...s.reps,
+                                            left: {
+                                                ...s.reps.left,
+                                                rir: action.value
+                                            }
+                                        }
+                                    }
+                                })
+                            }
+                        })
+                    }
+                }
+            }
+            case 'UPDATE_SET_LEFT_RPE': {
+                return {
+                    ...state,
+                    values: {
+                        ...state.values,
+                        exercises: state.values.exercises.map(e => {
+                            if (e.exerciseIndex !== action.exerciseIndex) return e;
+                            return {
+                                ...e,
+                                sets: e.sets.map(s => {
+                                    if (s.setIndex !== action.setIndex || !s.isUnilateral) return s;
+                                    return {
+                                        ...s,
+                                        reps: {
+                                            ...s.reps,
+                                            left: {
+                                                ...s.reps.left,
+                                                rpe: action.value
+                                            }
+                                        }
+                                    }
+                                })
+                            }
+                        })
+                    }
+                }
+            }
             case 'UPDATE_SET_RIGHT_FULL_REPS': {
                 return {
                     ...state,
@@ -411,6 +513,60 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
                                             right: {
                                                 ...s.reps.right,
                                                 partialReps: action.value
+                                            }
+                                        }
+                                    }
+                                })
+                            }
+                        })
+                    }
+                }
+            }
+            case 'UPDATE_SET_RIGHT_RIR': {
+                return {
+                    ...state,
+                    values: {
+                        ...state.values,
+                        exercises: state.values.exercises.map(e => {
+                            if (e.exerciseIndex !== action.exerciseIndex) return e;
+                            return {
+                                ...e,
+                                sets: e.sets.map(s => {
+                                    if (s.setIndex !== action.setIndex || !s.isUnilateral) return s;
+                                    return {
+                                        ...s,
+                                        reps: {
+                                            ...s.reps,
+                                            right: {
+                                                ...s.reps.right,
+                                                rir: action.value
+                                            }
+                                        }
+                                    }
+                                })
+                            }
+                        })
+                    }
+                }
+            }
+            case 'UPDATE_SET_RIGHT_RPE': {
+                return {
+                    ...state,
+                    values: {
+                        ...state.values,
+                        exercises: state.values.exercises.map(e => {
+                            if (e.exerciseIndex !== action.exerciseIndex) return e;
+                            return {
+                                ...e,
+                                sets: e.sets.map(s => {
+                                    if (s.setIndex !== action.setIndex || !s.isUnilateral) return s;
+                                    return {
+                                        ...s,
+                                        reps: {
+                                            ...s.reps,
+                                            right: {
+                                                ...s.reps.right,
+                                                rpe: action.value
                                             }
                                         }
                                     }
@@ -531,8 +687,8 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
                                         usedBelt: false,
                                         usedStraps: false,
                                         reps: {
-                                            left: { fullReps: '0', assistedReps: '0', partialReps: '0' },
-                                            right: { fullReps: '0', assistedReps: '0', partialReps: '0' }
+                                            left: { fullReps: '0', assistedReps: '0', partialReps: '0', rir: '0', rpe: '0' },
+                                            right: { fullReps: '0', assistedReps: '0', partialReps: '0', rir: '0', rpe: '0' }
                                         }
                                     } :
                                     {
@@ -545,7 +701,7 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
                                         setNotes: '',
                                         usedBelt: false,
                                         usedStraps: false,
-                                        reps: { fullReps: '0', assistedReps: '0', partialReps: '0' }
+                                        reps: { fullReps: '0', assistedReps: '0', partialReps: '0', rir: '0', rpe: '0' }
                                     },
                                     ...e.sets.slice(action.setIndexAddedAfter + 1).map(st => {
                                         return {
@@ -671,8 +827,8 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
                                         usedBelt: false,
                                         usedStraps: false,
                                         reps: {
-                                            left: { fullReps: '0', assistedReps: '0', partialReps: '0' },
-                                            right: { fullReps: '0', assistedReps: '0', partialReps: '0' }
+                                            left: { fullReps: '0', assistedReps: '0', partialReps: '0', rir: '0', rpe: '0' },
+                                            right: { fullReps: '0', assistedReps: '0', partialReps: '0', rir: '0', rpe: '0' }
                                         }
                                     }] 
                                     :
@@ -686,7 +842,7 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
                                         setNotes: '',
                                         usedBelt: false,
                                         usedStraps: false,
-                                        reps: { fullReps: '0', assistedReps: '0', partialReps: '0' }
+                                        reps: { fullReps: '0', assistedReps: '0', partialReps: '0', rir: '0', rpe: '0' }
                                     }]
                             },
                             ...state.values.exercises.slice(action.exerciseIndexAddedAfter + 1).map(e => {
@@ -787,14 +943,14 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
                                         ...s,
                                         isUnilateral: true,
                                         reps: {
-                                            left: { fullReps: '0', assistedReps: '0', partialReps: '0' },
-                                            right: { fullReps: '0', assistedReps: '0', partialReps: '0' }
+                                            left: { fullReps: '0', assistedReps: '0', partialReps: '0', rir: '0', rpe: '0' },
+                                            right: { fullReps: '0', assistedReps: '0', partialReps: '0', rir: '0', rpe: '0' }
                                         }
                                     }
                                     return {
                                         ...s,
                                         isUnilateral: false,
-                                        reps: { fullReps: '0', assistedReps: '0', partialReps: '0' }
+                                        reps: { fullReps: '0', assistedReps: '0', partialReps: '0', rir: '0', rpe: '0' }
                                     }
                                 })
                             }
@@ -846,14 +1002,14 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
                                         ...s,
                                         isUnilateral: true,
                                         reps: {
-                                            left: { fullReps: '0', assistedReps: '0', partialReps: '0' },
-                                            right: { fullReps: '0', assistedReps: '0', partialReps: '0' }
+                                            left: { fullReps: '0', assistedReps: '0', partialReps: '0', rir: '0', rpe: '0' },
+                                            right: { fullReps: '0', assistedReps: '0', partialReps: '0', rir: '0', rpe: '0' }
                                         }
                                     }
                                     return {
                                         ...s,
                                         isUnilateral: false,
-                                        reps: { fullReps: '0', assistedReps: '0', partialReps: '0' }
+                                        reps: { fullReps: '0', assistedReps: '0', partialReps: '0', rir: '0', rpe: '0' }
                                     }
                                 })
                             }
@@ -1041,6 +1197,48 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
                     }
                 }
             }
+            case 'VALIDATE_RIR': {
+                return {
+                    ...state,
+                    errors: {
+                        ...state.errors,
+                        exercises: state.errors.exercises.map((e, i) => {
+                            if (action.exerciseIndex !== i) return e;
+                            return {
+                                ...e,
+                                sets: e.sets.map((s, j) => {
+                                    if(action.setIndex !== j) return s;
+                                    return {
+                                        ...s,
+                                        rir: validateOptionalNumericField(action.value, 'Reps in Reserve')
+                                    }
+                                })
+                            }
+                        })
+                    }
+                }
+            }
+            case 'VALIDATE_RPE': {
+                return {
+                    ...state,
+                    errors: {
+                        ...state.errors,
+                        exercises: state.errors.exercises.map((e, i) => {
+                            if (action.exerciseIndex !== i) return e;
+                            return {
+                                ...e,
+                                sets: e.sets.map((s, j) => {
+                                    if(action.setIndex !== j) return s;
+                                    return {
+                                        ...s,
+                                        rpe: validateOptionalNumericField(action.value, 'RPE')
+                                    }
+                                })
+                            }
+                        })
+                    }
+                }
+            }
             case 'VALIDATE_LEFT_FULL_REPS': {
                 return {
                     ...state,
@@ -1108,6 +1306,56 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
                                         left: {
                                             ...s.left,
                                             partialReps: validateOptionalNumericField(action.value, 'Left Partial Reps')
+                                        }
+                                    }
+                                })
+                            }
+                        })
+                    }
+                }
+            }
+            case 'VALIDATE_LEFT_RIR': {
+                return {
+                    ...state,
+                    errors: {
+                        ...state.errors,
+                        exercises: state.errors.exercises.map((e, i) => {
+                            if (action.exerciseIndex !== i) return e;
+                            return {
+                                ...e,
+                                sets: e.sets.map((s, j) => {
+                                    if (action.setIndex !== j) return s;
+                                    if (!s.unilateralSet) return s;
+                                    return {
+                                        ...s,
+                                        left: {
+                                            ...s.left,
+                                            rir: validateOptionalNumericField(action.value, 'Left Reps in Reserve')
+                                        }
+                                    }
+                                })
+                            }
+                        })
+                    }
+                }
+            }
+            case 'VALIDATE_LEFT_RPE': {
+                return {
+                    ...state,
+                    errors: {
+                        ...state.errors,
+                        exercises: state.errors.exercises.map((e, i) => {
+                            if (action.exerciseIndex !== i) return e;
+                            return {
+                                ...e,
+                                sets: e.sets.map((s, j) => {
+                                    if (action.setIndex !== j) return s;
+                                    if (!s.unilateralSet) return s;
+                                    return {
+                                        ...s,
+                                        left: {
+                                            ...s.left,
+                                            rpe: validateOptionalNumericField(action.value, 'Left RPE')
                                         }
                                     }
                                 })
@@ -1191,6 +1439,56 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
                     }
                 }
             }
+            case 'VALIDATE_RIGHT_RIR': {
+                return {
+                    ...state,
+                    errors: {
+                        ...state.errors,
+                        exercises: state.errors.exercises.map((e, i) => {
+                            if (action.exerciseIndex !== i) return e;
+                            return {
+                                ...e,
+                                sets: e.sets.map((s, j) => {
+                                    if (action.setIndex !== j) return s;
+                                    if (!s.unilateralSet) return s;
+                                    return {
+                                        ...s,
+                                        right: {
+                                            ...s.right,
+                                            rir: validateOptionalNumericField(action.value, 'Right Reps in Reserve')
+                                        }
+                                    }
+                                })
+                            }
+                        })
+                    }
+                }
+            }
+            case 'VALIDATE_RIGHT_RPE': {
+                return {
+                    ...state,
+                    errors: {
+                        ...state.errors,
+                        exercises: state.errors.exercises.map((e, i) => {
+                            if (action.exerciseIndex !== i) return e;
+                            return {
+                                ...e,
+                                sets: e.sets.map((s, j) => {
+                                    if (action.setIndex !== j) return s;
+                                    if (!s.unilateralSet) return s;
+                                    return {
+                                        ...s,
+                                        right: {
+                                            ...s.right,
+                                            rpe: validateOptionalNumericField(action.value, 'Right RPE')
+                                        }
+                                    }
+                                })
+                            }
+                        })
+                    }
+                }
+            }
             case 'VALIDATE_ALL': {
                 return {
                     ...state,
@@ -1211,12 +1509,16 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
                                             left: {
                                                 fullReps: validateOptionalNumericField(setValues.reps.left.fullReps, 'Left Full Reps'),
                                                 assistedReps: validateOptionalNumericField(setValues.reps.left.assistedReps, 'Left Assisted Reps'),
-                                                partialReps: validateOptionalNumericField(setValues.reps.left.partialReps, 'Left Partial Reps')
+                                                partialReps: validateOptionalNumericField(setValues.reps.left.partialReps, 'Left Partial Reps'),
+                                                rir: validateOptionalNumericField(setValues.reps.left.rir, 'Left Reps in Reserve'),
+                                                rpe: validateOptionalNumericField(setValues.reps.left.rpe, 'Left RPE')
                                             },
                                             right: {
                                                 fullReps: validateOptionalNumericField(setValues.reps.right.fullReps, 'Right Full Reps'),
                                                 assistedReps: validateOptionalNumericField(setValues.reps.right.assistedReps, 'Right Assisted Reps'),
-                                                partialReps: validateOptionalNumericField(setValues.reps.right.partialReps, 'Right Partial Reps')
+                                                partialReps: validateOptionalNumericField(setValues.reps.right.partialReps, 'Right Partial Reps'),
+                                                rir: validateOptionalNumericField(setValues.reps.right.rir, 'Right Reps in Reserve'),
+                                                rpe: validateOptionalNumericField(setValues.reps.right.rpe, 'Right RPE')
                                             }
                                         }
                                     }
@@ -1226,7 +1528,9 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
                                         setNotes: validateOptionalAlphanumericSymbolsField(setValues.setNotes, 'Set Notes'),
                                         fullReps: validateOptionalNumericField(setValues.reps.fullReps, 'Full Reps'),
                                         assistedReps: validateOptionalNumericField(setValues.reps.assistedReps, 'Assisted Reps'),
-                                        partialReps: validateOptionalNumericField(setValues.reps.partialReps, 'Partial Reps')
+                                        partialReps: validateOptionalNumericField(setValues.reps.partialReps, 'Partial Reps'),
+                                        rir: validateOptionalNumericField(setValues.reps.rir, 'Reps in Reserve'),
+                                        rpe: validateOptionalNumericField(setValues.reps.rpe, 'RPE')
                                     }
                                 })
                             }
@@ -1280,13 +1584,13 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
           return e.sets.some(s => {
             if (s.setNotes || s.weight) return true;
             if (s.unilateralSet) {
-              return !!(s.left.fullReps || s.left.assistedReps || s.left.partialReps
-                || s.right.fullReps || s.right.assistedReps || s.right.partialReps);
+              return !!(s.left.fullReps || s.left.assistedReps || s.left.partialReps || s.left.rir || s.left.rpe
+                || s.right.fullReps || s.right.assistedReps || s.right.partialReps || s.right.rir || s.right.rpe);
             }
-            return !!(s.fullReps || s.assistedReps || s.partialReps);
+            return !!(s.fullReps || s.assistedReps || s.partialReps || s.rir || s.rpe);
           });
         });
-      };
+    };
 
     const handleSubmit = async () => {
         //Check for any form errors before continuing with form submission
@@ -1470,7 +1774,6 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
                         <LogExercise 
                             dispatch={dispatch} 
                             exerciseData={item}
-                            activeWorkout={isActive} 
                             exerciseCount={workoutForm.values.exercises.length}
                             lastTrainedExercise={props.lastTrained?.exercises.find(exc => exc.exerciseId === item.exerciseId)}
                             updateActiveSet={updateActiveSet}
@@ -1485,12 +1788,12 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
 
     return (
         <NestableScrollContainer style={{ flex: 1}} contentContainerStyle={{flexGrow: 1}}>
-                <Text>
-                    {   !isActive 
-                        ? `Session Notes: ${props.lastTrained?.workoutNotes}` 
-                        : `Last ${props.template?.workoutName} session notes: ${props.lastTrained?.workoutNotes}`
-                    }
-                </Text>
+            <Text>
+                {   !isActive 
+                    ? `Session Notes: ${props.lastTrained?.workoutNotes}` 
+                    : `Last ${props.template?.workoutName} session notes: ${props.lastTrained?.workoutNotes}`
+                }
+            </Text>
             { isActive && 
                 <View style={[layoutStyles.rowFlex]}>
                     <View>
