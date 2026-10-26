@@ -3,7 +3,8 @@ import { StyleSheet } from 'react-native';
 const workoutStyles = StyleSheet.create({
     setModifier: {
         width: 32,
-        height: 32
+        height: 32,
+        marginVertical: 4,
     },
     trueSetModifier: {
         borderWidth: 2,

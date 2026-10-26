@@ -80,14 +80,14 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
                                     else if (s.isUnilateral) return {
                                         ...s,
                                         isUnilateral: false,
-                                        reps: { fullReps: '0', assistedReps: '0', partialReps: '0', rir: '0', rpe: '0' }
+                                        reps: { fullReps: '', assistedReps: '', partialReps: '', rir: '', rpe: '' }
                                     }
                                     return {
                                         ...s,
                                         isUnilateral: true,
                                         reps: {
-                                            left: { fullReps: '0', assistedReps: '0', partialReps: '0', rir: '0', rpe: '0' },
-                                            right: { fullReps: '0', assistedReps: '0', partialReps: '0', rir: '0', rpe: '0' }
+                                            left: { fullReps: '', assistedReps: '', partialReps: '', rir: '', rpe: '' },
+                                            right: { fullReps: '', assistedReps: '', partialReps: '', rir: '', rpe: '' }
                                         }
                                     }
                                 })
@@ -680,28 +680,28 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
                                         isUnilateral: true,
                                         setIndex: action.setIndexAddedAfter + 1,
                                         setId: randomUUID(),
-                                        setType: 'working',
+                                        setType: e.sets[action.setIndexAddedAfter].setType,
                                         showSetTypeDropdown: false,
-                                        weight: '0',
+                                        weight: e.sets[action.setIndexAddedAfter].weight,
                                         setNotes: '',
                                         usedBelt: false,
                                         usedStraps: false,
                                         reps: {
-                                            left: { fullReps: '0', assistedReps: '0', partialReps: '0', rir: '0', rpe: '0' },
-                                            right: { fullReps: '0', assistedReps: '0', partialReps: '0', rir: '0', rpe: '0' }
+                                            left: { fullReps: '', assistedReps: '', partialReps: '', rir: '', rpe: '' },
+                                            right: { fullReps: '', assistedReps: '', partialReps: '', rir: '', rpe: '' }
                                         }
                                     } :
                                     {
                                         isUnilateral: false,
                                         setIndex: action.setIndexAddedAfter + 1,
                                         setId: randomUUID(),
-                                        setType: 'working',
+                                        setType: e.sets[action.setIndexAddedAfter].setType,
                                         showSetTypeDropdown: false,
-                                        weight: '0',
+                                        weight: e.sets[action.setIndexAddedAfter].weight,
                                         setNotes: '',
                                         usedBelt: false,
                                         usedStraps: false,
-                                        reps: { fullReps: '0', assistedReps: '0', partialReps: '0', rir: '0', rpe: '0' }
+                                        reps: { fullReps: '', assistedReps: '', partialReps: '', rir: '', rpe: '' }
                                     },
                                     ...e.sets.slice(action.setIndexAddedAfter + 1).map(st => {
                                         return {
@@ -822,13 +822,13 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
                                         setId: randomUUID(),
                                         setType: 'working',
                                         showSetTypeDropdown: false,
-                                        weight: '0',
+                                        weight: '',
                                         setNotes: '',
                                         usedBelt: false,
                                         usedStraps: false,
                                         reps: {
-                                            left: { fullReps: '0', assistedReps: '0', partialReps: '0', rir: '0', rpe: '0' },
-                                            right: { fullReps: '0', assistedReps: '0', partialReps: '0', rir: '0', rpe: '0' }
+                                            left: { fullReps: '', assistedReps: '', partialReps: '', rir: '', rpe: '' },
+                                            right: { fullReps: '', assistedReps: '', partialReps: '', rir: '', rpe: '' }
                                         }
                                     }] 
                                     :
@@ -838,11 +838,11 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
                                         setId: randomUUID(),
                                         setType: 'working',
                                         showSetTypeDropdown: false,
-                                        weight: '0',
+                                        weight: '',
                                         setNotes: '',
                                         usedBelt: false,
                                         usedStraps: false,
-                                        reps: { fullReps: '0', assistedReps: '0', partialReps: '0', rir: '0', rpe: '0' }
+                                        reps: { fullReps: '', assistedReps: '', partialReps: '', rir: '', rpe: '' }
                                     }]
                             },
                             ...state.values.exercises.slice(action.exerciseIndexAddedAfter + 1).map(e => {
@@ -943,14 +943,14 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
                                         ...s,
                                         isUnilateral: true,
                                         reps: {
-                                            left: { fullReps: '0', assistedReps: '0', partialReps: '0', rir: '0', rpe: '0' },
-                                            right: { fullReps: '0', assistedReps: '0', partialReps: '0', rir: '0', rpe: '0' }
+                                            left: { fullReps: '', assistedReps: '', partialReps: '', rir: '', rpe: '' },
+                                            right: { fullReps: '', assistedReps: '', partialReps: '', rir: '', rpe: '' }
                                         }
                                     }
                                     return {
                                         ...s,
                                         isUnilateral: false,
-                                        reps: { fullReps: '0', assistedReps: '0', partialReps: '0', rir: '0', rpe: '0' }
+                                        reps: { fullReps: '', assistedReps: '', partialReps: '', rir: '', rpe: '' }
                                     }
                                 })
                             }
@@ -1002,14 +1002,14 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
                                         ...s,
                                         isUnilateral: true,
                                         reps: {
-                                            left: { fullReps: '0', assistedReps: '0', partialReps: '0', rir: '0', rpe: '0' },
-                                            right: { fullReps: '0', assistedReps: '0', partialReps: '0', rir: '0', rpe: '0' }
+                                            left: { fullReps: '', assistedReps: '', partialReps: '', rir: '', rpe: '' },
+                                            right: { fullReps: '', assistedReps: '', partialReps: '', rir: '', rpe: '' }
                                         }
                                     }
                                     return {
                                         ...s,
                                         isUnilateral: false,
-                                        reps: { fullReps: '0', assistedReps: '0', partialReps: '0', rir: '0', rpe: '0' }
+                                        reps: { fullReps: '', assistedReps: '', partialReps: '', rir: '', rpe: '' }
                                     }
                                 })
                             }

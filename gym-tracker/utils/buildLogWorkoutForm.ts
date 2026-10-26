@@ -34,24 +34,24 @@ export function buildInitialForm(template: WorkoutTemplateType) : LogWorkoutForm
                             setId: randomUUID(),
                             setType: s.setType,
                             showSetTypeDropdown: false,
-                            weight: '0',
+                            weight: '',
                             setNotes: '',
                             usedBelt: false,
                             usedStraps: false,
                             reps: {
                                 left: {
-                                    fullReps: '0',
-                                    assistedReps: '0',
-                                    partialReps: '0',
-                                    rpe: '0',
-                                    rir: '0'
+                                    fullReps: '',
+                                    assistedReps: '',
+                                    partialReps: '',
+                                    rpe: '',
+                                    rir: ''
                                 },
                                 right: {
-                                    fullReps: '0',
-                                    assistedReps: '0',
-                                    partialReps: '0',
-                                    rpe: '0',
-                                    rir: '0'
+                                    fullReps: '',
+                                    assistedReps: '',
+                                    partialReps: '',
+                                    rpe: '',
+                                    rir: ''
                                 }
                             }
                         }
@@ -61,16 +61,16 @@ export function buildInitialForm(template: WorkoutTemplateType) : LogWorkoutForm
                             setId: randomUUID(),
                             setType: s.setType,
                             showSetTypeDropdown: false,
-                            weight: '0',
+                            weight: '',
                             setNotes: '',
                             usedBelt: false,
                             usedStraps: false,
                             reps: {
-                                fullReps: '0',
-                                assistedReps: '0',
-                                partialReps: '0',
-                                rpe: '0',
-                                rir: '0'
+                                fullReps: '',
+                                assistedReps: '',
+                                partialReps: '',
+                                rpe: '',
+                                rir: ''
                             }
                         }
                     })
