@@ -48,6 +48,12 @@ export default function LastTrainedSet(props: Props) {
                                         { (!!props.lastTrainedSet.reps.left.assistedReps || !!props.lastTrainedSet.reps.right.assistedReps) &&
                                             <Text>Assisted: {props.lastTrainedSet.reps.left.assistedReps}</Text>
                                         }
+                                        { (!!props.lastTrainedSet.reps.left.rpe) &&
+                                            <Text>RPE: {props.lastTrainedSet.reps.left.rpe}</Text>
+                                        }
+                                        { (!!props.lastTrainedSet.reps.left.rir) &&
+                                            <Text>RiR: {props.lastTrainedSet.reps.left.rir}</Text>
+                                        }
                                     </View>
                                     <View>
                                         <Text>R:</Text>
@@ -61,6 +67,12 @@ export default function LastTrainedSet(props: Props) {
                                         { (!!props.lastTrainedSet.reps.left.assistedReps || !!props.lastTrainedSet.reps.right.assistedReps) &&
                                             <Text>Assisted: {props.lastTrainedSet.reps.right.assistedReps}</Text>
                                         }
+                                        { (!!props.lastTrainedSet.reps.right.rpe) &&
+                                            <Text>RPE: {props.lastTrainedSet.reps.right.rpe}</Text>
+                                        }
+                                        { (!!props.lastTrainedSet.reps.right.rir) &&
+                                            <Text>RiR: {props.lastTrainedSet.reps.right.rir}</Text>
+                                        }
                                     </View>
                                 </View>
                             ) : (
@@ -70,6 +82,8 @@ export default function LastTrainedSet(props: Props) {
                                     {/* Only show partial or assisted if any logged */}
                                     { (!!props.lastTrainedSet.reps.partialReps) && <Text>Partials: {props.lastTrainedSet.reps.partialReps} </Text> }
                                     { (!!props.lastTrainedSet.reps.assistedReps) && <Text>Assisted: {props.lastTrainedSet.reps.assistedReps} </Text> }
+                                    { (!!props.lastTrainedSet.reps.rpe) && <Text>RPE: {props.lastTrainedSet.reps.rpe}</Text>}
+                                    { (!!props.lastTrainedSet.reps.rir) && <Text>RiR: {props.lastTrainedSet.reps.rir}</Text>}
                                 </View>
                             )}
                             { props.lastTrainedSet.setNotes && <Text>Notes: {props.lastTrainedSet.setNotes}</Text> }

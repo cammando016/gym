@@ -1,5 +1,6 @@
 import { LoggedWorkoutSetList } from "@/types/workouts";
 import { Text, View } from "react-native";
+import DisplayCompletedReps from "./DisplayCompletedReps";
 
 interface Props {
     unilateralExercise: boolean,
@@ -21,29 +22,16 @@ export default function DisplayCompletedSet(props: Props) {
                 (
                     <View>
                         <Text>Left Reps</Text>
-                        <View style={{display: 'flex', flexDirection: 'row', gap: 5}}>
-                            {s.reps.left.fullReps > 0 && <Text>{`Full: ${s.reps.left.fullReps}`}</Text> }
-                            {s.reps.left.prtlReps > 0 && <Text>{`Partial: ${s.reps.left.prtlReps}`}</Text> }
-                            {s.reps.left.astdReps > 0 && <Text>{`Assisted: ${s.reps.left.astdReps}`}</Text> }
-
-                        </View>
+                        <DisplayCompletedReps reps={s.reps.left} />
 
                         <Text>Right Reps</Text>
-                        <View style={{display: 'flex', flexDirection: 'row', gap: 5}}>
-                            {s.reps.right.fullReps > 0 && <Text>{`Full: ${s.reps.right.fullReps}`}</Text> }
-                            {s.reps.right.prtlReps > 0 && <Text>{`Partial: ${s.reps.right.prtlReps}`}</Text> }
-                            {s.reps.right.astdReps > 0 && <Text>{`Assisted: ${s.reps.right.astdReps}`}</Text> }
-                        </View>
+                        <DisplayCompletedReps reps={s.reps.right} />
                     </View>
                 ) : 
                 (
                     <View>
                         <Text>Reps</Text>
-                        <View style={{display: 'flex', flexDirection: 'row', gap: 5}}>
-                            {s.reps.fullReps > 0 && <Text>{`Full: ${s.reps.fullReps}`}</Text>}
-                            {s.reps.prtlReps > 0 && <Text>{`Full: ${s.reps.prtlReps}`}</Text>}
-                            {s.reps.astdReps > 0 && <Text>{`Full: ${s.reps.astdReps}`}</Text>}
-                        </View>
+                        <DisplayCompletedReps reps={s.reps} />
                     </View>
                 )
             }

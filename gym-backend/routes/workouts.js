@@ -9,8 +9,6 @@ dotenv.config();
 const router = express.Router();
 
 router.post('/sessions', authenticateToken, deactivateActiveWorkouts, setSplitDay, async (req, res) => {
-    
-    console.log(req.body);
     const { templateId } = req.body;
     const userId = req.user.id;
 
@@ -124,17 +122,23 @@ router.get('/sessions/:sessionId/view', authenticateToken, async (req, res) => {
                                     'left', jsonb_build_object(
                                         'fullReps', s.ull_full_reps,
                                         'prtlReps', s.ull_partial_reps,
-                                        'astdReps', s.ull_assisted_reps
+                                        'astdReps', s.ull_assisted_reps,
+                                        'rir', s.ull_reps_in_reserve,
+                                        'rpe', s.ull_rate_perceived_exertion
                                     ),
                                     'right', jsonb_build_object(
                                         'fullReps', s.ulr_full_reps,
                                         'prtlReps', s.ulr_partial_reps,
-                                        'astdReps', s.ulr_assisted_reps
+                                        'astdReps', s.ulr_assisted_reps,
+                                        'rir', s.ulr_reps_in_reserve,
+                                        'rpe', s.ulr_rate_perceived_exertion
                                     )
                                 ) ELSE jsonb_build_object(
                                     'fullReps', s.full_reps,
                                     'prtlReps', s.partial_reps,
-                                    'astdReps', s.assisted_reps
+                                    'astdReps', s.assisted_reps,
+                                    'rir', s.reps_in_reserve,
+                                    'rpe', s.rate_perceived_exertion
                                 )
                             END
                         )
@@ -236,7 +240,7 @@ router.post('/sessions/:sessionId/complete', authenticateToken, async(req, res) 
         }
 
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return res.status(500).json({
             error: error.message
         })
@@ -390,6 +394,7 @@ router.get('/active', authenticateToken, async (req, res) => {
     }
 })
 
+//Gets the last session from the matching template workout id
 router.get('/:workoutId/last', authenticateToken, async (req, res) => {
     const userId = req.user.id;
     const templateId = req.params.workoutId;
@@ -415,18 +420,24 @@ router.get('/:workoutId/last', authenticateToken, async (req, res) => {
                                     'left', jsonb_build_object(
                                         'fullReps', s.ull_full_reps,
                                         'partialReps', s.ull_partial_reps,
-                                        'assistedReps', s.ull_assisted_reps
+                                        'assistedReps', s.ull_assisted_reps,
+                                        'rir', s.ull_reps_in_reserve,
+                                        'rpe', s.ull_rate_perceived_exertion
                                     ),
                                     'right', jsonb_build_object(
                                         'fullReps', s.ulr_full_reps,
                                         'partialReps', s.ulr_partial_reps,
-                                        'assistedReps', s.ulr_assisted_reps
+                                        'assistedReps', s.ulr_assisted_reps,
+                                        'rir', s.ulr_reps_in_reserve,
+                                        'rpe', s.ulr_rate_perceived_exertion
                                     )
                                 )
                                 ELSE jsonb_build_object(
                                     'fullReps', s.full_reps,
                                     'partialReps', s.partial_reps,
-                                    'assistedReps', s.assisted_reps
+                                    'assistedReps', s.assisted_reps,
+                                    'rir', s.reps_in_reserve,
+                                    'rpe', s.rate_perceived_exertion
                                 )
                             END
                         )
@@ -474,8 +485,6 @@ router.get('/:workoutId/last', authenticateToken, async (req, res) => {
 
         if(workoutQuery.rows.length === 0) return res.status(404).json({error: 'No previous workout found'});
 
-        console.log(workoutQuery.rows[0]);
-
         return res.status(200).json({
             workout: workoutQuery.rows[0]
         });
@@ -489,7 +498,6 @@ router.get('/:workoutId/last', authenticateToken, async (req, res) => {
 
 //Get basic details of last three workouts (active or completed)
 router.get('/last-three', authenticateToken, async (req, res) => {
-    console.log('Reached here');
     const userId = req.user.id;
 
     try {
@@ -510,8 +518,6 @@ router.get('/last-three', authenticateToken, async (req, res) => {
         );
 
         if(lastThreeWorkoutsQuery.rows.length === 0) return res.status(404).json({error: `No past workouts found for user`});
-
-        console.log(lastThreeWorkoutsQuery.rows);
 
         return res.status(200).json({
             workouts: lastThreeWorkoutsQuery.rows

@@ -254,6 +254,8 @@ type LoggedWorkoutSetList = LoggedWorkoutSetBase & {
         astdReps: number,
         fullReps: number,
         prtlReps: number,
+        rir: number,
+        rpe: number,
     }
 } | LoggedWorkoutSetBase & {
     setIsUnilateral: true,
@@ -262,11 +264,15 @@ type LoggedWorkoutSetList = LoggedWorkoutSetBase & {
             astdReps: number,
             fullReps: number,
             prtlReps: number,
+            rir: number,
+            rpe: number,
         }, 
         right: {
             astdReps: number,
             fullReps: number,
             prtlReps: number,
+            rir: number,
+            rpe: number,
         }
     }
 }
