@@ -157,7 +157,12 @@ router.get('/sessions/:sessionId/view', authenticateToken, async (req, res) => {
                         'exerciseId', e.id,
                         'exerciseName', ex.name,
                         'exerciseNotes', e.exercise_notes,
-                        'exerciseSubbed', e.subbed_exercise,
+                        'exerciseSubbed', e.subbed_exercise_id,
+                        'exerciseSubbedName', CASE
+                            WHEN e.subbed_exercise = true THEN
+                                (SELECT excs.name FROM exercises excs WHERE excs.id = e.subbed_exercise_id)
+                            ELSE null
+                        END,
                         'exerciseIsUnilateral', ex.is_unilateral,
                         'exerciseOptionalModifiers', jsonb_build_object(
                             'unilateralOption', ex.opt_set_mod_unilateral,
@@ -261,8 +266,8 @@ router.post('/sessions/:sessionId/complete', authenticateToken, async(req, res) 
         //Insert completed exercises
         const insertExercisesQuery = await client.query(`
             INSERT INTO workout_exercises
-            (workout_id, exercise_index, exercise_id, exercise_notes, subbed_exercise)
-            SELECT * FROM unnest( $1::uuid[], $2::int2[], $3::uuid[], $4::text[], $5::bool[] )
+            (workout_id, exercise_index, exercise_id, exercise_notes, subbed_exercise, subbed_exercise_id)
+            SELECT * FROM unnest( $1::uuid[], $2::int2[], $3::uuid[], $4::text[], $5::bool[], $6::uuid[] )
             RETURNING id, exercise_index
         `, 
         [
@@ -270,7 +275,8 @@ router.post('/sessions/:sessionId/complete', authenticateToken, async(req, res) 
             exercises.map(e => e.exerciseIndex),
             exercises.map(e => e.exerciseId),
             exercises.map(e => e.exerciseNotes),
-            exercises.map(e => e.exerciseSubbed)
+            exercises.map(e => e.exerciseSubbed),
+            exercises.map(e => e.exerciseSubbedId ?? null)
         ]);
 
         //Build map of matching exercise index and created ID for exercise in workout_exercises table

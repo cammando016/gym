@@ -1628,9 +1628,10 @@ const LogWorkout = forwardRef<LogWorkoutRef, Props>((props, ref) => {
             ).map(e => {
                 return {
                     exerciseIndex: e.exerciseIndex,
-                    exerciseId: e.subbedExercise?.subbedExerciseId ? e.subbedExercise.subbedExerciseId : e.exerciseId,
+                    exerciseId: e.exerciseId,
                     exerciseNotes: e.exerciseNotes,
                     exerciseSubbed: e.subbedExercise === undefined ? false : true,
+                    exerciseSubbedId: e.subbedExercise === undefined ? undefined : e.subbedExercise.subbedExerciseId,
                     sets: e.sets.filter(st => 
                         st.isUnilateral ? (
                             st.weight !== '0' ||

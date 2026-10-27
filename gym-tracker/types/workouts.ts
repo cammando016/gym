@@ -282,7 +282,8 @@ interface LoggedWorkoutExerciseList {
     exerciseName: string,
     exerciseIndex: number,
     exerciseNotes?: string,
-    exerciseSubbed: boolean,
+    exerciseSubbed: string | null,
+    exerciseSubbedName: string | null,
     exerciseIsUnilateral: boolean,
     exerciseOptionalModifiers: {
         beltOption: boolean,
@@ -478,6 +479,7 @@ interface LogExercisePayload {
     exerciseId: string,
     exerciseNotes: string,
     exerciseSubbed: boolean,
+    exerciseSubbedId?: string,
     sets: LogSetPayload[],
 }
 

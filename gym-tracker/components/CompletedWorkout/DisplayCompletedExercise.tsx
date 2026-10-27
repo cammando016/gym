@@ -15,7 +15,8 @@ export default function DisplayCompletedExercise (props: Props) {
 
     return (
         <View>
-            <Text>{`${ex.exerciseIndex + 1}: ${ex.exerciseName}`}</Text>
+            <Text>{`${ex.exerciseIndex + 1}: ${ex.exerciseSubbed ? ex.exerciseSubbedName : ex.exerciseName}`}</Text>
+            {ex.exerciseSubbed && <Text>{`Substituted for ${ex.exerciseName}`}</Text>}
             {ex.exerciseNotes && <Text>{`Notes: ${ex.exerciseNotes}`}</Text> }
             <Text>Sets</Text>
             {
