@@ -34,7 +34,12 @@ interface LogonFormValues {
 interface User {
     username: string;
     name: string;
+    bodyWeight: number;
     weightUnit: WeightUnit;
+    showAstd: boolean;
+    showPrtl: boolean;
+    showRir: boolean;
+    showRpe: boolean;
 }
 
 interface AuthContextType {

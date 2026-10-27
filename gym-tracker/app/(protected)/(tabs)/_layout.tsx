@@ -31,6 +31,7 @@ export default function TabLayout() {
                 name='settings'
                 options={{
                     title: 'Settings',
+                    headerShown: false,
                 }}
             />
         </Tabs>
