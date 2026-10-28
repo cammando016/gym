@@ -5,6 +5,7 @@ import { Pressable, Text, View } from 'react-native';
 import { TextInput } from 'react-native-paper';
 import { Switch } from 'react-native';
 import OptionSwitch from '@/forms/account/edit/OptionSwitch';
+import LogSetPreferencesPreview from '@/components/LogSetPreferencesPreview';
 
 type BooleanFields = 'showPrtl' | 'showAstd' | 'showRir' | 'showRpe';
 
@@ -69,12 +70,14 @@ export default function Settings() {
         value: boolean,
         hasChanged: boolean,
         error: string | undefined,
-        label: string
+        label: string,
+        inputLabel: string,
+        inputPlaceholder: string,
     }[] = [
-        {fieldKey: 'showPrtl', label: 'Show Partial Reps', ...editAccountForm.showPrtl},
-        {fieldKey: 'showAstd', label: 'Show Assisted Reps', ...editAccountForm.showAstd},
-        {fieldKey: 'showRpe', label: 'Show RPE', ...editAccountForm.showRpe},
-        {fieldKey: 'showRir', label: 'Show Reps in Reserve', ...editAccountForm.showRir}
+        {fieldKey: 'showPrtl', label: 'Show Partial Reps', inputLabel: 'Partial: ', inputPlaceholder: '1', ...editAccountForm.showPrtl},
+        {fieldKey: 'showAstd', label: 'Show Assisted Reps', inputLabel: 'Assisted: ', inputPlaceholder: '0', ...editAccountForm.showAstd},
+        {fieldKey: 'showRpe', label: 'Show RPE', inputLabel: 'RPE: ', inputPlaceholder: '9', ...editAccountForm.showRpe},
+        {fieldKey: 'showRir', label: 'Show Reps in Reserve', inputLabel: 'RiR: ', inputPlaceholder: '0', ...editAccountForm.showRir}
     ];
 
     if (!user) return <View><Text>You must be logged in to view this page</Text></View>
@@ -180,9 +183,13 @@ export default function Settings() {
                                 />
                             ))
                         }
+                        <LogSetPreferencesPreview 
+                            shownFields={toggleableFields.filter(t => t.value).map(t => ({fieldLabel: t.inputLabel, fieldValue: t.inputPlaceholder}))}
+                        />
                     </View>
                 }
             </View>
+
         </View>
     )
 }
