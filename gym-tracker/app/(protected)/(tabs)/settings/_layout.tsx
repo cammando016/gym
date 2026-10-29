@@ -4,21 +4,27 @@ import { Pressable, Text } from 'react-native';
 
 export default function SettingsLayout() {
     const { logout } = useAuth();
-    const saveAccountChanges = () => {
-        alert('Save Changes Fired');
-    }
     return (
-        <Stack 
-            screenOptions = {{
+        <Stack>
+            <Stack.Screen
+                name="index"
+                options={{
                 title: 'Settings',
                 headerRight: () => (
-                    <Pressable
-                        onPress={logout}
-                    >
-                        <Text>Logout</Text>
+                    <Pressable onPress={logout}>
+                    <Text>Logout</Text>
                     </Pressable>
-                )
-            }}
-        />
-    )
+                ),
+                }}
+            />
+            <Stack.Screen
+                name="change-recovery"
+                options={{ title: 'Change Recovery' }}
+            />
+            <Stack.Screen 
+                name="change-password"
+                options={{ title: 'Change Password' }}
+            />
+            </Stack>
+        );
 }

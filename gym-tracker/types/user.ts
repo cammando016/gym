@@ -40,6 +40,7 @@ interface User {
     showPrtl: boolean;
     showRir: boolean;
     showRpe: boolean;
+    recoveryQuestion: string;
 }
 
 interface AuthContextType {

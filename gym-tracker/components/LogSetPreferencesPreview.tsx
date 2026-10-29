@@ -8,6 +8,7 @@ interface Props {
         fieldLabel: string,
         fieldValue: string,
     }[],
+    unit: 'kg' | 'lb',
 }
 
 export default function LogSetPreferencesPreview (props: Props) {
@@ -31,8 +32,8 @@ export default function LogSetPreferencesPreview (props: Props) {
                         </View>
                         <View style={[formStyles.inputLabelPair]}>
                             <Text>Weight: </Text>
-                            <Text style={[formStyles.input]}>180</Text>
-                            <Text> KGs</Text>
+                            <Text style={[formStyles.input]}>{`${props.unit === 'kg' ? '180' : '405'}`}</Text>
+                            <Text>{` ${props.unit.toUpperCase()}s`}</Text>
                         </View>
                     </View>
 
