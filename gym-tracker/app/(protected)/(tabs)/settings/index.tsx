@@ -142,19 +142,19 @@ export default function Settings() {
                                 <View>
                                     <Text>{user.username}</Text>
                                     <Text>***************</Text>
-                                    <Text>Recovery Answer</Text>
+                                    <Text>{user.recoveryQuestion}</Text>
                                 </View>
                             </View>
                             <View style={[layoutStyles.rowFlex, {backgroundColor: 'red', justifyContent: 'space-around'}]}>
                                 <Pressable
-                                    onPress={() => router.push('/settings/change-recovery')}
-                                >
-                                    <Text>Change Recovery ?</Text>
-                                </Pressable>
-                                <Pressable
                                     onPress={() => router.push('/settings/change-password')}
                                 >
                                     <Text>Change Password</Text>
+                                </Pressable>
+                                <Pressable
+                                    onPress={() => router.push('/settings/change-recovery')}
+                                >
+                                    <Text>Change Recovery ?</Text>
                                 </Pressable>
                             </View>
                         </View>

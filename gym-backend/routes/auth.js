@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv'
 dotenv.config();
 import pool from '../db/pool.js'
+import { authenticateToken } from '../middleware/authenticateToken.js';
 
 const router = express.Router();
 
@@ -96,6 +97,68 @@ router.post('/login', async (req, res) => {
     } catch(error) {
         console.log(error);
         return res.status(400).json({error: error.message});
+    }
+})
+
+router.post('/auth/change-password', authenticateToken, async (req, res) => {
+    const { oldPassword, newPassword } = req.body;
+    const userId = req.user.id;
+
+    if (typeof oldPassword !== 'string' || typeof newPassword !== 'string') {
+        return res.status(400).json({
+            error: 'Existing and New passwords are both required'
+        });
+    }
+    if (newPassword.length < 4 || newPassword.length > 72) {
+        return res.status(400).json({
+            error: 'New password must be between 4-72 characters'
+        });
+    }
+
+    try {
+        //Check old password matches before updating
+        const { rows } = await pool.query(`SELECT password FROM users WHERE id = $1`, [userId]);
+        if (rows.length === 0) return res.status(404).json({ error: 'User not found' });
+        if (!(await bcrypt.compare(oldPassword, rows[0].password))) return res.status(401).json({ error: 'Invalid Password' })
+
+        const newPwdHash = await bcrypt.hash(newPassword, 10);
+        await pool.query(`
+            UPDATE users
+            SET password = $1
+            WHERE id = $2
+        `, [newPwdHash, userId]);
+
+        return res.sendStatus(204);
+    } catch (error) {
+        console.error(error.message);
+        return res.status(500).json({error: 'Failed to change password'})
+    }
+});
+
+router.post('/auth/change-recovery', authenticateToken, async(req, res) => {
+    const { password, recQuestion, recAnswer } = req.body;
+    const userId = req.user.id;
+
+    try {
+        //Check submitted password before changing account questions
+        const { rows } = await pool.query(`SELECT password FROM users WHERE id = $1`, [userId]);
+        if (rows.length === 0) return res.status(404).json({ error: 'User not found' });
+        if (!await(bcrypt.compare(password, rows[0].password))) return res.status(401).json({ error: 'Invalid Password' })
+
+        const recAnswerHash = await bcrypt.hash(recAnswer, 10);
+        await pool.query(
+            `UPDATE users
+            SET 
+                rec_answer = $1,
+                rec_question = $2
+            WHERE id = $3
+            `, [recAnswerHash, recQuestion, userId]
+        );
+
+        return res.sendStatus(204);
+    } catch (error) {
+        console.error(error.message)
+        return res.status(500).json({error: 'Failed to update recovery question'})
     }
 })
 

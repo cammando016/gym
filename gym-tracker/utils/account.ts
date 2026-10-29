@@ -26,6 +26,48 @@ export const logon = async (details: LogonFormValues) => {
     }
 };
 
+export const changePassword = async (oldPassword: string, newPassword: string) => {
+    const token = await AsyncStorage.getItem('token');
+    const res = await fetch(`http://localhost:3000/api/auth/change-password`, {
+        method: 'POST',
+        headers: {
+            'Content-Type' : 'application/json',
+            Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({oldPassword, newPassword}),
+    });
+
+    if (res.ok) return { ok: true as const };
+
+    const body = await res.json().catch(() => null);
+    return {
+        ok: false as const,
+        status: res.status,
+        error: body?.error ?? 'Failed to change password'
+    }
+}
+
+export const changeRecovery = async (password: string, recQuestion: string, recAnswer: string) => {
+    const token = await AsyncStorage.getItem('token');
+    const res = await fetch(`http://localhost:3000/api/auth/change-recovery`, {
+        method: 'POST',
+        headers: {
+            'Content-Type' : 'application/json',
+            Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({password, recQuestion, recAnswer})
+    });
+
+    if (res.ok) return { ok: true as const }
+
+    const body = await res.json().catch(() => null);
+    return {
+        ok: false as const,
+        status: res.status,
+        error: body?.error ?? 'Failed to update recovery question'
+    }
+}
+
 export const getSplits = async (username : string) => {
     if (!username) throw new Error('Username not found');
     const res = await fetch(`http://localhost:3000/api/users/${encodeURIComponent(username)}/splits`);

@@ -1,5 +1,6 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { recoveryQuestions } from "@/data/recoveryQuestions";
+import { changeRecovery } from "@/utils/account";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { View, Text, Pressable } from "react-native";
@@ -15,6 +16,12 @@ export default function ChangeRecoveryForm () {
         recoveryAnswer: '',
         password: ''
     })
+
+    const handleSubmit = async () => {
+        const res = await changeRecovery(formValues.password, formValues.recoveryQuestion, formValues.recoveryAnswer)
+        console.log(res);
+        if (res.ok) router.back();
+    }
 
     if (!user) return <View><Text>Please login to access this page.</Text></View>
 
@@ -59,6 +66,9 @@ export default function ChangeRecoveryForm () {
                 <TextInput 
                     mode="outlined"
                     label="Password"
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    secureTextEntry={true}
                     value={formValues.password}
                     onChangeText={(s: string) => setFormValues({
                         ...formValues,
@@ -67,13 +77,8 @@ export default function ChangeRecoveryForm () {
                 />
             </View>
             <View>
-                <Pressable>
+                <Pressable onPress={handleSubmit}>
                     <Text>Submit</Text>
-                </Pressable>
-                <Pressable
-                    onPress={() => router.back()}
-                >
-                    <Text>Cancel</Text>
                 </Pressable>
             </View>
         </View>

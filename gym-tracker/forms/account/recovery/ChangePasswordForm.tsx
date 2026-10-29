@@ -3,6 +3,7 @@ import { useRouter } from "expo-router";
 import { View, Text, Pressable } from "react-native";
 import { useState } from "react";
 import { TextInput } from "react-native-paper";
+import { changePassword } from "@/utils/account";
 
 
 export default function ChangePasswordForm () {
@@ -13,6 +14,11 @@ export default function ChangePasswordForm () {
         newPassword: '',
         confirmNewPassword: ''
     });
+
+    const handleSubmit = async () => {
+        const res = await changePassword(formValues.oldPassword, formValues.confirmNewPassword);
+        if (res.ok) router.back();
+    }
 
     if (!user) return <View><Text>Please login to access this page</Text></View>
 
@@ -31,7 +37,7 @@ export default function ChangePasswordForm () {
                     mode="outlined"
                     autoCapitalize="none"
                     autoCorrect={false}
-                    secureTextEntry={false}
+                    secureTextEntry={true}
                 />
                 <TextInput
                     label='New Password'
@@ -45,7 +51,7 @@ export default function ChangePasswordForm () {
                     mode="outlined"
                     autoCapitalize="none"
                     autoCorrect={false}
-                    secureTextEntry={false}
+                    secureTextEntry={true}
                 />
                 <TextInput
                     label='Confirm Password'
@@ -59,11 +65,13 @@ export default function ChangePasswordForm () {
                     mode="outlined"
                     autoCapitalize="none"
                     autoCorrect={false}
-                    secureTextEntry={false}
+                    secureTextEntry={true}
                 />
             </View>
             <View>
-                <Pressable>
+                <Pressable
+                    onPress={handleSubmit}
+                >
                     <Text>Submit</Text>
                 </Pressable>
             </View>
