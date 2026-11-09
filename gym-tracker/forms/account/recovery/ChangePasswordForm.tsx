@@ -4,6 +4,7 @@ import { View, Text, Pressable } from "react-native";
 import { useState } from "react";
 import { TextInput } from "react-native-paper";
 import { changePassword } from "@/utils/account";
+import Toast from 'react-native-toast-message';
 
 type FormState = Record<string, {value: string, error?: string}>
 
@@ -75,8 +76,21 @@ export default function ChangePasswordForm () {
         }
 
         const res = await changePassword(formValues.oldPassword.value, formValues.confirmNewPassword.value);
-        console.log(res);
-        if (res.ok) router.back();
+        if (res.ok) {
+            router.back();
+            Toast.show({
+                type: 'success',
+                text1: 'Password Changed',
+                topOffset: 80,
+            })
+        }
+        else {
+            Toast.show({
+                type: 'error',
+                text1: res.error,
+                topOffset: 80,
+            })
+        }
     }
 
     const submitDisabled : boolean = formValues.oldPassword.error !== undefined || formValues.newPassword.error !== undefined || formValues.confirmNewPassword.error !== undefined;

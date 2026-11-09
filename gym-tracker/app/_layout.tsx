@@ -3,6 +3,7 @@ import { Slot } from "expo-router";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { useState } from "react";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import Toast from 'react-native-toast-message';
 
 export default function RootLayout() {
   const [queryClient] = useState(() => new QueryClient());
@@ -14,6 +15,7 @@ export default function RootLayout() {
           <Slot />
         </AuthProvider>
       </QueryClientProvider>
+      <Toast />
     </GestureHandlerRootView>
   )
 }
