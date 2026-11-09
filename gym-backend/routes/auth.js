@@ -109,9 +109,9 @@ router.post('/auth/change-password', authenticateToken, async (req, res) => {
             error: 'Existing and New passwords are both required'
         });
     }
-    if (newPassword.length < 4 || newPassword.length > 72) {
+    if ( !/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^\w\s]).{8,64}$/.test(newPassword)) {
         return res.status(400).json({
-            error: 'New password must be between 4-72 characters'
+            error: 'New password must be between 8-64 characters and contain at least one lowercase letter, uppercase letter, number and symbol.'
         });
     }
 
