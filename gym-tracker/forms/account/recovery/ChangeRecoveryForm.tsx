@@ -3,7 +3,7 @@ import { recoveryQuestions } from "@/data/recoveryQuestions";
 import { changeRecovery } from "@/utils/account";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { View, Text, Pressable } from "react-native";
+import { View, Text, Pressable, GestureResponderEvent } from "react-native";
 import { TextInput } from "react-native-paper";
 
 export default function ChangeRecoveryForm () {
@@ -23,16 +23,28 @@ export default function ChangeRecoveryForm () {
         if (res.ok) router.back();
     }
 
+    const toggleDropdownOpen = () => setDropdownOpen(prev => !prev);
+
     if (!user) return <View><Text>Please login to access this page.</Text></View>
 
     return (
         <View>
             <View>
-                <Text>Recovery Question</Text>
-                <Pressable
-                    onPress={() => setDropdownOpen(prev => !prev)}
-                >
-                    <Text>{formValues.recoveryQuestion}</Text>
+                <Pressable onPress={toggleDropdownOpen}>
+                    <View pointerEvents="none">
+                        <TextInput 
+                            mode='flat'
+                            label='Recovery Question'
+                            value={formValues.recoveryQuestion}
+                            editable={false}
+                            right={
+                                <TextInput.Affix 
+                                    text=">"
+                                    textStyle={{transform : [{rotate: dropdownOpen ? '90deg' : '0deg'}] }}
+                                />
+                            }
+                        />
+                    </View>
                 </Pressable>
                 {dropdownOpen &&
                     recoveryQuestionList.filter(q => q !== formValues.recoveryQuestion).map(q => {

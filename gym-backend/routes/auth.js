@@ -92,6 +92,7 @@ router.post('/login', async (req, res) => {
                 showPrtl: user.show_prtl_reps,
                 showRir: user.show_rir,
                 showRpe: user.show_rpe,
+                recoveryQuestion: user.rec_question,
             }
         })
     } catch(error) {
