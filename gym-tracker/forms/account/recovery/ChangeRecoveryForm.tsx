@@ -3,8 +3,9 @@ import { recoveryQuestions } from "@/data/recoveryQuestions";
 import { changeRecovery } from "@/utils/account";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { View, Text, Pressable, GestureResponderEvent } from "react-native";
+import { View, Text, Pressable } from "react-native";
 import { TextInput } from "react-native-paper";
+import Toast from "react-native-toast-message";
 
 export default function ChangeRecoveryForm () {
     const { user } = useAuth();
@@ -19,8 +20,20 @@ export default function ChangeRecoveryForm () {
 
     const handleSubmit = async () => {
         const res = await changeRecovery(formValues.password, formValues.recoveryQuestion, formValues.recoveryAnswer)
-        console.log(res);
-        if (res.ok) router.back();
+        if (res.ok) {
+            Toast.show({
+                type: 'success',
+                topOffset: 80,
+                text1: 'Recovery question updated'
+            })
+            router.back();
+        } else {
+            Toast.show({
+                type: 'error',
+                topOffset: 80,
+                text1: res.error
+            })
+        }
     }
 
     const toggleDropdownOpen = () => setDropdownOpen(prev => !prev);

@@ -7,6 +7,8 @@ import { Switch } from 'react-native';
 import OptionSwitch from '@/forms/account/edit/OptionSwitch';
 import LogSetPreferencesPreview from '@/components/LogSetPreferencesPreview';
 import { useRouter } from 'expo-router';
+import { kgToLb, lbToKg, parseToKg, toDisplay } from '@/utils/unitConversion';
+import { EditAccountForm, WeightUnit } from '@/types/user';
 
 type BooleanFields = 'showPrtl' | 'showAstd' | 'showRir' | 'showRpe';
 
@@ -16,14 +18,15 @@ export default function Settings() {
     const [showUserSettings, setShowUserSettings] = useState<boolean>(false);
     const [showWorkoutSettings, setShowWorkoutSettings] = useState<boolean>(false);
 
-    const [editAccountForm, setEditAccountForm] = useState({
+    const [canonicalKg, setCanonicalKg] = useState<number | null>(user ? user.bodyWeight : 0);
+    const [editAccountForm, setEditAccountForm] = useState<EditAccountForm>({
         name: {
             value: user ? user.name : '',
             hasChanged: false,
             error: undefined
         },
         bodyWeight: {
-            value: user ? user.bodyWeight.toString() : '',
+            value: user ? toDisplay(user.bodyWeight, user.weightUnit) : '',
             hasChanged: false,
             error: undefined
         },
@@ -54,7 +57,15 @@ export default function Settings() {
         },
     });
 
-    const toggleField = (key: BooleanFields) => {
+    const changedFields = Object.fromEntries(
+        Object.entries(editAccountForm)
+            .filter(([ , field]) => field.hasChanged === true)
+            .map(([key, field]) => [key, field.value])
+    );
+
+    // console.log(changedFields);
+
+    const toggleField = (key: BooleanFields) : void => {
         setEditAccountForm(prev => {
             const flipped = !prev[key].value;
             return {
@@ -83,6 +94,18 @@ export default function Settings() {
         {fieldKey: 'showRir', label: 'Show Reps in Reserve', inputLabel: 'RiR: ', inputPlaceholder: '0', ...editAccountForm.showRir}
     ];
 
+    const checkWeightKgValueChanged = (typedWeight: string, weightUnit: WeightUnit) : boolean => {
+        const enteredAsKg = weightUnit === 'kg' ? Number(typedWeight.trim()) : lbToKg(Number(typedWeight.trim()));
+        if (typedWeight.trim() === '' || Number.isNaN(enteredAsKg)) return true;
+
+        const savedKg = user?.bodyWeight!!;
+        return Math.abs(enteredAsKg - savedKg) > 0.05;
+    }
+
+    const handleSubmit = async () => {
+
+    }
+
     if (!user) return <View><Text>You must be logged in to view this page</Text></View>
     return (
         <View style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
@@ -102,16 +125,16 @@ export default function Settings() {
                                 mode='outlined'
                                 value={editAccountForm.name.value}
                                 onChangeText={(s: string) => {
-                                    setEditAccountForm({
-                                        ...editAccountForm,
+                                    setEditAccountForm(prev => ({
+                                        ...prev,
                                         name: {
                                             value: s,
-                                            hasChanged: editAccountForm.name.value.trim().toLowerCase() !== s.trim().toLowerCase(),
+                                            hasChanged: user.name.trim().toLowerCase() !== s.trim().toLowerCase(),
                                             error: undefined,
                                         }
-                                    });
+                                    }));
                                 }}
-                                style={{fontWeight: editAccountForm.name.value.trim().toLowerCase() === user.name.trim().toLowerCase() ? 'normal' : 'bold'}}
+                                style={{fontWeight: editAccountForm.name.hasChanged ? 'bold' : 'normal'}}
                             />
                             <TextInput 
                                 label='Weight'
@@ -121,16 +144,18 @@ export default function Settings() {
                                 mode='outlined'
                                 value={editAccountForm.bodyWeight.value}
                                 onChangeText={(s: string) => {
-                                    setEditAccountForm({
-                                        ...editAccountForm,
+                                    const kg = parseToKg(s, editAccountForm.weightUnit.value);
+                                    setCanonicalKg(kg);
+                                    setEditAccountForm(prev => ({
+                                        ...prev,
                                         bodyWeight: {
-                                            value: s,
-                                            hasChanged: editAccountForm.bodyWeight.value.trim() !== s.trim(),
-                                            error: undefined
+                                            value: s.trim(),
+                                            hasChanged: kg !== null && Math.abs(kg - user.bodyWeight) > 0.004,
+                                            error: kg === null ? 'Enter a valid weight' : undefined
                                         }
-                                    });
+                                    }));
                                 }}
-                                style={{fontWeight: editAccountForm.bodyWeight.value.trim() === user.bodyWeight.toString().trim() ? 'normal' : 'bold'}}
+                                style={{fontWeight: editAccountForm.bodyWeight.hasChanged ? 'bold' : 'normal'}}
                                 right={<TextInput.Affix text={ editAccountForm.weightUnit.value.toUpperCase() + 's' } />}
                             />
                             <View style={{display: 'flex', flexDirection: 'row'}}>
@@ -176,20 +201,21 @@ export default function Settings() {
                                 <Switch 
                                     value={editAccountForm.weightUnit.value === 'lb'}
                                     onValueChange={() => setEditAccountForm(prev => {
+                                        const newUnit = prev.weightUnit.value === 'kg' ? 'lb' : 'kg';
+
                                         return {
-                                            ...editAccountForm,
+                                            ...prev,
                                             weightUnit: {
-                                                ...editAccountForm.weightUnit,
-                                                value: prev.weightUnit.value === 'kg' ? 'lb' : 'kg',
-                                                hasChanged: prev.weightUnit.value === user.weightUnit
+                                                ...prev.weightUnit,
+                                                value: newUnit,
+                                                hasChanged: newUnit !== user.weightUnit
                                             },
-                                            bodyWeight: {
-                                                ...editAccountForm.bodyWeight,
-                                                value: prev.weightUnit.value === 'kg' ? 
-                                                    (Number(prev.bodyWeight.value) * 2.2046226218).toString() :
-                                                    (Number(prev.bodyWeight.value) / 2.2046226218).toString()
-                                                ,
-                                            }
+                                            bodyWeight: canonicalKg === null ?
+                                                prev.bodyWeight : 
+                                                {
+                                                    ...prev.bodyWeight,
+                                                    value: toDisplay(canonicalKg, newUnit)
+                                                }
                                         }
                                     })}
                                     ios_backgroundColor='rgb(0, 255, 0)'

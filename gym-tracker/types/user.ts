@@ -51,4 +51,29 @@ interface AuthContextType {
     logout: () => void;
 }
 
-export { FormValues, SignupPayload, LogonFormValues, User, AuthContextType };
+interface EditAccountField<T> {
+    value: T,
+    hasChanged: boolean,
+    error: string | undefined,
+}
+
+interface EditAccountForm {
+    name: EditAccountField<string>,
+    bodyWeight: EditAccountField<string>,
+    weightUnit: EditAccountField<WeightUnit>,
+    showPrtl: EditAccountField<boolean>,
+    showAstd: EditAccountField<boolean>,
+    showRir: EditAccountField<boolean>,
+    showRpe: EditAccountField<boolean>,
+}
+
+export { 
+    FormValues, 
+    SignupPayload, 
+    LogonFormValues, 
+    User, 
+    AuthContextType,
+    WeightUnit,
+    EditAccountField,
+    EditAccountForm
+};
