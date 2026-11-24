@@ -2,7 +2,7 @@ import layoutStyles from "@/styles/layoutStyles";
 import { Text, View } from "react-native";
 import { Switch } from "react-native-paper";
 
-type BooleanFields = 'showPrtl' | 'showAstd' | 'showRir' | 'showRpe';
+type BooleanFields = 'show_prtl_reps' | 'show_astd_reps' | 'show_rir' | 'show_rpe';
 interface Props {
     hasChanged: boolean,
     label: string,

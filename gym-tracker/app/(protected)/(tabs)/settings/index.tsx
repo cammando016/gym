@@ -7,17 +7,30 @@ import { Switch } from 'react-native';
 import OptionSwitch from '@/forms/account/edit/OptionSwitch';
 import LogSetPreferencesPreview from '@/components/LogSetPreferencesPreview';
 import { useRouter } from 'expo-router';
-import { kgToLb, lbToKg, parseToKg, toDisplay } from '@/utils/unitConversion';
-import { EditAccountForm, WeightUnit } from '@/types/user';
+import { parseToKg, toDisplay } from '@/utils/unitConversion';
+import { EditAccountForm, EditAccountPayload, User } from '@/types/user';
+import { validateNameField } from '@/utils/formValiditors';
+import Toast from 'react-native-toast-message';
+import { updateAccountSettings } from '@/utils/account';
 
-type BooleanFields = 'showPrtl' | 'showAstd' | 'showRir' | 'showRpe';
+type BooleanFields = 'show_prtl_reps' | 'show_astd_reps' | 'show_rir' | 'show_rpe';
+//Match fields from user object to field names in db (camelCase vs kebab_case)
+const USER_KEY: Record<BooleanFields, keyof User> = {
+    show_prtl_reps: 'showPrtl',
+    show_astd_reps: 'showAstd',
+    show_rir: 'showRir',
+    show_rpe: 'showRpe'
+}
 
 export default function Settings() {
     const { user } = useAuth();
     const router = useRouter();
+    //Toggle showing/hiding setting sections
     const [showUserSettings, setShowUserSettings] = useState<boolean>(false);
     const [showWorkoutSettings, setShowWorkoutSettings] = useState<boolean>(false);
 
+    //Store the value of the user's bodyweight as a kg value, regardless of selected weight unit
+    //DB stores all values in KG and converts displayed value on frontend based on account setting
     const [canonicalKg, setCanonicalKg] = useState<number | null>(user ? user.bodyWeight : 0);
     const [editAccountForm, setEditAccountForm] = useState<EditAccountForm>({
         name: {
@@ -25,46 +38,39 @@ export default function Settings() {
             hasChanged: false,
             error: undefined
         },
-        bodyWeight: {
+        weight: {
             value: user ? toDisplay(user.bodyWeight, user.weightUnit) : '',
             hasChanged: false,
             error: undefined
         },
-        weightUnit: {
+        weight_unit: {
             value: user ? user.weightUnit : 'kg',
             hasChanged: false,
             error: undefined
         },
-        showPrtl: {
+        show_prtl_reps: {
             value: user ? user.showPrtl : true,
             hasChanged: false,
             error: undefined,
         },
-        showAstd: {
+        show_astd_reps: {
             value: user ? user.showAstd : true,
             hasChanged: false,
             error: undefined,
         },
-        showRir: {
+        show_rir: {
             value: user ? user.showRir : true,
             hasChanged: false,
             error: undefined,
         },
-        showRpe: {
+        show_rpe: {
             value: user ? user.showRpe : true,
             hasChanged: false,
             error: undefined,
         },
     });
 
-    const changedFields = Object.fromEntries(
-        Object.entries(editAccountForm)
-            .filter(([ , field]) => field.hasChanged === true)
-            .map(([key, field]) => [key, field.value])
-    );
-
-    // console.log(changedFields);
-
+    //Reusable function for fields controlled by switch
     const toggleField = (key: BooleanFields) : void => {
         setEditAccountForm(prev => {
             const flipped = !prev[key].value;
@@ -73,12 +79,13 @@ export default function Settings() {
                 [key]: {
                     ...prev[key],
                     value: flipped,
-                    hasChanged: flipped !== user?.[key]
+                    hasChanged: flipped !== user?.[USER_KEY[key]],
                 }
             }
         })
     }
 
+    //List of fields controlled by toggle switch to map reusable component
     const toggleableFields : {
         fieldKey: BooleanFields,
         value: boolean,
@@ -88,22 +95,84 @@ export default function Settings() {
         inputLabel: string,
         inputPlaceholder: string,
     }[] = [
-        {fieldKey: 'showPrtl', label: 'Show Partial Reps', inputLabel: 'Partial: ', inputPlaceholder: '1', ...editAccountForm.showPrtl},
-        {fieldKey: 'showAstd', label: 'Show Assisted Reps', inputLabel: 'Assisted: ', inputPlaceholder: '0', ...editAccountForm.showAstd},
-        {fieldKey: 'showRpe', label: 'Show RPE', inputLabel: 'RPE: ', inputPlaceholder: '9', ...editAccountForm.showRpe},
-        {fieldKey: 'showRir', label: 'Show Reps in Reserve', inputLabel: 'RiR: ', inputPlaceholder: '0', ...editAccountForm.showRir}
+        {fieldKey: 'show_prtl_reps', label: 'Show Partial Reps', inputLabel: 'Partial: ', inputPlaceholder: '1', ...editAccountForm.show_prtl_reps},
+        {fieldKey: 'show_astd_reps', label: 'Show Assisted Reps', inputLabel: 'Assisted: ', inputPlaceholder: '0', ...editAccountForm.show_astd_reps},
+        {fieldKey: 'show_rpe', label: 'Show RPE', inputLabel: 'RPE: ', inputPlaceholder: '9', ...editAccountForm.show_rpe},
+        {fieldKey: 'show_rir', label: 'Show Reps in Reserve', inputLabel: 'RiR: ', inputPlaceholder: '0', ...editAccountForm.show_rir}
     ];
 
-    const checkWeightKgValueChanged = (typedWeight: string, weightUnit: WeightUnit) : boolean => {
-        const enteredAsKg = weightUnit === 'kg' ? Number(typedWeight.trim()) : lbToKg(Number(typedWeight.trim()));
-        if (typedWeight.trim() === '' || Number.isNaN(enteredAsKg)) return true;
+    //Object with only edited values to submit patch request
+    const changedFields = Object.fromEntries(
+        Object.entries(editAccountForm)
+            .filter(([ , field]) => field.hasChanged === true)
+            .map(([key, field]) => [key, field.value])
+    );
+    const hasChanges = Object.values(editAccountForm).some(f => f.hasChanged);
+    //Disable update account button if any validation fails
+    const hasErrors : boolean = Object.values(editAccountForm).some(
+        field => field.error !== undefined
+    );
+    const submitDisabled : boolean = !hasChanges || hasErrors;
 
-        const savedKg = user?.bodyWeight!!;
-        return Math.abs(enteredAsKg - savedKg) > 0.05;
+    const validateAllFields = () : boolean => {
+        let validationPassed : boolean = true;
+        const validateName = validateNameField(editAccountForm.name.value, 'First Name');
+        if (validateName) {
+            setEditAccountForm(prev => (
+                {
+                    ...prev,
+                    name: {
+                        ...prev.name,
+                        error: validateName
+                    }
+                }
+            ));
+            validationPassed = false;
+        }
+        const validateWeight = parseToKg(editAccountForm.weight.value, editAccountForm.weight_unit.value);
+        if (validateWeight === null) {
+            setEditAccountForm(prev => (
+                {
+                    ...prev,
+                    bodyWeight: {
+                        ...prev.weight,
+                        error: 'Enter a valid weight'
+                    }
+                }
+            ));
+            validationPassed = false;
+        }
+
+        return validationPassed;
     }
 
     const handleSubmit = async () => {
-
+        if (!validateAllFields()) {
+            Toast.show({
+                type: 'error',
+                text1: 'Please fix errors and retry',
+                topOffset: 80
+            });
+            return;
+        }
+        const payload : EditAccountPayload = changedFields; 
+        if (payload.weight && canonicalKg) payload.weight = canonicalKg;
+        const res = await updateAccountSettings(payload);
+        
+        if (res.ok) {
+            Toast.show({
+                type: 'success',
+                text1: 'Account Updated',
+                topOffset: 80
+            });
+        } else {
+            Toast.show({
+                type: 'error',
+                text1: res.error,
+                text2: 'Please try again',
+                topOffset: 80
+            })
+        }
     }
 
     if (!user) return <View><Text>You must be logged in to view this page</Text></View>
@@ -124,27 +193,34 @@ export default function Settings() {
                                 placeholder='Enter your first name'
                                 mode='outlined'
                                 value={editAccountForm.name.value}
+                                autoCorrect={false}
                                 onChangeText={(s: string) => {
                                     setEditAccountForm(prev => ({
                                         ...prev,
                                         name: {
                                             value: s,
-                                            hasChanged: user.name.trim().toLowerCase() !== s.trim().toLowerCase(),
-                                            error: undefined,
+                                            hasChanged: user.name.trim() !== s.trim(),
+                                            error: validateNameField(s, 'First Name'),
                                         }
                                     }));
                                 }}
-                                style={{fontWeight: editAccountForm.name.hasChanged ? 'bold' : 'normal'}}
+                                outlineStyle={{
+                                    borderColor: editAccountForm.name.error ? 'red' : 'green'
+                                }}
+                                style={{
+                                    fontWeight: editAccountForm.name.hasChanged ? 'bold' : 'normal',
+                                }}
                             />
+                            {editAccountForm.name.error && <Text>{editAccountForm.name.error}</Text>}
                             <TextInput 
                                 label='Weight'
                                 keyboardType='decimal-pad'
                                 returnKeyType='done'
                                 placeholder='Enter your bodyweight'
                                 mode='outlined'
-                                value={editAccountForm.bodyWeight.value}
+                                value={editAccountForm.weight.value}
                                 onChangeText={(s: string) => {
-                                    const kg = parseToKg(s, editAccountForm.weightUnit.value);
+                                    const kg = parseToKg(s, editAccountForm.weight_unit.value);
                                     setCanonicalKg(kg);
                                     setEditAccountForm(prev => ({
                                         ...prev,
@@ -155,9 +231,10 @@ export default function Settings() {
                                         }
                                     }));
                                 }}
-                                style={{fontWeight: editAccountForm.bodyWeight.hasChanged ? 'bold' : 'normal'}}
-                                right={<TextInput.Affix text={ editAccountForm.weightUnit.value.toUpperCase() + 's' } />}
+                                style={{fontWeight: editAccountForm.weight.hasChanged ? 'bold' : 'normal'}}
+                                right={<TextInput.Affix text={ editAccountForm.weight_unit.value.toUpperCase() + 's' } />}
                             />
+                            {editAccountForm.weight.error && <Text>{editAccountForm.weight.error}</Text>}
                             <View style={{display: 'flex', flexDirection: 'row'}}>
                                 <View>
                                     <Text>Username: </Text>
@@ -199,21 +276,21 @@ export default function Settings() {
                                 <Text>Weight Unit </Text>
                                 <Text>KGs</Text>
                                 <Switch 
-                                    value={editAccountForm.weightUnit.value === 'lb'}
+                                    value={editAccountForm.weight_unit.value === 'lb'}
                                     onValueChange={() => setEditAccountForm(prev => {
-                                        const newUnit = prev.weightUnit.value === 'kg' ? 'lb' : 'kg';
+                                        const newUnit = prev.weight_unit.value === 'kg' ? 'lb' : 'kg';
 
                                         return {
                                             ...prev,
                                             weightUnit: {
-                                                ...prev.weightUnit,
+                                                ...prev.weight_unit,
                                                 value: newUnit,
                                                 hasChanged: newUnit !== user.weightUnit
                                             },
                                             bodyWeight: canonicalKg === null ?
-                                                prev.bodyWeight : 
+                                                prev.weight : 
                                                 {
-                                                    ...prev.bodyWeight,
+                                                    ...prev.weight,
                                                     value: toDisplay(canonicalKg, newUnit)
                                                 }
                                         }
@@ -234,10 +311,12 @@ export default function Settings() {
                                     />
                                 ))
                             }
+                            {/* Shows how user settings will be rendered when logging a workout */}
+                            {/* Filters to the true values from the toggleable fields to update without manually passing each from form */}
                             <Text>Preview Preferences</Text>
                             <LogSetPreferencesPreview 
                                 shownFields={toggleableFields.filter(t => t.value).map(t => ({fieldLabel: t.inputLabel, fieldValue: t.inputPlaceholder}))}
-                                unit={editAccountForm.weightUnit.value}
+                                unit={editAccountForm.weight_unit.value}
                             />
                         </View>
                     }
@@ -245,8 +324,11 @@ export default function Settings() {
 
             </ScrollView>
 
-            <View style={[layoutStyles.rowFlex, {backgroundColor: 'red', justifyContent: 'space-around', flexGrow: 0}]}>
-                <Pressable>
+            <View style={[layoutStyles.rowFlex, {backgroundColor: submitDisabled ? 'red' : 'green', justifyContent: 'space-around', flexGrow: 0}]}>
+                <Pressable
+                    disabled={submitDisabled}
+                    onPress={handleSubmit}
+                >
                     <Text>Update Account</Text>
                 </Pressable>
                 <Pressable>

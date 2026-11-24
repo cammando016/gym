@@ -1,4 +1,4 @@
-import { SignupPayload, LogonFormValues } from "@/types/user"
+import { SignupPayload, LogonFormValues, EditAccountPayload } from "@/types/user"
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const signup = async (details: SignupPayload) => {
@@ -65,6 +65,27 @@ export const changeRecovery = async (password: string, recQuestion: string, recA
         ok: false as const,
         status: res.status,
         error: body?.error ?? 'Failed to update recovery question'
+    }
+}
+
+export const updateAccountSettings = async (details : EditAccountPayload) => {
+    const token = await AsyncStorage.getItem('token');
+    const res = await fetch(`http://localhost:3000/api/users/edit`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(details)
+    });
+
+    if (res.ok) return {ok: true as const}
+
+    const body = await res.json().catch(() => null);
+    return {
+        ok: false as const,
+        status: res.status,
+        error: body?.error ?? 'Failed to update account'
     }
 }
 

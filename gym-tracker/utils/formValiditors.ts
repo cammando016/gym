@@ -63,3 +63,12 @@ export const validateUpperRepsTarget = (upper?: string, lower?: string) : string
 
     return undefined;
 }
+
+export const validateNameField = (input: string, fieldName: string) : string | undefined => {
+    const normalisedInput = input.normalize('NFC');
+    if (normalisedInput.trim() === '') return `${fieldName} is required`;
+    if (!/^\p{L}+([-.']\p{L}+)*$/u.test(normalisedInput.trim())) return `Invalid format for ${fieldName}`
+    if (normalisedInput.length > 50) return `${fieldName} may not be longer than 50 characters`
+
+    return undefined
+}

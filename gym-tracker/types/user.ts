@@ -51,6 +51,8 @@ interface AuthContextType {
     logout: () => void;
 }
 
+// <------- TYPES FOR EDITING ACCOUNT FORMS ------->
+
 interface EditAccountField<T> {
     value: T,
     hasChanged: boolean,
@@ -59,12 +61,22 @@ interface EditAccountField<T> {
 
 interface EditAccountForm {
     name: EditAccountField<string>,
-    bodyWeight: EditAccountField<string>,
-    weightUnit: EditAccountField<WeightUnit>,
-    showPrtl: EditAccountField<boolean>,
-    showAstd: EditAccountField<boolean>,
-    showRir: EditAccountField<boolean>,
-    showRpe: EditAccountField<boolean>,
+    weight: EditAccountField<string>,
+    weight_unit: EditAccountField<WeightUnit>,
+    show_prtl_reps: EditAccountField<boolean>,
+    show_astd_reps: EditAccountField<boolean>,
+    show_rir: EditAccountField<boolean>,
+    show_rpe: EditAccountField<boolean>,
+}
+
+interface EditAccountPayload {
+    name?: string,
+    weight?: number,
+    weight_unit?: WeightUnit,
+    show_astd_reps?: boolean,
+    show_rpe?: boolean,
+    show_rir?: boolean,
+    show_prtl_reps?: boolean
 }
 
 export { 
@@ -75,5 +87,6 @@ export {
     AuthContextType,
     WeightUnit,
     EditAccountField,
-    EditAccountForm
+    EditAccountForm,
+    EditAccountPayload
 };
