@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { jwtDecode } from "jwt-decode";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AuthContextType, User } from '@/types/user';
+import { fetchCurrentUser } from '@/utils/account';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -62,8 +62,14 @@ export function AuthProvider({ children } : {children: React.ReactNode}) {
         setIsLoggedIn(false);
     }
 
+    const refreshUser = async () => {
+        const refreshedUser = await fetchCurrentUser();
+        await AsyncStorage.setItem('user', JSON.stringify(refreshedUser));
+        setUser(refreshedUser);
+    }
+
     return (
-        <AuthContext.Provider value={{ user, isLoggedIn, isLoading, login, logout }}>
+        <AuthContext.Provider value={{ user, isLoggedIn, isLoading, login, logout, refreshUser }}>
             {children}
         </AuthContext.Provider>
     )

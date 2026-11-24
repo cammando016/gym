@@ -49,6 +49,7 @@ interface AuthContextType {
     isLoading: boolean;
     login: (token: string, user: User) => void;
     logout: () => void;
+    refreshUser: () => Promise<void>;
 }
 
 // <------- TYPES FOR EDITING ACCOUNT FORMS ------->

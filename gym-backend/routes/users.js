@@ -2,6 +2,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import pool from '../db/pool.js';
 import { getUserId } from '../utils/user.js';
+import { authenticateToken } from '../middleware/authenticateToken.js';
 
 dotenv.config();
 const router = express.Router();
@@ -94,5 +95,68 @@ router.get('/:username/splits', async(req, res) => {
         });
     }
 });
+
+// <------- ACCOUNT FETCH/EDIT -------->
+
+router.get('/me', authenticateToken, async(req, res) => {
+    try {
+        const { rows } = await pool.query(
+            `SELECT 
+                username,
+                name,
+                weight::float8 AS "bodyWeight",
+                weight_unit AS "weightUnit",
+                show_prtl_reps AS "showPrtl",
+                show_astd_reps AS "showAstd",
+                show_rir AS "showRir",
+                show_rpe AS "showRpe",
+                rec_question AS "recoveryQuestion"
+            FROM users
+            WHERE id = $1
+            `, [req.user.id]
+        );
+
+        if (rows.length === 0) return res.status(404).json({ error: 'User not found'});
+        return res.status(200).json(rows[0]);
+    } catch (error) {
+        console.error(error.message);
+        return res.status(500).json({ error: 'Failed to load user' })
+    }
+})
+
+router.patch('/edit', authenticateToken, async(req, res) => {
+    const userId = req.user.id;
+
+    const ALLOWED_COLUMNS = [
+        'name',
+        'weight',
+        'show_prtl_reps',
+        'show_astd_reps',
+        'show_rir',
+        'show_rpe'
+    ];
+
+    const entries = Object.entries(req.body).filter(([key]) => ALLOWED_COLUMNS.includes(key));
+    if (entries.length === 0) return res.status(400).json({error: 'No valid fields to update'});
+
+    const columns = entries.map(([key], i) => `${key} = $${i + 1}`).join(', ');
+    const values = entries.map(([_, value]) => value);
+
+    try {
+        await pool.query(
+            `UPDATE users
+            SET ${columns}
+            WHERE id = $${entries.length + 1}
+            `, [
+                ...values,
+                userId
+            ]
+        );
+        return res.sendStatus(204);
+    } catch (error) {
+        console.error(error.message);
+        return res.status(500).json({ error: 'Failed to update account' });
+    }
+})
 
 export default router;

@@ -1,4 +1,4 @@
-import { SignupPayload, LogonFormValues, EditAccountPayload } from "@/types/user"
+import { SignupPayload, LogonFormValues, EditAccountPayload, User } from "@/types/user"
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const signup = async (details: SignupPayload) => {
@@ -25,6 +25,15 @@ export const logon = async (details: LogonFormValues) => {
         ...response
     }
 };
+
+export const fetchCurrentUser = async () : Promise<User> => {
+    const token = await AsyncStorage.getItem('token');
+    const res = await fetch(`http://localhost:3000/api/users/me`, {
+        headers: {Authorization: `Bearer ${token}`},
+    });
+    if (!res.ok) throw new Error('Failed to load user');
+    return res.json();
+}
 
 export const changePassword = async (oldPassword: string, newPassword: string) => {
     const token = await AsyncStorage.getItem('token');
