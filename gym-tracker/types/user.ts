@@ -45,18 +45,32 @@ interface AuthContextType {
 }
 
 interface ResetPasswordFormType {
-    username: string,
-    recoveryAnswer: string,
-    newPassword: string,
-    confirmNewPassword: string
+    values: {
+        username: string,
+        recoveryAnswer: string,
+        newPassword: string,
+        confirmNewPassword: string
+    },
+    errors: {
+        username: string | undefined,
+        recoveryAnswer: string | undefined,
+        newPassword: string | undefined,
+        confirmNewPassword: string | undefined
+    }
 }
 
 type ResetPasswordReducerActions = 
 | { type: 'UPDATE_USERNAME', value: string }
+| { type: 'VALIDATE_USERNAME', value: string }
 | { type: 'UPDATE_NEW_PASSWORD', value: string }
+| { type: 'VALIDATE_NEW_PASSWORD', value: string }
 | { type: 'UPDATE_CONFIRM_PASSWORD', value: string }
+| { type: 'VALIDATE_CONFIRM_PASSWORD', value: string }
 | { type: 'UPDATE_RECOVERY_ANSWER', value: string }
+| { type: 'VALIDATE_RECOVERY_ANSWER', value: string }
 | { type: 'RESET_FORM' }
+| { type: 'RESET_AFTER_RECOVERY_FAILURE' }
+| { type: 'VALIDATE_FORM' }
 
 interface ResetPasswordPayload {
     username: string,
