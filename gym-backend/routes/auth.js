@@ -136,6 +136,34 @@ router.post('/auth/change-password', authenticateToken, async (req, res) => {
     }
 });
 
+router.post('/auth/reset-password', async(req, res) => {
+    const { username, recoveryAnswer, newPassword } = req.body;
+
+    //Test supplied recovery answer against db
+    try {
+        const { rows } = await pool.query(
+            `SELECT rec_answer FROM users WHERE username = $1`, [username]
+        );
+
+        //Early return if username not found or recovery answer is incorrect
+        if (rows.length === 0) return res.status(404).json({ error: 'User not found' });
+        if (!(await bcrypt.compare(recoveryAnswer, rows[0].rec_answer))) return res.status(401).json({ error: 'Incorrect answer to recovery question' })
+
+        const newPwdHash = await bcrypt.hash(newPassword, 10);
+        await pool.query(
+            `UPDATE users
+            SET password = $1
+            WHERE username = $2`,
+            [newPwdHash, username]
+        );
+
+        return res.status(200).json({ message: 'Password reset' });
+    } catch (error) {
+        console.error(error.message);
+        return res.status(500).json({ error: 'Failed to reset password' })
+    }
+})
+
 router.post('/auth/change-recovery', authenticateToken, async(req, res) => {
     const { password, recQuestion, recAnswer } = req.body;
     const userId = req.user.id;
@@ -160,6 +188,20 @@ router.post('/auth/change-recovery', authenticateToken, async(req, res) => {
     } catch (error) {
         console.error(error.message)
         return res.status(500).json({error: 'Failed to update recovery question'})
+    }
+})
+
+router.get(`/auth/:username/recovery-question`, async (req, res) => {
+    const username = req.params.username;
+    try {
+        const { rows } = await pool.query(
+            `SELECT rec_question AS "recoveryQuestion" FROM users WHERE username = $1`, [username]
+        );
+        if (rows.length === 0) return res.status(404).json({error: 'Username not found'});
+        return res.status(200).json(rows[0]);
+    } catch (error) {
+        console.error(error.message);
+        return res.status(500).json({error: 'Failed to fetch recovery question'})
     }
 })
 

@@ -1,5 +1,7 @@
 type WeightUnit = 'kg' | 'lb'
 
+// <----- SIGN UP --------->
+
 interface FormValues {
     name: string;
     birthday: Date;
@@ -26,10 +28,42 @@ interface SignupPayload {
     confirmPassword: string;
 }
 
+// <------- AUTH ------->
+
 interface LogonFormValues {
     username: string;
     password: string;
 }
+
+interface AuthContextType {
+    user: User | null;
+    isLoggedIn: boolean;
+    isLoading: boolean;
+    login: (token: string, user: User) => void;
+    logout: () => void;
+    refreshUser: () => Promise<void>;
+}
+
+interface ResetPasswordFormType {
+    username: string,
+    recoveryAnswer: string,
+    newPassword: string,
+    confirmNewPassword: string
+}
+
+type ResetPasswordReducerActions = 
+| { type: 'UPDATE_USERNAME', value: string }
+| { type: 'UPDATE_NEW_PASSWORD', value: string }
+| { type: 'UPDATE_CONFIRM_PASSWORD', value: string }
+| { type: 'UPDATE_RECOVERY_ANSWER', value: string }
+
+interface ResetPasswordPayload {
+    username: string,
+    recoveryAnswer: string,
+    newPassword: string
+}
+
+// <-------- USER -------->
 
 interface User {
     username: string;
@@ -41,15 +75,6 @@ interface User {
     showRir: boolean;
     showRpe: boolean;
     recoveryQuestion: string;
-}
-
-interface AuthContextType {
-    user: User | null;
-    isLoggedIn: boolean;
-    isLoading: boolean;
-    login: (token: string, user: User) => void;
-    logout: () => void;
-    refreshUser: () => Promise<void>;
 }
 
 // <------- TYPES FOR EDITING ACCOUNT FORMS ------->
@@ -89,5 +114,8 @@ export {
     WeightUnit,
     EditAccountField,
     EditAccountForm,
-    EditAccountPayload
+    EditAccountPayload,
+    ResetPasswordFormType,
+    ResetPasswordReducerActions,
+    ResetPasswordPayload
 };

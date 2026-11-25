@@ -7,7 +7,10 @@ export default function Login() {
 
     return (
         <View>
-            <LogonForm></LogonForm>
+            <LogonForm />
+            <Pressable onPress={() => router.navigate("/(auth)/forgotPassword")}>
+                <Text>Forgot Password?</Text>
+            </Pressable>
             <Pressable onPress={() => router.navigate("/(auth)/signup")}>
                 <Text>Signup</Text>
             </Pressable>
