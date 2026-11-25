@@ -56,6 +56,7 @@ type ResetPasswordReducerActions =
 | { type: 'UPDATE_NEW_PASSWORD', value: string }
 | { type: 'UPDATE_CONFIRM_PASSWORD', value: string }
 | { type: 'UPDATE_RECOVERY_ANSWER', value: string }
+| { type: 'RESET_FORM' }
 
 interface ResetPasswordPayload {
     username: string,

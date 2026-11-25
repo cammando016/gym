@@ -47,6 +47,10 @@ const formStyles = StyleSheet.create({
         borderRadius: 4,
         backgroundColor: '#61988880',
         justifyContent: 'center',
+    },
+    basicButton: {
+        borderColor: 'black',
+        borderWidth: 1,
     }
 });
 

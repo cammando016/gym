@@ -6,6 +6,14 @@ import { ResetPasswordFormType, ResetPasswordPayload, ResetPasswordReducerAction
 import ResetPasswordHiddenFields from "./ResetPasswordHiddenFields";
 import { useRouter } from "expo-router";
 import Toast from "react-native-toast-message";
+import styles from '../../../styles/formStyles';
+
+const initialFormState : ResetPasswordFormType = {
+    username: '',
+    recoveryAnswer: '',
+    newPassword: '',
+    confirmNewPassword: ''
+}
 
 const resetPasswordReducer = (state : ResetPasswordFormType, action : ResetPasswordReducerActions) => {
     switch (action.type) {
@@ -33,14 +41,10 @@ const resetPasswordReducer = (state : ResetPasswordFormType, action : ResetPassw
                 recoveryAnswer: action.value
             }
         }
+        case 'RESET_FORM' : {
+            return initialFormState
+        }
     }
-}
-
-const initialFormState : ResetPasswordFormType = {
-    username: '',
-    recoveryAnswer: '',
-    newPassword: '',
-    confirmNewPassword: ''
 }
 
 export default function ResetPasswordForm () {
@@ -57,6 +61,11 @@ export default function ResetPasswordForm () {
         } else {
             setRecoveryQuestion(undefined);
         }
+    }
+
+    const handleResetUsername = () => {
+        dispatch({type: 'RESET_FORM'});
+        setRecoveryQuestion(undefined);
     }
 
     const handleSubmit = async () => {
@@ -100,6 +109,9 @@ export default function ResetPasswordForm () {
             {/* Show new password fields if username found, otherwise show button to check username */}
             {recoveryQuestion ?
                 <View>
+                    <Pressable onPress={handleResetUsername} style={styles.basicButton}>
+                        <Text>Reset Username</Text>
+                    </Pressable>
                     <Text>{recoveryQuestion}</Text>
                     <ResetPasswordHiddenFields 
                         recoveryAnswer={form.recoveryAnswer}
@@ -113,7 +125,7 @@ export default function ResetPasswordForm () {
                 </View>
                 :
                 <View>
-                    <Pressable onPress={handleCheckUsername}>
+                    <Pressable onPress={handleCheckUsername} disabled={form.username === ''} style={styles.basicButton}>
                         <Text>Check Username</Text>
                     </Pressable>
                 </View>

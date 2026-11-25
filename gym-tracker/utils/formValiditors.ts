@@ -72,3 +72,21 @@ export const validateNameField = (input: string, fieldName: string) : string | u
 
     return undefined
 }
+
+export const checkPwdRegex = (pwd: string) : string | undefined => {
+    const missingPwdComponents: string[] = [];
+    if (!/[a-z]/.test(pwd)) missingPwdComponents.push('lowercase letter');
+    if (!/[A-Z]/.test(pwd)) missingPwdComponents.push('uppercase letter');
+    if (!/[0-9]/.test(pwd)) missingPwdComponents.push('number');
+    if (!/[^\w\s]/.test(pwd)) missingPwdComponents.push('symbol');
+
+    const validLength : boolean = pwd.length > 7 && pwd.length < 65;
+
+    if (validLength && missingPwdComponents.length === 0) return undefined;
+
+    const errorStringParts : string[] = [];
+    if (!validLength) errorStringParts.push('be between 8-64 characters');
+    if (missingPwdComponents.length > 0) errorStringParts.push(`contain at least one ${missingPwdComponents.join(', ')}`);
+
+    return `Password must ${errorStringParts.join(' and ')}.`;
+}
